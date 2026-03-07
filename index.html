@@ -1484,60 +1484,73 @@ async function deployToGithub() {
   toast('⏳ 배포 중...');
   try {
     const headers = {
-      Authorization: `token ${GITHUB_CONFIG.token}`,
+      Authorization: 'token ' + GITHUB_CONFIG.token,
       Accept: 'application/vnd.github.v3+json',
       'Content-Type': 'application/json',
     };
-    const base = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`;
+    const base = 'https://api.github.com/repos/' + GITHUB_CONFIG.owner + '/' + GITHUB_CONFIG.repo;
 
-    const refRes = await fetch(`${base}/git/refs/heads/${GITHUB_CONFIG.branch}`, { headers });
+    const refRes = await fetch(base + '/git/refs/heads/' + GITHUB_CONFIG.branch, { headers });
     const refJson = await refRes.json();
     const commitSha = refJson.object.sha;
 
-    const commitRes = await fetch(`${base}/git/commits/${commitSha}`, { headers });
+    const commitRes = await fetch(base + '/git/commits/' + commitSha, { headers });
     const commitJson = await commitRes.json();
     const treeSha = commitJson.tree.sha;
 
-    const treeRes = await fetch(`${base}/git/trees/${treeSha}`, { headers });
+    const treeRes = await fetch(base + '/git/trees/' + treeSha, { headers });
     const treeJson = await treeRes.json();
     const fileBlob = treeJson.tree.find(f => f.path === GITHUB_CONFIG.path);
     if (!fileBlob) { toast('❌ 파일을 찾을 수 없습니다'); return; }
 
-    const blobRes = await fetch(`${base}/git/blobs/${fileBlob.sha}`, {
+    const blobRes = await fetch(base + '/git/blobs/' + fileBlob.sha, {
       headers: { ...headers, Accept: 'application/vnd.github.v3.raw' }
     });
     let html = await blobRes.text();
 
-    // 이전 주입 블록 제거
-    html = html.replace(/\n?<!--BLOGDATA-->[\s\S]*?<!--\/BLOGDATA-->/g, '');
+    // 이전 BLOGDATA 블록 전부 제거
+    while (html.includes('<!--BLOGDATA-->')) {
+      const s = html.indexOf('<!--BLOGDATA-->');
+      const e = html.indexOf('<!--/BLOGDATA-->');
+      if (e === -1) break;
+      html = html.slice(0, s) + html.slice(e + 16);
+    }
+
+    const payload = JSON.stringify({ posts, papers, cats: categories, cv: cvSections, profile });
+    const inject = '<!--BLOGDATA-->\n<scr' + 'ipt>\nvar _bd=' + payload + ';\n'
+      + "localStorage.setItem('blog_posts',JSON.stringify(_bd.posts));\n"
+      + "localStorage.setItem('blog_papers',JSON.stringify(_bd.papers));\n"
+      + "localStorage.setItem('blog_cats',JSON.stringify(_bd.cats));\n"
+      + "localStorage.setItem('blog_cv',JSON.stringify(_bd.cv));\n"
+      + "localStorage.setItem('blog_profile',JSON.stringify(_bd.profile));\n"
+      + '</' + 'script>\n<!--/BLOGDATA-->';
 
     const bodyIdx = html.lastIndexOf('</body>');
     if (bodyIdx !== -1) {
       html = html.slice(0, bodyIdx) + inject + '\n</body>' + html.slice(bodyIdx + 7);
     }
 
-    const encoded = btoa(Array.from(new TextEncoder().encode(html))
-      .map(b => String.fromCharCode(b)).join(''));
+    const encoded = btoa(Array.from(new TextEncoder().encode(html)).map(b => String.fromCharCode(b)).join(''));
 
-    const newBlobRes = await fetch(`${base}/git/blobs`, {
+    const newBlobRes = await fetch(base + '/git/blobs', {
       method: 'POST', headers,
       body: JSON.stringify({ content: encoded, encoding: 'base64' })
     });
     const newBlob = await newBlobRes.json();
 
-    const newTreeRes = await fetch(`${base}/git/trees`, {
+    const newTreeRes = await fetch(base + '/git/trees', {
       method: 'POST', headers,
       body: JSON.stringify({ base_tree: treeSha, tree: [{ path: GITHUB_CONFIG.path, mode: '100644', type: 'blob', sha: newBlob.sha }] })
     });
     const newTree = await newTreeRes.json();
 
-    const newCommitRes = await fetch(`${base}/git/commits`, {
+    const newCommitRes = await fetch(base + '/git/commits', {
       method: 'POST', headers,
-      body: JSON.stringify({ message: `update: ${new Date().toLocaleString('ko-KR')}`, tree: newTree.sha, parents: [commitSha] })
+      body: JSON.stringify({ message: 'update: ' + new Date().toLocaleString('ko-KR'), tree: newTree.sha, parents: [commitSha] })
     });
     const newCommit = await newCommitRes.json();
 
-    const updateRes = await fetch(`${base}/git/refs/heads/${GITHUB_CONFIG.branch}`, {
+    const updateRes = await fetch(base + '/git/refs/heads/' + GITHUB_CONFIG.branch, {
       method: 'PATCH', headers,
       body: JSON.stringify({ sha: newCommit.sha })
     });
@@ -1552,6 +1565,12 @@ async function deployToGithub() {
     toast('❌ 오류: ' + e.message);
   }
 }
+
+function openDeployConfig() {
+  document.getElementById('modal-deploy').style.display = 'flex';
+  setTimeout(()=>document.getElementById('inp-gh-token').focus(), 100);
+}
+
 function saveDeployConfig() {
   const token = document.getElementById('inp-gh-token').value.trim();
   if (!token) { toast('토큰을 입력하세요.'); return; }
@@ -1614,7 +1633,5 @@ particlesJS("particles-js",{
   retina_detect:true
 });
 </script>
-
 </body>
 </html>
-
