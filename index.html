@@ -1509,7 +1509,7 @@ async function deployToGithub() {
     let html = await blobRes.text();
 
     // 이전 주입 블록 제거
-    html = html.replace(/\n?';
+    html = html.replace(/\n?<!--BLOGDATA-->[\s\S]*?<!--\/BLOGDATA-->/g, '');
 
     const bodyIdx = html.lastIndexOf('</body>');
     if (bodyIdx !== -1) {
@@ -1617,3 +1617,4 @@ particlesJS("particles-js",{
 
 </body>
 </html>
+
