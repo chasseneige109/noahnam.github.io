@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Blog</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-l:#3b82f6;--blue-bg:#eff6ff;
+  --s900:#0f172a;--s800:#1e293b;--s700:#334155;--s600:#475569;
+  --s500:#64748b;--s400:#94a3b8;--s300:#cbd5e1;--s200:#e2e8f0;--s100:#f1f5f9;
+  --bg:#F8FAFC;
+  --mono:'DM Mono',monospace;--serif:'Lora',serif;--sans:'Manrope',sans-serif;
+  --r:8px;--r2:16px;--r3:20px;
+  --shadow:0 2px 8px rgba(0,0,0,.06);--shadow-lg:0 12px 40px rgba(0,0,0,.1);
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+#particles-js{position:fixed;width:100%;height:100%;top:0;left:0;z-index:0;pointer-events:none}
+.z1{position:relative;z-index:1}
+::selection{background:#3b82f6;color:#fff}
+
+/* ── TOPNAV ── */
+.topnav{position:sticky;top:0;z-index:200;background:rgba(248,250,252,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--s200);height:60px;display:flex;align-items:center;padding:0 28px}
+.nav-logo{font-family:var(--sans);font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;cursor:pointer;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-l);animation:pulse-b 2s infinite}
+@keyframes pulse-b{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,.7)}70%{transform:scale(1);box-shadow:0 0 0 8px rgba(59,130,246,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+.nav-tabs{display:flex;gap:2px;margin-left:32px}
+.nav-tab{padding:6px 14px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--sans)}
+.nav-tab:hover{color:var(--blue);background:var(--blue-bg)}
+.nav-tab.active{background:var(--blue);color:#fff}
+.nav-spacer{flex:1}
+.admin-controls{display:none;align-items:center;gap:8px}
+.admin-controls.visible{display:flex}
+.btn-write{display:flex;align-items:center;gap:7px;padding:8px 18px;background:var(--s900);color:#fff;border:none;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all .2s}
+.btn-write:hover{background:var(--blue);transform:translateY(-1px)}
+.btn-admin-toggle{padding:7px 14px;border-radius:20px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:none;color:var(--s400);transition:all .2s}
+.btn-admin-toggle:hover{border-color:var(--s400);color:var(--s600)}
+.admin-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#fef3c7;border:1px solid #fcd34d;border-radius:20px;font-size:.62rem;font-weight:700;color:#92400e;letter-spacing:.05em;text-transform:uppercase}
+.btn-unlock{padding:7px 12px;border-radius:20px;font-size:.78rem;border:1px solid var(--s200);background:none;color:var(--s400);cursor:pointer;transition:all .2s;margin-left:8px}
+.btn-unlock:hover{border-color:var(--blue);color:var(--blue)}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadeUp .25s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.two-col{display:grid;grid-template-columns:280px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
+.three-col-sidebar{display:grid;grid-template-columns:220px 1fr;gap:36px;padding:40px 0 80px;align-items:start}
+
+/* ── GLASS CARD ── */
+.gc{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow)}
+.admin-mode .cv-entry:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.15)}
+.gc-hover:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+/* ── PROFILE SIDEBAR (Home only) ── */
+.profile-sidebar{position:sticky;top:72px;display:flex;flex-direction:column;gap:14px}
+.profile-card{padding:26px 24px;border-radius:var(--r3)}
+.av-wrap{position:relative;width:64px;height:64px;margin-bottom:14px;cursor:pointer}
+.av{width:64px;height:64px;border-radius:50%;background:var(--s100);border:2px solid var(--s200);display:flex;align-items:center;justify-content:center;font-size:1.5rem;overflow:hidden;font-weight:700;color:var(--blue);transition:border-color .2s}
+.av img{width:100%;height:100%;object-fit:cover}
+.av-wrap:hover .av{border-color:var(--blue)}
+.av-edit{position:absolute;bottom:0;right:0;width:20px;height:20px;background:var(--blue);color:#fff;border-radius:50%;font-size:.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff;opacity:0;transition:opacity .2s}
+.av-wrap:hover .av-edit{opacity:1}
+.p-name{font-size:1.15rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;line-height:1.2;margin-bottom:2px}
+.p-handle{font-family:var(--mono);font-size:.65rem;color:var(--s400);margin-bottom:10px}
+.p-bio{font-size:.8rem;color:var(--s700);line-height:1.7}
+.p-bio:empty::after{content:'자기소개를 입력하세요...';color:var(--s400);font-style:italic}
+.p-divider{height:1px;background:var(--s200);margin:14px 0}
+.p-stats{display:flex;gap:20px}
+.stat-n{font-size:1.3rem;font-weight:800;color:var(--s900);letter-spacing:-.03em;line-height:1}
+.stat-l{font-size:.58rem;font-weight:700;color:var(--s400);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.btn-ep{width:100%;margin-top:12px;padding:7px;background:none;border:1px solid var(--s200);border-radius:var(--r);font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--s500);font-family:var(--sans);cursor:pointer;transition:all .2s}
+.btn-ep:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+/* profile links card */
+.links-card{padding:16px 20px;border-radius:var(--r2)}
+.link-item{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.76rem;font-weight:600;color:var(--s600);text-decoration:none;transition:color .2s;border-bottom:1px solid var(--s100)}
+.link-item:last-child{border-bottom:none}
+.link-item:hover{color:var(--blue)}
+.link-icon{width:26px;height:26px;border-radius:7px;background:var(--s100);display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;transition:background .2s;font-family:var(--mono);font-weight:600;color:var(--s500)}
+.link-item:hover .link-icon{background:var(--blue-bg);color:var(--blue)}
+
+/* sec-label */
+.sec-label{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::before{content:'';display:block;width:18px;height:2px;background:#bfdbfe}
+
+/* ── CV SECTIONS (Home right column) ── */
+.cv-area{}
+.cv-section-block{margin-bottom:32px}
+.cv-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--s200)}
+.cv-section-title{font-size:.72rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);display:flex;align-items:center;gap:8px}
+.cv-section-title::before{content:'';display:block;width:18px;height:2px;background:#bfdbfe}
+.cv-section-actions{display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.cv-section-block:hover .cv-section-actions{opacity:1}
+
+/* CV Entry card */
+.cv-entry{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow);border-radius:var(--r3);padding:22px 26px;margin-bottom:10px;transition:all .25s;position:relative}
+
+.cv-entry-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.cv-entry-title{font-size:.98rem;font-weight:700;color:var(--s900);letter-spacing:-.01em;line-height:1.3}
+.cv-entry-date{font-family:var(--mono);font-size:.90rem;color:var(--s400);flex-shrink:0;margin-left:12px;padding-top:2px}
+.cv-entry-sub{font-size:.8rem;font-weight:600;color:var(--blue);margin-bottom:6px}
+.cv-entry-desc{font-size:.82rem;color:var(--s700);line-height:1.7;white-space:pre-wrap}
+.cv-entry-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.cv-entry-tag{font-family:var(--mono);font-size:.6rem;color:var(--s500);background:var(--s100);padding:2px 8px;border-radius:10px}
+.cv-entry-admin{position:absolute;top:14px;right:14px;display:flex;gap:5px;opacity:0;transition:opacity .2s}
+.admin-mode .cv-entry:hover .cv-entry-admin{opacity:1}
+.cv-entry.drag-over{border:2px dashed var(--blue);background:var(--blue-bg)}
+.cv-section-block.drag-over-sec{border-top:3px solid var(--blue)}
+.admin-mode .cv-entry{cursor:grab}
+.admin-mode .cv-section-block{cursor:default}
+.admin-mode .cv-section-header{cursor:grab}
+.cv-entry:hover .cv-entry-admin{opacity:1}
+
+/* add section/entry buttons */
+.btn-add-section{display:flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(255,255,255,.6);border:1px dashed var(--s300);border-radius:var(--r3);font-size:.75rem;font-weight:700;color:var(--s400);cursor:pointer;transition:all .2s;font-family:var(--sans);width:100%;margin-top:8px;letter-spacing:.04em}
+.btn-add-section:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.btn-add-entry{display:flex;align-items:center;gap:6px;padding:8px 14px;background:none;border:1px dashed var(--s300);border-radius:var(--r2);font-size:.7rem;font-weight:600;color:var(--s400);cursor:pointer;transition:all .2s;font-family:var(--sans);letter-spacing:.03em}
+.btn-add-entry:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+/* ── POSTS/PAPER sidebar (category+tag only) ── */
+.filter-sidebar{position:sticky;top:72px;display:flex;flex-direction:column;gap:14px}
+.cat-card{padding:16px 20px;border-radius:var(--r2)}
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--s100);cursor:pointer;transition:color .2s}
+.cat-item:last-child{border-bottom:none}
+.cat-item:hover .cat-name{color:var(--blue)}
+.cat-name{font-size:.8rem;font-weight:600;color:var(--s700);transition:color .2s}
+.cat-name.active{color:var(--blue)}
+.cat-count{font-family:var(--mono);font-size:.62rem;color:var(--s400);background:var(--s100);padding:1px 7px;border-radius:10px}
+.tag-card{padding:16px 20px;border-radius:var(--r2)}
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px}
+.tag-chip{padding:3px 10px;background:var(--s100);color:var(--s500);border-radius:20px;font-size:.65rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.tag-chip:hover,.tag-chip.active{background:var(--blue);color:#fff}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.filter-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s400)}
+.sort-btn{font-size:.65rem;font-weight:700;color:var(--s400);background:none;border:none;font-family:var(--sans);cursor:pointer;transition:color .2s}
+.sort-btn:hover{color:var(--blue)}
+
+/* ── POST CARDS ── */
+.post-card{padding:24px 26px;border-radius:var(--r3);margin-bottom:10px;cursor:pointer;transition:all .25s}
+.post-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+.pc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.pc-cat{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s400);background:var(--s100);padding:2px 8px;border-radius:6px}
+.pc-tag{font-family:var(--mono);font-size:.6rem;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:10px}
+.pc-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--s900);line-height:1.4;letter-spacing:-.01em;margin-bottom:6px;transition:color .2s}
+.post-card:hover .pc-title{color:var(--blue)}
+.pc-excerpt{font-size:.81rem;color:var(--s700);line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid var(--s100)}
+.pc-date{font-family:var(--mono);font-size:.62rem;color:var(--s400)}
+.pc-actions{display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.post-card:hover .pc-actions{opacity:1}
+.btn-sm{padding:4px 10px;border-radius:var(--r);font-size:.62rem;font-weight:700;letter-spacing:.03em;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s500);transition:all .15s}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.btn-sm.danger:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--s400)}
+.empty-icon{font-size:2rem;margin-bottom:12px}
+.empty-state h3{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--s500);margin-bottom:5px}
+.empty-state p{font-size:.78rem}
+
+/* ── ARTICLE ── */
+.article-wrap{max-width:720px;margin:0 auto;padding:0 24px 80px}
+.article-topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;border-bottom:1px solid var(--s200);margin-bottom:40px}
+.btn-back{display:flex;align-items:center;gap:7px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);background:none;border:none;cursor:pointer;font-family:var(--sans);transition:color .2s}
+.btn-back:hover{color:var(--blue)}
+.a-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.a-cat{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s500);background:var(--s100);padding:3px 10px;border-radius:6px}
+.a-tag{font-family:var(--mono);font-size:.62rem;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:12px}
+.a-title{font-family:var(--serif);font-size:2.1rem;font-weight:700;color:var(--s900);line-height:1.2;letter-spacing:-.02em;margin-bottom:14px}
+.a-meta{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.65rem;color:var(--s400);padding-bottom:30px;border-bottom:1px solid var(--s200);margin-bottom:34px}
+.a-body{font-family:var(--serif);font-size:1.04rem;line-height:1.9;color:var(--s800)}
+.a-body h1,.a-body h2,.a-body h3{font-family:var(--sans);font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-top:2em;margin-bottom:.7em;line-height:1.3}
+.a-body h1{font-size:1.5rem}
+.a-body h2{font-size:1.15rem;padding-bottom:9px;border-bottom:1px solid var(--s200)}
+.a-body h3{font-size:.98rem;color:var(--s700)}
+.a-body p{margin-bottom:1.4em}
+.a-body ul,.a-body ol{padding-left:1.6em;margin-bottom:1.4em}
+.a-body li{margin-bottom:.4em}
+.a-body strong{font-weight:700;color:var(--s900)}
+.a-body code{font-family:var(--mono);font-size:.83em;background:var(--s100);padding:2px 6px;border-radius:4px;color:#2563eb}
+.a-body pre{background:var(--s900);border-radius:12px;padding:20px 24px;overflow-x:auto;margin-bottom:1.6em}
+.a-body pre code{background:none;color:#cbd5e1;font-size:.85rem;padding:0}
+.a-body blockquote{border-left:3px solid #bfdbfe;padding-left:18px;margin:1.5em 0;color:var(--s600);font-style:italic}
+.math-block{overflow-x:auto;padding:18px 22px;background:rgba(255,255,255,.8);border:1px solid var(--s200);border-left:3px solid #93c5fd;border-radius:0 12px 12px 0;margin:1.7em 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+
+/* ── EDITOR ── */
+.editor-wrap{max-width:840px;margin:0 auto;padding:0 24px 80px}
+.editor-topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px;border-bottom:1px solid var(--s200);margin-bottom:26px}
+.editor-mode{font-family:var(--mono);font-size:.62rem;color:var(--s400)}
+.btn-pub{padding:8px 20px;background:var(--blue);color:#fff;border:none;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all .2s}
+.btn-pub:hover{background:#1d4ed8;transform:translateY(-1px)}
+.btn-cancel{padding:8px 14px;background:none;color:var(--s500);border:1px solid var(--s200);border-radius:20px;font-size:.7rem;font-weight:700;font-family:var(--sans);cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--s400);color:var(--s700)}
+.editor-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--s200)}
+.editor-row-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);flex-shrink:0;font-family:var(--sans);width:60px}
+.cat-sel-btn{padding:3px 11px;border-radius:20px;font-size:.68rem;font-weight:600;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s600);transition:all .15s}
+.cat-sel-btn:hover,.cat-sel-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
+.cat-new-inp{border:1px solid var(--s200);border-radius:20px;padding:3px 11px;font-size:.68rem;font-family:var(--sans);color:var(--s700);outline:none;transition:border-color .15s;width:120px}
+.cat-new-inp:focus{border-color:var(--blue)}
+.cat-add-btn{padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;font-family:var(--sans);cursor:pointer;border:1px solid var(--blue);background:none;color:var(--blue);transition:all .15s}
+.cat-add-btn:hover{background:var(--blue);color:#fff}
+.editor-title-inp{width:100%;font-family:var(--serif);font-size:1.85rem;font-weight:700;color:var(--s900);border:none;outline:none;background:transparent;letter-spacing:-.02em;line-height:1.3;margin-bottom:12px;resize:none;overflow:hidden}
+.editor-title-inp::placeholder{color:var(--s300)}
+.editor-tags-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:9px 0;border-top:1px solid var(--s200);border-bottom:1px solid var(--s200);margin-bottom:16px}
+.e-tag-pill{display:flex;align-items:center;gap:4px;background:var(--blue-bg);padding:3px 10px;border-radius:20px;font-size:.63rem;font-family:var(--mono);color:var(--blue)}
+.tag-rm{cursor:pointer;color:#93c5fd;font-size:.76rem;transition:color .15s}
+.tag-rm:hover{color:#ef4444}
+.tag-inp{border:none;outline:none;font-size:.73rem;font-family:var(--mono);color:var(--s700);background:transparent;min-width:120px}
+.tag-inp::placeholder{color:var(--s300)}
+.editor-toolbar{display:flex;gap:2px;padding:5px 0;border-bottom:1px solid var(--s200);margin-bottom:12px;flex-wrap:wrap}
+.tb-btn{padding:4px 9px;background:none;border:none;border-radius:6px;font-size:.7rem;font-family:var(--mono);color:var(--s500);cursor:pointer;transition:all .12s;font-weight:500}
+.tb-btn:hover{background:var(--blue-bg);color:var(--blue)}
+.tb-sep{width:1px;background:var(--s200);margin:3px 5px}
+.editor-tabs-row{display:flex;border-bottom:1px solid var(--s200)}
+.editor-tab{padding:7px 15px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);color:var(--s400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none}
+.editor-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.editor-body-ta{width:100%;min-height:500px;font-family:var(--mono);font-size:.88rem;color:var(--s900);border:none;outline:none;background:transparent;line-height:2;resize:vertical;padding:18px 0}
+.editor-body-ta::placeholder{color:var(--s300)}
+.e-preview{display:none;padding:18px 0;min-height:200px}
+.e-preview.active{display:block}
+.editor-body-ta.hidden{display:none}
+.editor-hint{font-size:.62rem;font-family:var(--mono);color:var(--s400);padding:9px 0;border-top:1px solid var(--s200);line-height:1.9}
+
+/* ── MODALS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease;padding:20px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border-radius:var(--r3);padding:28px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:scaleIn .2s ease}
+@keyframes scaleIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-bottom:16px}
+.form-label{display:block;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s500);margin-bottom:4px}
+.form-input,.form-textarea{width:100%;padding:8px 11px;border:1px solid var(--s200);border-radius:var(--r);font-size:.84rem;font-family:var(--sans);color:var(--s800);background:#fff;outline:none;transition:border-color .15s;margin-bottom:11px}
+.form-input:focus,.form-textarea:focus{border-color:var(--blue)}
+.form-textarea{resize:vertical;min-height:75px;line-height:1.6}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-primary{padding:8px 18px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:background .2s}
+.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{padding:8px 14px;background:none;border:1px solid var(--s200);border-radius:var(--r);font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--sans);color:var(--s500);cursor:pointer}
+
+/* admin-only visibility */
+.admin-only{display:none}
+.admin-mode .admin-only{display:block}
+.admin-mode .admin-only.flex{display:flex}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--s900);color:#fff;padding:8px 18px;border-radius:20px;font-size:.73rem;font-weight:600;font-family:var(--sans);opacity:0;transition:all .25s;z-index:1000;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px}
+@media(max-width:860px){.two-col,.three-col-sidebar{grid-template-columns:1fr}.profile-sidebar,.filter-sidebar{position:static}}
+@media(max-width:600px){.topnav{padding:0 14px}.nav-tabs{gap:0}.a-title{font-size:1.65rem}}
+.katex{color:var(--s800)}
+/* ── MEDIA IN ARTICLE ── */
+.media-img-wrap{margin:1.8em 0;text-align:center}
+.media-img-wrap img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+.media-caption{font-family:var(--sans);font-size:.75rem;color:var(--s400);margin-top:8px;text-align:center}
+.media-video-wrap{margin:1.8em 0;border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:#000}
+.media-video-wrap iframe{width:100%;height:100%;border:none}
+.media-pdf-wrap{margin:1.8em 0}
+.media-pdf-link{display:inline-flex;align-items:center;gap:10px;padding:14px 20px;background:var(--s100);border:1px solid var(--s200);border-radius:12px;text-decoration:none;color:var(--s700);font-size:.88rem;font-weight:600;transition:all .2s}
+.media-pdf-link:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.media-pdf-icon{font-size:1.3rem}
+.media-link-inline{color:var(--blue);text-decoration:none;border-bottom:1px solid #bfdbfe;transition:border-color .2s}
+.media-link-inline:hover{border-bottom-color:var(--blue)}
+/* ── CV GRID LAYOUT ── */
+.cv-entries-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cv-entries-list{display:flex;flex-direction:column;gap:10px}
+.layout-toggle{display:flex;gap:4px;background:var(--s100);border-radius:10px;padding:3px}
+.layout-btn{padding:4px 10px;border-radius:7px;font-size:.62rem;font-weight:700;font-family:var(--sans);border:none;background:none;color:var(--s400);cursor:pointer;transition:all .15s;letter-spacing:.04em}
+.layout-btn.active{background:#fff;color:var(--s700);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+</style>
+</head>
+<body>
+<div id="particles-js"></div>
+<div class="z1">
+
+<!-- ══ TOPNAV ══ -->
+<nav class="topnav">
+  <span class="nav-logo" onclick="showSection('home')">
+    <span class="nav-dot"></span>
+    <span id="nav-blog-name">My Blog</span>
+  </span>
+  <div class="nav-tabs">
+    <button class="nav-tab" id="tab-home"  onclick="showSection('home')">Home</button>
+    <button class="nav-tab" id="tab-posts" onclick="showSection('posts')">Posts</button>
+    <button class="nav-tab" id="tab-paper" onclick="showSection('paper')">Paper Review</button>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="admin-controls" id="admin-controls">
+    <span class="admin-badge">🔓 관리자</span>
+    <button class="btn-write" id="btn-write-nav" onclick="openWrite()" style="display:none">✏ 새 글 쓰기</button>
+    <button class="btn-admin-toggle" onclick="lockAdmin()">잠금</button>
+    <button class="btn-admin-toggle" onclick="deployToGithub()" style="border-color:#22c55e;color:#16a34a">🚀 배포</button>
+  </div>
+  <button class="btn-unlock" id="btn-unlock" onclick="openPwModal()">🔒</button>
+</nav>
+
+<!-- ══ HOME ══ -->
+<div id="page-home" class="page">
+  <div class="wrap">
+    <div class="two-col">
+      <!-- LEFT: Profile sidebar -->
+      <div class="profile-sidebar">
+        <div class="gc profile-card">
+          <div class="av-wrap" onclick="if(isAdmin)openAvatarEdit()">
+            <div class="av" id="home-av">?</div>
+            <div class="av-edit admin-only">✎</div>
+          </div>
+          <div class="p-name" id="home-name">이름을 설정하세요</div>
+          <div class="p-handle" id="home-handle">@handle</div>
+          <div class="p-bio" id="home-bio"></div>
+          <div class="p-divider"></div>
+          <div class="p-stats">
+            <div><div class="stat-n" id="home-post-cnt">0</div><div class="stat-l">Posts</div></div>
+            <div><div class="stat-n" id="home-paper-cnt">0</div><div class="stat-l">Papers</div></div>
+          </div>
+          <button class="btn-ep admin-only" onclick="openProfileEdit()">프로필 수정</button>
+        </div>
+        <div class="gc links-card" id="home-links-card">
+          <div class="sec-label">Links</div>
+          <div id="home-links"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: CV sections -->
+      <div class="cv-area" id="cv-area">
+        <!-- rendered by JS -->
+        <button class="btn-add-section admin-only" onclick="openAddSection()">+ 새 섹션 추가</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POSTS ══ -->
+<div id="page-posts" class="page">
+  <div class="wrap">
+    <div class="three-col-sidebar">
+      <div class="filter-sidebar" id="posts-filter-sidebar"></div>
+      <div>
+        <div class="filter-bar">
+          <span class="filter-label" id="posts-filter-label">Posts</span>
+          <button class="sort-btn" onclick="toggleSort('posts')">최신순 ↕</button>
+        </div>
+        <div id="posts-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAPER REVIEW ══ -->
+<div id="page-paper" class="page">
+  <div class="wrap">
+    <div class="three-col-sidebar">
+      <div class="filter-sidebar" id="paper-filter-sidebar"></div>
+      <div>
+        <div class="filter-bar">
+          <span class="filter-label" id="paper-filter-label">Paper Review</span>
+          <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
+        </div>
+        <div id="paper-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ARTICLE ══ -->
+<div id="page-article" class="page">
+  <div class="article-wrap">
+    <div class="article-topbar">
+      <button class="btn-back" onclick="goBack()">← 목록으로</button>
+      <div style="display:flex;gap:8px" id="article-admin-btns">
+        <button class="btn-sm admin-only" onclick="editCurrentArticle()">✎ 수정</button>
+        <button class="btn-sm danger admin-only" onclick="deleteCurrentArticle()">✕ 삭제</button>
+      </div>
+    </div>
+    <div class="a-tags" id="article-tags"></div>
+    <h1 class="a-title" id="article-title"></h1>
+    <div class="a-meta"><span id="article-date"></span></div>
+    <div class="a-body" id="article-body"></div>
+  </div>
+</div>
+
+<!-- ══ WRITE/EDIT ══ -->
+<div id="page-write" class="page">
+  <div class="editor-wrap">
+    <div class="editor-topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-back" onclick="cancelWrite()">← 취소</button>
+        <span class="editor-mode" id="editor-mode-label">새 글 작성</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-cancel" onclick="cancelWrite()">취소</button>
+        <button class="btn-pub" onclick="publishPost()">발행하기</button>
+      </div>
+    </div>
+    <!-- Section -->
+    <div class="editor-row">
+      <span class="editor-row-label">섹션</span>
+      <button class="cat-sel-btn sel" id="sec-btn-posts" onclick="selectSection('posts',this)">Posts</button>
+      <button class="cat-sel-btn" id="sec-btn-paper" onclick="selectSection('paper',this)">Paper Review</button>
+    </div>
+    <!-- Category -->
+    <div class="editor-row">
+      <span class="editor-row-label">카테고리</span>
+      <div id="editor-cat-btns" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
+      <input class="cat-new-inp" id="cat-new-inp" placeholder="새 카테고리...">
+      <button class="cat-add-btn" onclick="addNewCat()">+ 추가</button>
+    </div>
+    <textarea class="editor-title-inp" id="editor-title" placeholder="제목을 입력하세요" rows="1" oninput="autoResize(this)"></textarea>
+    <div class="editor-tags-row">
+      <span id="editor-tag-list"></span>
+      <input class="tag-inp" id="editor-tag-inp" placeholder="태그 입력 후 Enter..." onkeydown="handleTagInput(event)">
+    </div>
+    <div class="editor-tabs-row">
+      <button class="editor-tab active" onclick="switchTab('write',this)">작성</button>
+      <button class="editor-tab" onclick="switchTab('preview',this)">미리보기</button>
+    </div>
+    <div class="editor-toolbar">
+      <button class="tb-btn" onclick="ins('## ','')">H2</button>
+      <button class="tb-btn" onclick="ins('### ','')">H3</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="ins('**','**')"><b>B</b></button>
+      <button class="tb-btn" onclick="ins('*','*')"><i>I</i></button>
+      <button class="tb-btn" onclick="ins('`','`')">Code</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="ins('> ','')">Quote</button>
+      <button class="tb-btn" onclick="ins('- ','')">List</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="ins('$$\n','\n$$')">∑ Block</button>
+      <button class="tb-btn" onclick="ins('$','$')">∑ Inline</button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" onclick="insertMedia('image')">🖼 사진</button>
+      <button class="tb-btn" onclick="insertMedia('video')">🎬 동영상</button>
+      <button class="tb-btn" onclick="insertMedia('pdf')">📄 PDF</button>
+      <button class="tb-btn" onclick="insertMedia('link')">🔗 링크</button>
+    </div>
+    <textarea class="editor-body-ta" id="editor-body" placeholder="마크다운으로 작성하세요...&#10;&#10;$E=mc^2$ 또는 $$\int f(x)dx$$"></textarea>
+    <div class="e-preview a-body" id="editor-preview"></div>
+    <div class="editor-hint">마크다운 지원 · 수식: $...$ (인라인) / $$...$$ (블록) · Enter로 태그 추가</div>
+  </div>
+</div>
+
+</div><!-- z1 -->
+
+<!-- ══ MODALS ══ -->
+<!-- Password -->
+<div id="modal-pw" class="modal-overlay" style="display:none" onclick="closeModal('modal-pw',event)">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-title">🔐 관리자 로그인</div>
+    <label class="form-label">비밀번호</label>
+    <input class="form-input" id="pw-input" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkPw()">
+    <p id="pw-error" style="font-size:.7rem;color:#ef4444;margin-top:-7px;margin-bottom:9px;display:none">비밀번호가 틀렸습니다.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-pw')">취소</button>
+      <button class="btn-primary" onclick="checkPw()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Password -->
+<div id="modal-set-pw" class="modal-overlay" style="display:none" onclick="closeModal('modal-set-pw',event)">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-title">🔑 비밀번호 설정</div>
+    <p style="font-size:.78rem;color:var(--s600);margin-bottom:12px;line-height:1.6">처음 사용 시 관리자 비밀번호를 설정하세요.</p>
+    <label class="form-label">새 비밀번호</label>
+    <input class="form-input" id="set-pw1" type="password" placeholder="비밀번호 입력">
+    <label class="form-label">확인</label>
+    <input class="form-input" id="set-pw2" type="password" placeholder="비밀번호 재입력" onkeydown="if(event.key==='Enter')setPw()">
+    <p id="set-pw-error" style="font-size:.7rem;color:#ef4444;margin-top:-7px;margin-bottom:9px;display:none">비밀번호가 일치하지 않습니다.</p>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="setPw()">설정</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Edit -->
+<div id="modal-profile" class="modal-overlay" style="display:none" onclick="closeModal('modal-profile',event)">
+  <div class="modal">
+    <div class="modal-title">프로필 수정</div>
+    <label class="form-label">이름</label><input class="form-input" id="inp-name" placeholder="이름">
+    <label class="form-label">핸들 (@)</label><input class="form-input" id="inp-handle" placeholder="handle">
+    <label class="form-label">블로그 이름</label><input class="form-input" id="inp-blog-name" placeholder="My Blog">
+    <label class="form-label">자기소개</label><textarea class="form-textarea" id="inp-bio" placeholder="자기소개..."></textarea>
+    <label class="form-label">GitHub URL</label><input class="form-input" id="inp-github" placeholder="https://github.com/...">
+    <label class="form-label">이메일</label><input class="form-input" id="inp-email" placeholder="email@example.com">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-profile')">취소</button>
+      <button class="btn-primary" onclick="saveProfile()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add CV Section -->
+<div id="modal-add-section" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-section',event)">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title" id="add-section-title">새 섹션 추가</div>
+    <label class="form-label">섹션 이름</label>
+    <input class="form-input" id="inp-section-name" placeholder="예: Education, Experience, Projects..." onkeydown="if(event.key==='Enter')saveSection()">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-add-section')">취소</button>
+      <button class="btn-primary" onclick="saveSection()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit CV Entry -->
+<div id="modal-add-entry" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-entry',event)">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" id="add-entry-title">항목 추가</div>
+    <label class="form-label">제목</label>
+    <input class="form-input" id="inp-entry-title" placeholder="예: SungKyunKwan University">
+    <label class="form-label">부제 (선택)</label>
+    <input class="form-input" id="inp-entry-sub" placeholder="예: Biomechatronics · 2023~Present">
+    <label class="form-label">날짜 / 기간 (선택)</label>
+    <input class="form-input" id="inp-entry-date" placeholder="예: 2023 ~ Present">
+    <label class="form-label">내용 (선택)</label>
+    <textarea class="form-textarea" id="inp-entry-desc" placeholder="상세 내용..."></textarea>
+    <label class="form-label">태그 (쉼표로 구분, 선택)</label>
+    <input class="form-input" id="inp-entry-tags" placeholder="예: ML, PyTorch, Computer Vision">
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-add-entry')">취소</button>
+      <button class="btn-primary" onclick="saveEntry()">저장</button>
+    </div>
+  </div>
+</div>
+<!-- Media Insert -->
+<div id="modal-media" class="modal-overlay" style="display:none" onclick="closeModal('modal-media',event)">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title" id="media-modal-title">미디어 삽입</div>
+
+    <!-- IMAGE -->
+    <div id="media-image">
+      <label class="form-label">파일 업로드</label>
+      <input type="file" id="media-file-inp" accept="image/*" style="display:none" onchange="handleMediaFile(event)">
+      <button onclick="document.getElementById('media-file-inp').click()"
+        style="width:100%;padding:10px;border:1px dashed var(--s300);border-radius:var(--r);font-size:.8rem;color:var(--s500);background:none;cursor:pointer;margin-bottom:10px;font-family:var(--sans);transition:all .2s"
+        onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+        onmouseout="this.style.borderColor='var(--s300)';this.style.color='var(--s500)'">
+        📁 파일 선택
+      </button>
+      <div id="media-preview" style="margin-bottom:10px;display:none">
+        <img id="media-preview-img" style="max-width:100%;border-radius:var(--r);border:1px solid var(--s200)">
+      </div>
+      <label class="form-label">또는 URL 직접 입력</label>
+      <input class="form-input" id="media-url-inp" placeholder="https://...">
+      <label class="form-label">캡션 (선택)</label>
+      <input class="form-input" id="media-caption-inp" placeholder="이미지 설명...">
+    </div>
+
+    <!-- VIDEO -->
+    <div id="media-video" style="display:none">
+      <label class="form-label">YouTube / 동영상 URL</label>
+      <input class="form-input" id="media-video-url" placeholder="https://youtube.com/watch?v=...">
+      <label class="form-label">캡션 (선택)</label>
+      <input class="form-input" id="media-video-caption" placeholder="동영상 설명...">
+    </div>
+
+    <!-- PDF -->
+    <div id="media-pdf" style="display:none">
+      <label class="form-label">PDF 파일 업로드</label>
+      <input type="file" id="media-pdf-inp" accept=".pdf" style="display:none" onchange="handlePdfFile(event)">
+      <button onclick="document.getElementById('media-pdf-inp').click()"
+        style="width:100%;padding:10px;border:1px dashed var(--s300);border-radius:var(--r);font-size:.8rem;color:var(--s500);background:none;cursor:pointer;margin-bottom:10px;font-family:var(--sans);transition:all .2s"
+        onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+        onmouseout="this.style.borderColor='var(--s300)';this.style.color='var(--s500)'">
+        📁 PDF 선택
+      </button>
+      <div id="media-pdf-name" style="font-size:.75rem;color:var(--blue);margin-bottom:8px;font-family:var(--mono)"></div>
+      <label class="form-label">또는 PDF URL</label>
+      <input class="form-input" id="media-pdf-url" placeholder="https://.../file.pdf">
+      <label class="form-label">표시 이름</label>
+      <input class="form-input" id="media-pdf-label" placeholder="논문 제목 등...">
+    </div>
+
+    <!-- LINK -->
+    <div id="media-link" style="display:none">
+      <label class="form-label">URL</label>
+      <input class="form-input" id="media-link-url" placeholder="https://...">
+      <label class="form-label">표시 텍스트</label>
+      <input class="form-input" id="media-link-text" placeholder="링크 이름">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-media')">취소</button>
+      <button class="btn-primary" onclick="confirmInsertMedia()">삽입</button>
+    </div>
+  </div>
+</div>
+<!-- Deploy Config -->
+<div id="modal-deploy" class="modal-overlay" style="display:none" onclick="closeModal('modal-deploy',event)">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">🚀 GitHub 배포 설정</div>
+    <p style="font-size:.78rem;color:var(--s600);line-height:1.7;margin-bottom:14px">
+      GitHub Personal Access Token을 입력하세요.<br>
+      한 번 저장하면 다음부터는 바로 배포됩니다.
+    </p>
+    <label class="form-label">Personal Access Token</label>
+    <input class="form-input" id="inp-gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx">
+    <p style="font-size:.68rem;color:var(--s400);margin-top:-8px;margin-bottom:12px">
+      GitHub → Settings → Developer settings → Personal access tokens → repo 권한 필요
+    </p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-deploy')">취소</button>
+      <button class="btn-primary" onclick="saveDeployConfig()">저장 후 배포</button>
+    </div>
+  </div>
+</div>
+<!-- Delete confirm -->
+<div id="modal-delete" class="modal-overlay" style="display:none" onclick="closeModal('modal-delete',event)">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title">삭제할까요?</div>
+    <p style="font-size:.82rem;color:var(--s500);line-height:1.6">삭제하면 복구할 수 없습니다.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-delete')">취소</button>
+      <button class="btn-primary" style="background:#ef4444" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────
+let posts      = [];
+let papers     = [];
+let categories = { posts:[], paper:[] };
+let cvSections = []; // [{id, name, entries:[{id,title,sub,date,desc,tags}]}]
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'' };
+
+let currentPostId   = null;
+let currentSection  = null;
+let editingPostId   = null;
+let editingSection  = 'posts';
+let editorTags      = [];
+let editorCat       = '';
+let deleteTargetId  = null;
+let deleteType      = null; // 'post'|'paper'|'cv-section'|'cv-entry'
+let deleteExtra     = null;
+let sortDesc        = { posts:true, paper:true };
+let filterCat       = { posts:null, paper:null };
+let filterTag       = { posts:null, paper:null };
+let isAdmin         = false;
+
+// CV editing state
+let editingSectionId = null;
+let editingEntryId   = null;
+let editingEntrySectionId = null;
+
+const PW_KEY = 'blog_admin_pw';
+
+// ── STORAGE ───────────────────────────────────────────────────────
+function save() {
+  try {
+    localStorage.setItem('blog_posts',   JSON.stringify(posts));
+    localStorage.setItem('blog_papers',  JSON.stringify(papers));
+    localStorage.setItem('blog_cats',    JSON.stringify(categories));
+    localStorage.setItem('blog_cv',      JSON.stringify(cvSections));
+    localStorage.setItem('blog_profile', JSON.stringify(profile));
+  } catch(e){}
+}
+function load() {
+  try {
+    const p  = localStorage.getItem('blog_posts');
+    const pa = localStorage.getItem('blog_papers');
+    const c  = localStorage.getItem('blog_cats');
+    const cv = localStorage.getItem('blog_cv');
+    const pr = localStorage.getItem('blog_profile');
+    if(p)  posts      = JSON.parse(p);
+    if(pa) papers     = JSON.parse(pa);
+    if(c)  categories = JSON.parse(c);
+    if(cv) cvSections = JSON.parse(cv);
+    if(pr) profile    = {...profile,...JSON.parse(pr)};
+    const tk = localStorage.getItem('blog_gh_token');
+    if(tk) GITHUB_CONFIG.token = tk;
+  } catch(e){}
+}
+// ── ADMIN ─────────────────────────────────────────────────────────
+function openPwModal() {
+  const stored = localStorage.getItem(PW_KEY);
+  if (!stored) {
+    document.getElementById('set-pw1').value='';
+    document.getElementById('set-pw2').value='';
+    document.getElementById('set-pw-error').style.display='none';
+    document.getElementById('modal-set-pw').style.display='flex';
+  } else {
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-error').style.display='none';
+    document.getElementById('modal-pw').style.display='flex';
+    setTimeout(()=>document.getElementById('pw-input').focus(),100);
+  }
+}
+function setPw() {
+  const v1=document.getElementById('set-pw1').value;
+  const v2=document.getElementById('set-pw2').value;
+  if(!v1){toast('비밀번호를 입력하세요.');return;}
+  if(v1!==v2){document.getElementById('set-pw-error').style.display='block';return;}
+  localStorage.setItem(PW_KEY,btoa(v1));
+  closeModal('modal-set-pw');
+  enterAdmin();
+  toast('비밀번호가 설정되었습니다.');
+}
+function checkPw() {
+  const stored=localStorage.getItem(PW_KEY);
+  const input=document.getElementById('pw-input').value;
+  if(stored&&btoa(input)===stored){closeModal('modal-pw');enterAdmin();}
+  else document.getElementById('pw-error').style.display='block';
+}
+function enterAdmin() {
+  isAdmin=true;
+  document.body.classList.add('admin-mode');
+  document.getElementById('admin-controls').classList.add('visible');
+  document.getElementById('btn-unlock').style.display='none';
+  updateWriteBtn();
+  toast('🔓 편집 모드');
+  renderCurrentPage();
+}
+function lockAdmin() {
+  isAdmin=false;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('admin-controls').classList.remove('visible');
+  document.getElementById('btn-unlock').style.display='';
+  toast('🔒 잠금');
+  renderCurrentPage();
+}
+function updateWriteBtn() {
+  const btn=document.getElementById('btn-write-nav');
+  const sec=currentPageName;
+  btn.style.display=(sec==='posts'||sec==='paper')&&isAdmin?'flex':'none';
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+let currentPageName='home';
+
+function setTab(name) {
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const el=document.getElementById('tab-'+name);
+  if(el) el.classList.add('active');
+}
+
+function showSection(name) {
+  currentPageName=name;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  setTab(name);
+  window.scrollTo(0,0);
+  renderCurrentPage();
+  updateWriteBtn();
+}
+
+function renderCurrentPage() {
+  if(currentPageName==='home')  renderHome();
+  if(currentPageName==='posts') renderPostsPage();
+  if(currentPageName==='paper') renderPaperPage();
+}
+
+function goBack() {
+  if(currentSection) showSection(currentSection);
+  else showSection('home');
+}
+
+// ── HOME ──────────────────────────────────────────────────────────
+function renderHome() {
+  // Profile sidebar
+  document.getElementById('home-name').textContent   = profile.name||'이름을 설정하세요';
+  document.getElementById('home-handle').textContent = '@'+(profile.handle||'handle');
+  document.getElementById('home-bio').textContent    = profile.bio||'';
+  document.getElementById('home-post-cnt').textContent  = posts.length;
+  document.getElementById('home-paper-cnt').textContent = papers.length;
+  document.getElementById('nav-blog-name').textContent  = profile.blogName||'My Blog';
+
+  const av=document.getElementById('home-av');
+  if(profile.avatar) av.innerHTML=`<img src="${esc(profile.avatar)}">`;
+  else av.textContent=profile.name?profile.name[0].toUpperCase():'?';
+
+  // Links
+  const linksEl=document.getElementById('home-links');
+  const linkItems=[];
+  if(profile.github) linkItems.push(`<a class="link-item" href="${esc(profile.github)}" target="_blank"><span class="link-icon">GH</span>${esc(profile.github.replace('https://github.com/','@'))}</a>`);
+  if(profile.email)  linkItems.push(`<a class="link-item" href="mailto:${esc(profile.email)}"><span class="link-icon">@</span>${esc(profile.email)}</a>`);
+  linksEl.innerHTML=linkItems.length?linkItems.join(''):'<span style="font-size:.72rem;color:var(--s400)">링크 없음</span>';
+  document.getElementById('home-links-card').style.display=linkItems.length||isAdmin?'block':'none';
+
+  // CV sections
+  renderCvArea();
+}
+
+// ── DRAG STATE ────────────────────────────────────────────────────
+let dragType    = null; // 'section' | 'entry'
+let dragSecIdx  = null;
+let dragEntIdx  = null;
+
+function renderCvArea() {
+  const area = document.getElementById('cv-area');
+  let html = '';
+
+  cvSections.forEach((sec, sIdx) => {
+    const adminDrag = isAdmin
+      ? `draggable="true"
+         ondragstart="onSecDragStart(event,${sIdx})"
+         ondragover="onSecDragOver(event,${sIdx})"
+         ondragleave="onSecDragLeave(event)"
+         ondrop="onSecDrop(event,${sIdx})"
+         ondragend="onDragEnd()"` : '';
+
+const layout = sec.layout || 'list';
+    html += `<div class="cv-section-block" id="sec-block-${sIdx}" ${adminDrag}>
+      <div class="cv-section-header">
+        <div class="cv-section-title">
+          ${isAdmin ? `<span style="color:var(--s300);margin-right:6px;font-size:.8rem;cursor:grab" 
+            ondragstart="onSecDragStart(event,${sIdx})" draggable="true">⠿</span>` : ''}
+          ${esc(sec.name)}
+        </div>
+        <div class="cv-section-actions">
+          ${isAdmin ? `<div class="layout-toggle">
+            <button class="layout-btn ${layout==='list'?'active':''}" onclick="setSecLayout('${sec.id}','list')">≡ 목록</button>
+            <button class="layout-btn ${layout==='grid'?'active':''}" onclick="setSecLayout('${sec.id}','grid')">⊞ 3열</button>
+          </div>` : ''}
+          <button class="btn-sm admin-only" onclick="openAddEntry('${sec.id}')">+ 항목 추가</button>
+          <button class="btn-sm admin-only" onclick="openEditSection('${sec.id}')">✎</button>
+          <button class="btn-sm danger admin-only" onclick="askDeleteCvSection('${sec.id}')">✕</button>
+        </div>
+      </div>`;
+    if (!sec.entries || !sec.entries.length) {
+      html += `<div style="font-size:.78rem;color:var(--s400);padding:10px 0">
+        항목이 없습니다.
+        <span class="admin-only" style="color:var(--blue);cursor:pointer" onclick="openAddEntry('${sec.id}')"> + 추가</span>
+      </div>`;
+    } else {
+      html += `<div class="${layout==='grid'?'cv-entries-grid':'cv-entries-list'}">`;
+      sec.entries.forEach((entry, eIdx) => {
+        const adminEntryDrag = isAdmin
+          ? `draggable="true"
+             ondragstart="onEntDragStart(event,${sIdx},${eIdx})"
+             ondragover="onEntDragOver(event,${sIdx},${eIdx})"
+             ondragleave="onEntDragLeave(event)"
+             ondrop="onEntDrop(event,${sIdx},${eIdx})"
+             ondragend="onDragEnd()"` : '';
+
+        html += `<div class="cv-entry" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
+          <div class="cv-entry-admin">
+            ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
+            <button class="btn-sm admin-only" onclick="openEditEntry('${sec.id}','${entry.id}')">✎</button>
+            <button class="btn-sm danger admin-only" onclick="askDeleteCvEntry('${sec.id}','${entry.id}')">✕</button>
+          </div>
+          <div class="cv-entry-header">
+            <div class="cv-entry-title">${esc(entry.title)}</div>
+            ${entry.date ? `<div class="cv-entry-date">${esc(entry.date)}</div>` : ''}
+          </div>
+          ${entry.sub  ? `<div class="cv-entry-sub">${esc(entry.sub)}</div>` : ''}
+          ${entry.desc ? `<div class="cv-entry-desc">${esc(entry.desc)}</div>` : ''}
+          ${entry.tags && entry.tags.length
+            ? `<div class="cv-entry-tags">${entry.tags.map(t=>`<span class="cv-entry-tag">${esc(t)}</span>`).join('')}</div>`
+            : ''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  html += `<button class="btn-add-section admin-only" onclick="openAddSection()">+ 새 섹션 추가</button>`;
+
+  if (!cvSections.length && !isAdmin) {
+    html = `<div class="empty-state"><div class="empty-icon">📋</div><h3>아직 내용이 없습니다</h3></div>`;
+  }
+
+  area.innerHTML = html;
+}
+
+// ── SECTION DRAG ─────────────────────────────────────────────────
+function onSecDragStart(e, sIdx) {
+  dragType = 'section'; dragSecIdx = sIdx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.stopPropagation();
+  setTimeout(() => {
+    const el = document.getElementById('sec-block-' + sIdx);
+    if (el) el.style.opacity = '0.45';
+  }, 0);
+}
+
+function onSecDragOver(e, sIdx) {
+  if (dragType !== 'section') return;
+  e.preventDefault();
+  document.querySelectorAll('.cv-section-block').forEach(el => el.classList.remove('drag-over-sec'));
+  const el = document.getElementById('sec-block-' + sIdx);
+  if (el) el.classList.add('drag-over-sec');
+}
+
+function onSecDragLeave(e) {
+  if (e.currentTarget) e.currentTarget.classList.remove('drag-over-sec');
+}
+
+function onSecDrop(e, targetIdx) {
+  e.preventDefault();
+  if (dragType !== 'section' || dragSecIdx === null || dragSecIdx === targetIdx) { onDragEnd(); return; }
+  const moved = cvSections.splice(dragSecIdx, 1)[0];
+  cvSections.splice(targetIdx, 0, moved);
+  dragSecIdx = null; dragType = null;
+  save(); renderCvArea();
+}
+function setSecLayout(secId, layout) {
+  const sec = cvSections.find(s => s.id === secId);
+  if (sec) { sec.layout = layout; save(); renderCvArea(); }
+}
+// ── ENTRY DRAG ────────────────────────────────────────────────────
+function onEntDragStart(e, sIdx, eIdx) {
+  dragType = 'entry'; dragSecIdx = sIdx; dragEntIdx = eIdx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.stopPropagation();
+  setTimeout(() => {
+    const el = document.getElementById(`ent-${sIdx}-${eIdx}`);
+    if (el) el.style.opacity = '0.45';
+  }, 0);
+}
+
+function onEntDragOver(e, sIdx, eIdx) {
+  if (dragType !== 'entry' || sIdx !== dragSecIdx) return;
+  e.preventDefault();
+  e.stopPropagation();
+  document.querySelectorAll('.cv-entry').forEach(el => el.classList.remove('drag-over'));
+  const el = document.getElementById(`ent-${sIdx}-${eIdx}`);
+  if (el) el.classList.add('drag-over');
+}
+
+function onEntDragLeave(e) {
+  if (e.currentTarget) e.currentTarget.classList.remove('drag-over');
+}
+
+function onEntDrop(e, sIdx, targetEIdx) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (dragType !== 'entry' || dragSecIdx !== sIdx || dragEntIdx === targetEIdx) { onDragEnd(); return; }
+  const sec = cvSections[sIdx];
+  const moved = sec.entries.splice(dragEntIdx, 1)[0];
+  sec.entries.splice(targetEIdx, 0, moved);
+  dragSecIdx = null; dragEntIdx = null; dragType = null;
+  save(); renderCvArea();
+}
+
+function onDragEnd() {
+  dragType = null; dragSecIdx = null; dragEntIdx = null;
+  document.querySelectorAll('.cv-section-block').forEach(el => {
+    el.style.opacity = '';
+    el.classList.remove('drag-over-sec');
+  });
+  document.querySelectorAll('.cv-entry').forEach(el => {
+    el.style.opacity = '';
+    el.classList.remove('drag-over');
+  });
+}
+
+// ── CV SECTION CRUD ───────────────────────────────────────────────
+function openAddSection() {
+  editingSectionId=null;
+  document.getElementById('add-section-title').textContent='새 섹션 추가';
+  document.getElementById('inp-section-name').value='';
+  document.getElementById('modal-add-section').style.display='flex';
+  setTimeout(()=>document.getElementById('inp-section-name').focus(),100);
+}
+function openEditSection(secId) {
+  const sec=cvSections.find(s=>s.id===secId);
+  if(!sec) return;
+  editingSectionId=secId;
+  document.getElementById('add-section-title').textContent='섹션 이름 수정';
+  document.getElementById('inp-section-name').value=sec.name;
+  document.getElementById('modal-add-section').style.display='flex';
+}
+function saveSection() {
+  const name=document.getElementById('inp-section-name').value.trim();
+  if(!name){toast('이름을 입력하세요.');return;}
+  if(editingSectionId) {
+    const s=cvSections.find(x=>x.id===editingSectionId);
+    if(s) s.name=name;
+  } else {
+    cvSections.push({id:'s'+Date.now(),name,entries:[],layout:'list'});
+  }
+  save();closeModal('modal-add-section');renderCvArea();
+}
+
+// ── CV ENTRY CRUD ─────────────────────────────────────────────────
+function openAddEntry(secId) {
+  editingEntrySectionId=secId; editingEntryId=null;
+  document.getElementById('add-entry-title').textContent='항목 추가';
+  ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-add-entry').style.display='flex';
+  setTimeout(()=>document.getElementById('inp-entry-title').focus(),100);
+}
+function openEditEntry(secId,entryId) {
+  const sec=cvSections.find(s=>s.id===secId);
+  const entry=sec&&sec.entries.find(e=>e.id===entryId);
+  if(!entry) return;
+  editingEntrySectionId=secId; editingEntryId=entryId;
+  document.getElementById('add-entry-title').textContent='항목 수정';
+  document.getElementById('inp-entry-title').value=entry.title||'';
+  document.getElementById('inp-entry-sub').value=entry.sub||'';
+  document.getElementById('inp-entry-date').value=entry.date||'';
+  document.getElementById('inp-entry-desc').value=entry.desc||'';
+  document.getElementById('inp-entry-tags').value=(entry.tags||[]).join(', ');
+  document.getElementById('modal-add-entry').style.display='flex';
+}
+function saveEntry() {
+  const title=document.getElementById('inp-entry-title').value.trim();
+  if(!title){toast('제목을 입력하세요.');return;}
+  const sub  =document.getElementById('inp-entry-sub').value.trim();
+  const date =document.getElementById('inp-entry-date').value.trim();
+  const desc =document.getElementById('inp-entry-desc').value.trim();
+  const tagsRaw=document.getElementById('inp-entry-tags').value;
+  const tags=tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+
+  const sec=cvSections.find(s=>s.id===editingEntrySectionId);
+  if(!sec) return;
+  if(editingEntryId) {
+    const i=sec.entries.findIndex(e=>e.id===editingEntryId);
+    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags};
+  } else {
+    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags});
+  }
+  save();closeModal('modal-add-entry');renderCvArea();
+}
+
+function askDeleteCvSection(secId) {
+  deleteType='cv-section'; deleteTargetId=secId; deleteExtra=null;
+  document.getElementById('modal-delete').style.display='flex';
+}
+function askDeleteCvEntry(secId,entryId) {
+  deleteType='cv-entry'; deleteTargetId=entryId; deleteExtra=secId;
+  document.getElementById('modal-delete').style.display='flex';
+}
+
+// ── POSTS/PAPER FILTER SIDEBAR ────────────────────────────────────
+function buildFilterSidebar(containerId, section) {
+  const el=document.getElementById(containerId);
+  const list=section==='posts'?posts:papers;
+  const allTags=new Set(list.flatMap(p=>p.tags||[]));
+  const cats=categories[section]||[];
+  const fc=filterCat[section], ft=filterTag[section];
+  let html='';
+
+  if(cats.length) {
+    html+=`<div class="gc cat-card">
+      <div class="sec-label">카테고리</div>
+      <div class="cat-item" onclick="setCatFilter('${section}',null)">
+        <span class="cat-name ${!fc?'active':''}">전체</span>
+        <span class="cat-count">${list.length}</span>
+      </div>
+      ${cats.map(c=>{
+        const cnt=list.filter(p=>p.cat===c).length;
+        return `<div class="cat-item" onclick="setCatFilter('${section}','${esc(c)}')">
+          <span class="cat-name ${fc===c?'active':''}">${esc(c)}</span>
+          <span class="cat-count">${cnt}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  if(allTags.size) {
+    html+=`<div class="gc tag-card">
+      <div class="sec-label">Tags</div>
+      <div class="tag-cloud">
+        ${[...allTags].map(t=>`<span class="tag-chip ${ft===t?'active':''}" onclick="setTagFilter('${section}','${esc(t)}')">${esc(t)}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+// ── POSTS/PAPER PAGES ─────────────────────────────────────────────
+function renderPostsPage() {
+  buildFilterSidebar('posts-filter-sidebar','posts');
+  let list=[...posts];
+  const fc=filterCat.posts,ft=filterTag.posts;
+  if(fc) list=list.filter(p=>p.cat===fc);
+  if(ft) list=list.filter(p=>(p.tags||[]).includes(ft));
+  list.sort((a,b)=>sortDesc.posts?b.id-a.id:a.id-b.id);
+  let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Posts (${list.length})`;
+  document.getElementById('posts-filter-label').textContent=label;
+  document.getElementById('posts-list').innerHTML=list.length
+    ?list.map(p=>postCardHTML(p,'posts')).join('')
+    :`<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+}
+function renderPaperPage() {
+  buildFilterSidebar('paper-filter-sidebar','paper');
+  let list=[...papers];
+  const fc=filterCat.paper,ft=filterTag.paper;
+  if(fc) list=list.filter(p=>p.cat===fc);
+  if(ft) list=list.filter(p=>(p.tags||[]).includes(ft));
+  list.sort((a,b)=>sortDesc.paper?b.id-a.id:a.id-b.id);
+  let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Paper Review (${list.length})`;
+  document.getElementById('paper-filter-label').textContent=label;
+  document.getElementById('paper-list').innerHTML=list.length
+    ?list.map(p=>postCardHTML(p,'paper')).join('')
+    :`<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
+}
+
+function postCardHTML(p,section) {
+  const tags=(p.tags||[]).map(t=>`<span class="pc-tag">#${esc(t)}</span>`).join('');
+  const cat=p.cat?`<span class="pc-cat">${esc(p.cat)}</span>`:'';
+  return `<div class="gc gc-hover post-card" onclick="openPost(${p.id},'${section}')">
+    <div class="pc-top">${cat}${tags}</div>
+    <div class="pc-title">${esc(p.title)}</div>
+    <div class="pc-excerpt">${esc(excerpt(p.body))}</div>
+    <div class="pc-footer">
+      <span class="pc-date">${fmtDate(p.createdAt)}</span>
+      <div class="pc-actions admin-only" onclick="event.stopPropagation()">
+        <button class="btn-sm" onclick="openEdit(${p.id},'${section}')">✎</button>
+        <button class="btn-sm danger" onclick="askDelete(${p.id},'${section}')">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function setCatFilter(section,cat) { filterCat[section]=cat;filterTag[section]=null;section==='posts'?renderPostsPage():renderPaperPage(); }
+function setTagFilter(section,tag) { filterTag[section]=filterTag[section]===tag?null:tag;filterCat[section]=null;section==='posts'?renderPostsPage():renderPaperPage(); }
+function toggleSort(section) { sortDesc[section]=!sortDesc[section];section==='posts'?renderPostsPage():renderPaperPage(); }
+
+// ── ARTICLE ───────────────────────────────────────────────────────
+function openPost(id,section) {
+  const list=section==='posts'?posts:papers;
+  const p=list.find(x=>x.id===id);
+  if(!p) return;
+  currentPostId=id; currentSection=section;
+  document.getElementById('article-tags').innerHTML=
+    (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')+(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join('');
+  document.getElementById('article-title').textContent=p.title;
+  document.getElementById('article-date').textContent=fmtDate(p.createdAt);
+  const body=document.getElementById('article-body');
+  body.innerHTML=parseMd(p.body);
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+  document.getElementById('page-article').classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(()=>{
+    if(window.renderMathInElement) renderMathInElement(body,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
+    });
+  },60);
+}
+function editCurrentArticle(){if(currentPostId)openEdit(currentPostId,currentSection);}
+function deleteCurrentArticle(){if(currentPostId)askDelete(currentPostId,currentSection);}
+
+// ── WRITE / EDIT ──────────────────────────────────────────────────
+function openWrite(sectionHint) {
+  if(!isAdmin){openPwModal();return;}
+  editingPostId=null; editorTags=[]; editorCat='';
+  editingSection=sectionHint||currentPageName==='paper'?'paper':'posts';
+  if(currentPageName==='paper') editingSection='paper';
+  else editingSection='posts';
+  document.getElementById('editor-title').value='';
+  document.getElementById('editor-body').value='';
+  document.getElementById('editor-mode-label').textContent='새 글 작성';
+  selectSection(editingSection,document.getElementById('sec-btn-'+editingSection));
+  renderEditorCats(); renderEditorTags();
+  switchTab('write',document.querySelector('.editor-tab'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-write').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+function openEdit(id,section) {
+  if(!isAdmin) return;
+  const list=section==='posts'?posts:papers;
+  const p=list.find(x=>x.id===id);
+  if(!p) return;
+  editingPostId=id; editingSection=section; editorTags=[...(p.tags||[])]; editorCat=p.cat||'';
+  document.getElementById('editor-title').value=p.title;
+  document.getElementById('editor-body').value=p.body;
+  document.getElementById('editor-mode-label').textContent='글 수정 중';
+  selectSection(section,document.getElementById('sec-btn-'+section));
+  renderEditorCats(); renderEditorTags();
+  switchTab('write',document.querySelector('.editor-tab'));
+  document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+  document.getElementById('page-write').classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  window.scrollTo(0,0);
+}
+function cancelWrite() {
+  if(editingPostId!==null) openPost(editingPostId,editingSection);
+  else showSection(editingSection||'posts');
+}
+function publishPost() {
+  const title=document.getElementById('editor-title').value.trim();
+  const body=document.getElementById('editor-body').value.trim();
+  if(!title){toast('제목을 입력하세요.');return;}
+  if(!body){toast('본문을 입력하세요.');return;}
+  const list=editingSection==='posts'?posts:papers;
+  if(editingPostId!==null) {
+    const i=list.findIndex(x=>x.id===editingPostId);
+    if(i>=0) list[i]={...list[i],title,body,tags:editorTags,cat:editorCat,updatedAt:Date.now()};
+    toast('수정되었습니다.');
+    const id=editingPostId; editingPostId=null;
+    save(); openPost(id,editingSection);
+  } else {
+    const np={id:Date.now(),title,body,tags:editorTags,cat:editorCat,createdAt:Date.now(),updatedAt:Date.now()};
+    list.unshift(np);
+    if(editorCat&&!(categories[editingSection]||[]).includes(editorCat)){
+      categories[editingSection]=categories[editingSection]||[];
+      categories[editingSection].push(editorCat);
+    }
+    save(); toast('발행되었습니다.'); openPost(np.id,editingSection);
+  }
+}
+function selectSection(sec,btn) {
+  editingSection=sec;
+  document.querySelectorAll('[id^="sec-btn-"]').forEach(b=>b.classList.remove('sel'));
+  if(btn) btn.classList.add('sel');
+  renderEditorCats();
+}
+function renderEditorCats() {
+  const cats=categories[editingSection]||[];
+  document.getElementById('editor-cat-btns').innerHTML=cats.map(c=>
+    `<button class="cat-sel-btn ${editorCat===c?'sel':''}" onclick="selectCat('${esc(c)}')">${esc(c)}</button>`
+  ).join('');
+}
+function selectCat(cat){editorCat=editorCat===cat?'':cat;renderEditorCats();}
+function addNewCat(){
+  const v=document.getElementById('cat-new-inp').value.trim();
+  if(!v) return;
+  if(!categories[editingSection]) categories[editingSection]=[];
+  if(!categories[editingSection].includes(v)) categories[editingSection].push(v);
+  editorCat=v; document.getElementById('cat-new-inp').value='';
+  save(); renderEditorCats();
+}
+function renderEditorTags(){
+  document.getElementById('editor-tag-list').innerHTML=editorTags.map(t=>
+    `<span class="e-tag-pill">#${esc(t)}<span class="tag-rm" onclick="rmTag('${esc(t)}')">×</span></span>`
+  ).join('');
+}
+function handleTagInput(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const v=e.target.value.trim().replace(/,/g,'').replace(/\s+/g,'-');
+    if(v&&!editorTags.includes(v)&&editorTags.length<8){editorTags.push(v);renderEditorTags();}
+    e.target.value='';
+  }
+  if(e.key==='Backspace'&&e.target.value===''&&editorTags.length){editorTags.pop();renderEditorTags();}
+}
+function rmTag(t){editorTags=editorTags.filter(x=>x!==t);renderEditorTags();}
+function ins(before,after){
+  const ta=document.getElementById('editor-body');
+  const s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);
+  ta.value=ta.value.substring(0,s)+before+sel+after+ta.value.substring(e);
+  ta.focus();ta.selectionStart=s+before.length;ta.selectionEnd=s+before.length+sel.length;
+}
+function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+function switchTab(tab,el){
+  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const body=document.getElementById('editor-body');
+  const prev=document.getElementById('editor-preview');
+  if(tab==='preview'){
+    prev.innerHTML=parseMd(body.value);prev.classList.add('active');body.classList.add('hidden');
+    if(window.renderMathInElement) setTimeout(()=>renderMathInElement(prev,{
+      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
+    }),60);
+  } else { prev.classList.remove('active');body.classList.remove('hidden');body.focus(); }
+}
+
+// ── PROFILE ───────────────────────────────────────────────────────
+function openProfileEdit(){
+  if(!isAdmin) return;
+  document.getElementById('inp-name').value=profile.name;
+  document.getElementById('inp-handle').value=profile.handle;
+  document.getElementById('inp-blog-name').value=profile.blogName;
+  document.getElementById('inp-bio').value=profile.bio;
+  document.getElementById('inp-github').value=profile.github;
+  document.getElementById('inp-email').value=profile.email;
+  document.getElementById('modal-profile').style.display='flex';
+}
+function saveProfile(){
+  profile.name    =document.getElementById('inp-name').value.trim();
+  profile.handle  =document.getElementById('inp-handle').value.trim().replace('@','');
+  profile.blogName=document.getElementById('inp-blog-name').value.trim()||'My Blog';
+  profile.bio     =document.getElementById('inp-bio').value.trim();
+  profile.github  =document.getElementById('inp-github').value.trim();
+  profile.email   =document.getElementById('inp-email').value.trim();
+  save();closeModal('modal-profile');
+  document.getElementById('nav-blog-name').textContent=profile.blogName||'My Blog';
+  renderHome();toast('저장되었습니다.');
+}
+function openAvatarEdit(){
+  if(!isAdmin) return;
+  const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f) return;
+    const r=new FileReader();
+    r.onload=ev=>{profile.avatar=ev.target.result;save();renderHome();toast('사진 변경됨.');};
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+
+// ── DELETE ────────────────────────────────────────────────────────
+function askDelete(id,section){
+  deleteType=section==='posts'?'post':'paper';
+  deleteTargetId=id;deleteExtra=section;
+  document.getElementById('modal-delete').style.display='flex';
+}
+function confirmDelete(){
+  if(deleteType==='post')       posts  =posts.filter(p=>p.id!==deleteTargetId);
+  else if(deleteType==='paper') papers =papers.filter(p=>p.id!==deleteTargetId);
+  else if(deleteType==='cv-section') cvSections=cvSections.filter(s=>s.id!==deleteTargetId);
+  else if(deleteType==='cv-entry'){
+    const sec=cvSections.find(s=>s.id===deleteExtra);
+    if(sec) sec.entries=sec.entries.filter(e=>e.id!==deleteTargetId);
+  }
+  save();closeModal('modal-delete');toast('삭제되었습니다.');
+  if(deleteType==='post'||deleteType==='paper') showSection(deleteExtra||'posts');
+  else renderCvArea();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+function closeModal(id,event){
+  if(event&&event.target!==document.getElementById(id)) return;
+  document.getElementById(id).style.display='none';
+}
+
+// ── MARKDOWN ──────────────────────────────────────────────────────
+function parseMd(md){
+  if(!md) return '';
+  let h=esc(md);
+  const mb=[],mi=[];
+  h=h.replace(/\$\$([\s\S]*?)\$\$/g,(_,m)=>{mb.push(m);return`%%MB${mb.length-1}%%`;});
+  h=h.replace(/\$((?:[^$\\]|\\.)+?)\$/g,(_,m)=>{mi.push(m);return`%%MI${mi.length-1}%%`;});
+  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h=h.replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre><code>$1</code></pre>');
+  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  h=h.replace(/(^- .+\n?)+/gm,m=>{
+    const items=m.trim().split('\n').map(l=>`<li>${l.replace(/^- /,'')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+  h=h.split(/\n\n+/).map(b=>{
+    b=b.trim();if(!b) return '';
+    if(/^<(h[1-6]|ul|ol|pre|blockquote)/.test(b)) return b;
+    return `<p>${b.replace(/\n/g,'<br>')}</p>`;
+  }).join('\n');
+mb.forEach((m,i)=>{h=h.replace(`%%MB${i}%%`,`<div class="math-block">$$${m}$$</div>`);});
+  mi.forEach((m,i)=>{h=h.replace(`%%MI${i}%%`,`$${m}$`);});
+
+  // media tags
+  h = h.replace(/%%IMG%%([^%]+)%%([^%]*)%%/g, (_, src, caption) =>
+    `<div class="media-img-wrap"><img src="${src}" loading="lazy">${caption ? `<div class="media-caption">${caption}</div>` : ''}</div>`);
+  h = h.replace(/%%VID%%([^%]+)%%([^%]*)%%/g, (_, src, caption) =>
+    `<div class="media-video-wrap"><iframe src="${src}" allowfullscreen></iframe></div>${caption ? `<div class="media-caption">${caption}</div>` : ''}`);
+h = h.replace(/%%PDF%%([^%]+)%%([^%]*)%%/g, (_, src, label) =>
+    `<div class="media-pdf-wrap"><a class="media-pdf-link" href="#" onclick="openPdf('${src.length > 100 ? 'blob' : src}', ${JSON.stringify(src)});return false;"><span class="media-pdf-icon">📄</span>${label}<span style="font-size:.65rem;color:var(--s400);margin-left:8px">새 탭에서 열기 ↗</span></a></div>`);
+  h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+    (_, text, url) => `<a class="media-link-inline" href="${url}" target="_blank">${text}</a>`);
+
+  return h;
+}
+// ── MEDIA ─────────────────────────────────────────────────────────
+let currentMediaType = null;
+let mediaBase64      = null;
+let pdfBase64        = null;
+
+function insertMedia(type) {
+  currentMediaType = type;
+  mediaBase64 = null; pdfBase64 = null;
+  ['image','video','pdf','link'].forEach(t => {
+    document.getElementById('media-' + t).style.display = t === type ? 'block' : 'none';
+  });
+  const titles = { image:'🖼 사진 삽입', video:'🎬 동영상 삽입', pdf:'📄 PDF 삽입', link:'🔗 링크 삽입' };
+  document.getElementById('media-modal-title').textContent = titles[type];
+  // reset
+  document.getElementById('media-url-inp').value = '';
+  document.getElementById('media-caption-inp').value = '';
+  document.getElementById('media-video-url').value = '';
+  document.getElementById('media-video-caption').value = '';
+  document.getElementById('media-pdf-url').value = '';
+  document.getElementById('media-pdf-label').value = '';
+  document.getElementById('media-pdf-name').textContent = '';
+  document.getElementById('media-link-url').value = '';
+  document.getElementById('media-link-text').value = '';
+  document.getElementById('media-preview').style.display = 'none';
+  document.getElementById('modal-media').style.display = 'flex';
+}
+
+function handleMediaFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    mediaBase64 = ev.target.result;
+    document.getElementById('media-preview-img').src = mediaBase64;
+    document.getElementById('media-preview').style.display = 'block';
+    document.getElementById('media-url-inp').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function handlePdfFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pdfBase64 = ev.target.result;
+    document.getElementById('media-pdf-name').textContent = '✓ ' + file.name;
+    document.getElementById('media-pdf-label').value = document.getElementById('media-pdf-label').value || file.name.replace('.pdf','');
+    document.getElementById('media-pdf-url').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function confirmInsertMedia() {
+  let tag = '';
+
+  if (currentMediaType === 'image') {
+    const src     = mediaBase64 || document.getElementById('media-url-inp').value.trim();
+    const caption = document.getElementById('media-caption-inp').value.trim();
+    if (!src) { toast('이미지를 선택하거나 URL을 입력하세요.'); return; }
+    tag = `\n%%IMG%%${src}%%${caption}%%\n`;
+  }
+  else if (currentMediaType === 'video') {
+    let url = document.getElementById('media-video-url').value.trim();
+    const caption = document.getElementById('media-video-caption').value.trim();
+    if (!url) { toast('URL을 입력하세요.'); return; }
+    // convert youtube watch URL to embed
+    url = url.replace('watch?v=','embed/').replace('youtu.be/','www.youtube.com/embed/');
+    tag = `\n%%VID%%${url}%%${caption}%%\n`;
+  }
+  else if (currentMediaType === 'pdf') {
+    const src   = pdfBase64 || document.getElementById('media-pdf-url').value.trim();
+    const label = document.getElementById('media-pdf-label').value.trim() || 'PDF 파일';
+    if (!src) { toast('PDF를 선택하거나 URL을 입력하세요.'); return; }
+    tag = `\n%%PDF%%${src}%%${label}%%\n`;
+  }
+  else if (currentMediaType === 'link') {
+    const url  = document.getElementById('media-link-url').value.trim();
+    const text = document.getElementById('media-link-text').value.trim() || url;
+    if (!url) { toast('URL을 입력하세요.'); return; }
+    tag = `[${text}](${url})`;
+  }
+
+  const ta = document.getElementById('editor-body');
+  const pos = ta.selectionStart;
+  ta.value = ta.value.substring(0, pos) + tag + ta.value.substring(pos);
+  closeModal('modal-media');
+  toast('삽입되었습니다.');
+}
+function openPdf(type, src) {
+  if (src.startsWith('data:')) {
+    // base64 → blob URL → 새 탭
+    const byteStr = atob(src.split(',')[1]);
+    const ab = new ArrayBuffer(byteStr.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteStr.length; i++) ia[i] = byteStr.charCodeAt(i);
+    const blob = new Blob([ab], { type: 'application/pdf' });
+    const url  = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } else {
+    window.open(src, '_blank');
+  }
+}
+
+// ── DEPLOY ───────────────────────────────────────────────────────
+const GITHUB_CONFIG = {
+  token: '',        // 발급받은 토큰 붙여넣기
+  owner: 'chasseneige109',
+  repo:  'noahnam.github.io',
+  path:  'index.html',
+  branch:'main',
+};
+
+async function deployToGithub() {
+  if (!GITHUB_CONFIG.token) { openDeployConfig(); return; }
+  toast('⏳ 배포 중...');
+
+  try {
+    // GitHub에서 현재 파일 SHA + 원본 내용 가져오기
+    const getRes = await fetch(
+      `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?ref=${GITHUB_CONFIG.branch}&t=${Date.now()}`,
+      { headers: { Authorization: `token ${GITHUB_CONFIG.token}`, Accept: 'application/vnd.github.v3+json' } }
+    );
+    if (!getRes.ok) { toast('❌ GitHub 파일 읽기 실패'); return; }
+    const getJson = await getRes.json();
+    const sha = getJson.sha;
+
+    // base64 → 원본 HTML 복원
+    let html = decodeURIComponent(escape(atob(getJson.content.replace(/\n/g, ''))));
+
+    // 이전 주입 데이터 제거
+    html = html.replace(/<!--BLOGDATA-->([\s\S]*?)<!--\/BLOGDATA-->\n?/g, '');
+
+    // 현재 데이터 직렬화
+    const payload = JSON.stringify({
+      posts:   posts,
+      papers:  papers,
+      cats:    categories,
+      cv:      cvSections,
+      profile: profile,
+    });
+
+    // 데이터 주입 (안전하게 주석 태그로 감쌈)
+    const inject = [
+      '<!--BLOGDATA-->',
+      '<scr'+'ipt>',
+      '(function(){',
+      'var _d=' + payload + ';',
+      "localStorage.setItem('blog_posts',   JSON.stringify(_d.posts));",
+      "localStorage.setItem('blog_papers',  JSON.stringify(_d.papers));",
+      "localStorage.setItem('blog_cats',    JSON.stringify(_d.cats));",
+      "localStorage.setItem('blog_cv',      JSON.stringify(_d.cv));",
+      "localStorage.setItem('blog_profile', JSON.stringify(_d.profile));",
+      '})();',
+      '</'+'script>',
+      '<!--/BLOGDATA-->',
+    ].join('\n');
+
+    html = html.replace('</' + 'body>', inject + '\n</body>');
+
+    // UTF-8 → base64
+    const encoded = btoa(unescape(encodeURIComponent(html)));
+
+    // GitHub에 PUT
+    const putRes = await fetch(
+      `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${GITHUB_CONFIG.token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `data update: ${new Date().toLocaleString('ko-KR')}`,
+          content: encoded,
+          sha,
+          branch: GITHUB_CONFIG.branch,
+        })
+      }
+    );
+
+    if (putRes.ok) {
+      toast('✅ 배포 완료! 1~2분 후 반영됩니다');
+    } else {
+      const err = await putRes.json();
+      toast('❌ 실패: ' + (err.message || '오류'));
+    }
+  } catch(e) {
+    toast('❌ 오류: ' + e.message);
+  }
+}
+
+function openDeployConfig() {
+  document.getElementById('modal-deploy').style.display = 'flex';
+  setTimeout(()=>document.getElementById('inp-gh-token').focus(), 100);
+}
+
+function saveDeployConfig() {
+  const token = document.getElementById('inp-gh-token').value.trim();
+  if (!token) { toast('토큰을 입력하세요.'); return; }
+  GITHUB_CONFIG.token = token;
+  localStorage.setItem('blog_gh_token', token);
+  closeModal('modal-deploy');
+  toast('저장됨. 다시 배포 버튼을 눌러주세요.');
+}
+// ── UTILS ─────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function excerpt(b){return b.replace(/#{1,6} /g,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/`/g,'').replace(/\$\$[\s\S]*?\$\$/g,'[수식]').replace(/\$[^$]+\$/g,'[수식]').substring(0,110).trim()+'...';}
+function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  load();
+  document.getElementById('nav-blog-name').textContent=profile.blogName||'My Blog';
+  showSection('home');
+  document.getElementById('editor-title').addEventListener('input',function(){autoResize(this);});
+});
+let cvDragSrcIdx = null;
+
+function cvDragStart(e, idx) {
+  cvDragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '0.5';
+}
+
+function cvDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function cvDrop(e, targetIdx) {
+  e.preventDefault();
+  if (cvDragSrcIdx === null || cvDragSrcIdx === targetIdx) return;
+  const moved = cvSections.splice(cvDragSrcIdx, 1)[0];
+  cvSections.splice(targetIdx, 0, moved);
+  cvDragSrcIdx = null;
+  save();
+  renderCvArea();
+}
+</script>
+
+<script>
+particlesJS("particles-js",{
+  particles:{
+    number:{value:40,density:{enable:true,value_area:1200}},
+    color:{value:"#3b82f6"},shape:{type:"circle"},
+    opacity:{value:.18,random:false},size:{value:2.5,random:true},
+    line_linked:{enable:true,distance:160,color:"#93c5fd",opacity:.15,width:1},
+    move:{enable:true,speed:0.8,direction:"none",random:false,straight:false,out_mode:"out",bounce:false}
+  },
+  interactivity:{
+    detect_on:"window",
+    events:{onhover:{enable:true,mode:"grab"},onclick:{enable:false},resize:true},
+    modes:{grab:{distance:180,line_linked:{opacity:.35}}}
+  },
+  retina_detect:true
+});
+</script>
+</body>
+</html>
