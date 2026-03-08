@@ -435,6 +435,34 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-post-dot{width:4px;height:4px;border-radius:50%;background:var(--s300);flex-shrink:0}
 .folder-post-title{font-size:.75rem;color:var(--s600);line-height:1.4;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+
+/* ── PAPER META BOX ── */
+.paper-meta-box{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:var(--r2);padding:20px 24px;margin-bottom:28px}
+.paper-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px}
+.paper-meta-item{display:flex;flex-direction:column;gap:3px}
+.paper-meta-label{font-size:.55rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);opacity:.7}
+.paper-meta-value{font-size:.82rem;font-weight:600;color:var(--s800);font-family:var(--sans)}
+.paper-meta-link{font-size:.82rem;font-weight:600;color:var(--blue);text-decoration:none;word-break:break-all}
+.paper-meta-link:hover{text-decoration:underline}
+.paper-meta-full{grid-column:1/-1}
+.paper-summary-box{background:#fff;border:1px solid var(--s200);border-left:3px solid var(--blue);border-radius:0 var(--r2) var(--r2) 0;padding:18px 22px;margin-bottom:32px}
+.paper-summary-title{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.paper-summary-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.paper-summary-list li{display:flex;gap:10px;font-size:.88rem;color:var(--s700);line-height:1.6}
+.paper-summary-list li::before{content:counter(li);counter-increment:li;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:.6rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.paper-summary-list{counter-reset:li}
+/* editor paper fields */
+.paper-fields{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:var(--r2);padding:16px 20px;margin-bottom:14px;display:none}
+.paper-fields.visible{display:block}
+.paper-fields-title{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+.paper-fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.paper-field-inp{width:100%;padding:7px 10px;border:1px solid #bfdbfe;border-radius:var(--r);font-size:.8rem;font-family:var(--sans);color:var(--s800);background:#fff;outline:none;transition:border-color .15s}
+.paper-field-inp:focus{border-color:var(--blue)}
+.paper-field-full{grid-column:1/-1}
+.paper-summary-inp{width:100%;padding:7px 10px;border:1px solid #bfdbfe;border-radius:var(--r);font-size:.8rem;font-family:var(--sans);color:var(--s800);background:#fff;outline:none;resize:none;line-height:1.6;transition:border-color .15s}
+.paper-summary-inp:focus{border-color:var(--blue)}
+@media(max-width:600px){.paper-meta-grid,.paper-fields-grid{grid-template-columns:1fr}}
+
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
@@ -604,6 +632,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <div class="a-tags" id="article-tags"></div>
     <h1 class="a-title" id="article-title"></h1>
     <div class="a-meta"><span id="article-date"></span></div>
+    <div id="article-paper-meta" style="display:none">
+      <div class="paper-meta-box" id="article-meta-box"></div>
+      <div class="paper-summary-box" id="article-summary-box" style="display:none">
+        <div class="paper-summary-title">💡 세 줄 요약</div>
+        <ol class="paper-summary-list" id="article-summary-list"></ol>
+      </div>
+    </div>
     <div class="a-body" id="article-body"></div>
   </div>
 </div>
@@ -624,6 +659,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
       <span class="editor-row-label">섹션</span>
       <button class="cat-sel-btn sel" id="sec-btn-posts" onclick="selectSection('posts',this)">Posts</button>
       <button class="cat-sel-btn" id="sec-btn-paper" onclick="selectSection('paper',this)">Paper Review</button>
+    </div>
+    <!-- Paper Review 메타 필드 -->
+    <div class="paper-fields" id="paper-fields">
+      <div class="paper-fields-title">📄 논문 정보</div>
+      <div class="paper-fields-grid">
+        <input class="paper-field-inp" id="pf-authors" placeholder="저자 (Authors)">
+        <input class="paper-field-inp" id="pf-year" placeholder="연도 (Year)">
+        <input class="paper-field-inp" id="pf-venue" placeholder="학회 / 저널 (Venue)">
+        <input class="paper-field-inp" id="pf-arxiv" placeholder="arXiv 링크">
+        <input class="paper-field-inp paper-field-full" id="pf-code" placeholder="코드 링크 (GitHub 등)">
+      </div>
+      <div style="margin-top:10px">
+        <div class="paper-fields-title" style="margin-bottom:8px">💡 세 줄 요약</div>
+        <textarea class="paper-summary-inp paper-field-full" id="pf-s1" placeholder="핵심 기여 1" rows="2"></textarea>
+        <textarea class="paper-summary-inp paper-field-full" id="pf-s2" placeholder="핵심 기여 2" style="margin-top:6px" rows="2"></textarea>
+        <textarea class="paper-summary-inp paper-field-full" id="pf-s3" placeholder="핵심 기여 3" style="margin-top:6px" rows="2"></textarea>
+      </div>
     </div>
     <div class="editor-row">
       <span class="editor-row-label">카테고리</span>
@@ -863,7 +915,11 @@ async function load() {
     if (papersRes.data) papers = papersRes.data.map(r => ({
       id: r.id, title: r.title, body: r.content, cat: r.category,
       tags: r.tags || [], createdAt: new Date(r.created_at).getTime(),
-      updatedAt: new Date(r.updated_at).getTime()
+      updatedAt: new Date(r.updated_at).getTime(),
+      authors: r.authors || '', year: r.year || '',
+      venue: r.venue || '', arxiv: r.arxiv || '',
+      codeLink: r.code_link || '',
+      summary1: r.summary1 || '', summary2: r.summary2 || '', summary3: r.summary3 || ''
     }));
 
     if (catsRes.data) {
@@ -919,6 +975,14 @@ async function savePost(post, section) {
     tags: post.tags || [],
     created_at: new Date(post.createdAt).toISOString(),
     updated_at: new Date(post.updatedAt || post.createdAt).toISOString(),
+    authors: post.authors || null,
+    year: post.year || null,
+    venue: post.venue || null,
+    arxiv: post.arxiv || null,
+    code_link: post.codeLink || null,
+    summary1: post.summary1 || null,
+    summary2: post.summary2 || null,
+    summary3: post.summary3 || null,
   };
   const table = section === 'posts' ? 'posts' : 'papers';
   const { error } = await supa.from(table).upsert(row);
@@ -1622,6 +1686,66 @@ function setTagFilter(section,tag) { filterTag[section]=filterTag[section]===tag
 function toggleSort(section) { sortDesc[section]=!sortDesc[section];section==='posts'?renderPostsPage():renderPaperPage(); }
 
 // ── ARTICLE ───────────────────────────────────────────────────────
+
+// ── PAPER META HELPERS ────────────────────────────────────────────
+function readPaperFields() {
+  return {
+    authors:  document.getElementById('pf-authors').value.trim(),
+    year:     document.getElementById('pf-year').value.trim(),
+    venue:    document.getElementById('pf-venue').value.trim(),
+    arxiv:    document.getElementById('pf-arxiv').value.trim(),
+    codeLink: document.getElementById('pf-code').value.trim(),
+    summary1: document.getElementById('pf-s1').value.trim(),
+    summary2: document.getElementById('pf-s2').value.trim(),
+    summary3: document.getElementById('pf-s3').value.trim(),
+  };
+}
+function fillPaperFields(p) {
+  document.getElementById('pf-authors').value = p.authors || '';
+  document.getElementById('pf-year').value    = p.year || '';
+  document.getElementById('pf-venue').value   = p.venue || '';
+  document.getElementById('pf-arxiv').value   = p.arxiv || '';
+  document.getElementById('pf-code').value    = p.codeLink || '';
+  document.getElementById('pf-s1').value      = p.summary1 || '';
+  document.getElementById('pf-s2').value      = p.summary2 || '';
+  document.getElementById('pf-s3').value      = p.summary3 || '';
+}
+function clearPaperFields() {
+  ['pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+function renderPaperMeta(p, section) {
+  const wrap = document.getElementById('article-paper-meta');
+  if(!wrap) return;
+  if(section !== 'paper') { wrap.style.display='none'; return; }
+  const hasMeta = p.authors||p.year||p.venue||p.arxiv||p.codeLink;
+  const hasSummary = p.summary1||p.summary2||p.summary3;
+  if(!hasMeta && !hasSummary) { wrap.style.display='none'; return; }
+  wrap.style.display='block';
+
+  // meta box
+  const metaBox = document.getElementById('article-meta-box');
+  if(hasMeta) {
+    let items = '';
+    if(p.authors) items+=`<div class="paper-meta-item"><span class="paper-meta-label">Authors</span><span class="paper-meta-value">${esc(p.authors)}</span></div>`;
+    if(p.year)    items+=`<div class="paper-meta-item"><span class="paper-meta-label">Year</span><span class="paper-meta-value">${esc(p.year)}</span></div>`;
+    if(p.venue)   items+=`<div class="paper-meta-item paper-meta-full"><span class="paper-meta-label">Venue</span><span class="paper-meta-value">${esc(p.venue)}</span></div>`;
+    if(p.arxiv)   items+=`<div class="paper-meta-item paper-meta-full"><span class="paper-meta-label">arXiv</span><a class="paper-meta-link" href="${esc(p.arxiv)}" target="_blank">${esc(p.arxiv)}</a></div>`;
+    if(p.codeLink)items+=`<div class="paper-meta-item paper-meta-full"><span class="paper-meta-label">Code</span><a class="paper-meta-link" href="${esc(p.codeLink)}" target="_blank">${esc(p.codeLink)}</a></div>`;
+    metaBox.innerHTML = `<div class="paper-meta-grid">${items}</div>`;
+    metaBox.style.display='block';
+  } else { metaBox.style.display='none'; }
+
+  // summary box
+  const sumBox = document.getElementById('article-summary-box');
+  const sumList = document.getElementById('article-summary-list');
+  const summaries = [p.summary1,p.summary2,p.summary3].filter(Boolean);
+  if(hasSummary) {
+    sumList.innerHTML = summaries.map(s=>`<li>${esc(s)}</li>`).join('');
+    sumBox.style.display='block';
+  } else { sumBox.style.display='none'; }
+}
+
 function openPost(id,section) {
   const list=section==='posts'?posts:papers;
   const p=list.find(x=>x.id===id);
@@ -1633,6 +1757,7 @@ function openPost(id,section) {
   document.getElementById('article-date').textContent=fmtDate(p.createdAt);
   const body=document.getElementById('article-body');
   body.innerHTML=parseMd(p.body);
+  renderPaperMeta(p, section);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   document.getElementById('page-article').classList.add('active');
@@ -1656,6 +1781,7 @@ function openWrite(sectionHint) {
   document.getElementById('editor-title').value='';
   document.getElementById('editor-body').value='';
   document.getElementById('editor-mode-label').textContent='새 글 작성';
+  clearPaperFields();
   selectSection(editingSection,document.getElementById('sec-btn-'+editingSection));
   renderEditorCats(); renderEditorTags();
   switchTab('write',document.querySelector('.editor-tab'));
@@ -1675,6 +1801,7 @@ function openEdit(id,section) {
   document.getElementById('editor-mode-label').textContent='글 수정 중';
   selectSection(section,document.getElementById('sec-btn-'+section));
   renderEditorCats(); renderEditorTags();
+  if(section==='paper') fillPaperFields(p);
   switchTab('write',document.querySelector('.editor-tab'));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   document.getElementById('page-write').classList.add('active');
@@ -1694,7 +1821,8 @@ function publishPost() {
 
   if(editingPostId!==null) {
     const i=list.findIndex(x=>x.id===editingPostId);
-    const updated={...list[i],title,body,tags:editorTags,cat:editorCat,updatedAt:Date.now()};
+    const paperMeta = editingSection==='paper' ? readPaperFields() : null;
+    const updated={...list[i],title,body,tags:editorTags,cat:editorCat,updatedAt:Date.now(),...(paperMeta||{})};
     if(i>=0) list[i]=updated;
     save();
     
@@ -1710,7 +1838,8 @@ function publishPost() {
     const id=editingPostId; editingPostId=null;
     openPost(id,editingSection);
   } else {
-    const np={id:Date.now(),title,body,tags:editorTags,cat:editorCat,createdAt:Date.now(),updatedAt:Date.now()};
+    const paperMeta = editingSection==='paper' ? readPaperFields() : null;
+    const np={id:Date.now(),title,body,tags:editorTags,cat:editorCat,createdAt:Date.now(),updatedAt:Date.now(),...(paperMeta||{})};
     list.unshift(np);
     if(editorCat&&!(categories[editingSection]||[]).includes(editorCat)){
       categories[editingSection]=categories[editingSection]||[];
@@ -1736,6 +1865,9 @@ function selectSection(sec,btn) {
   document.querySelectorAll('[id^="sec-btn-"]').forEach(b=>b.classList.remove('sel'));
   if(btn) btn.classList.add('sel');
   renderEditorCats();
+  // paper 필드 토글
+  const pf = document.getElementById('paper-fields');
+  if(pf) pf.classList.toggle('visible', sec==='paper');
 }
 function renderEditorCats() {
   const cats=categories[editingSection]||[];
