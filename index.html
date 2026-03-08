@@ -1067,7 +1067,7 @@ function onSecDrop(e, targetIdx) {
 }
 function setSecLayout(secId, layout) {
   const sec = cvSections.find(s => s.id === secId);
-  if (sec) { sec.layout = layout; save(); renderCvArea(); }
+  if (sec) { sec.layout = layout; save(); saveCvSections(); renderCvArea(); }
 }
 // ── ENTRY DRAG ────────────────────────────────────────────────────
 function onEntDragStart(e, sIdx, eIdx) {
