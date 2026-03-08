@@ -1410,7 +1410,7 @@ function addNewCat(){
   if(!categories[editingSection]) categories[editingSection]=[];
   if(!categories[editingSection].includes(v)) categories[editingSection].push(v);
   editorCat=v; document.getElementById('cat-new-inp').value='';
-  save(); renderEditorCats();
+  save(); saveCategories(); renderEditorCats();
 }
 function renderEditorTags(){
   document.getElementById('editor-tag-list').innerHTML=editorTags.map(t=>
