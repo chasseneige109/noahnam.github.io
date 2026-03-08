@@ -236,9 +236,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-hint{font-size:.62rem;font-family:var(--mono);color:var(--s400);padding:9px 0;border-top:1px solid var(--s200);line-height:1.9}
 
 /* ── MODALS ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;animation:fadeIn .15s ease;padding:20px}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:flex-start;justify-content:center;animation:fadeIn .15s ease;padding:20px;overflow-y:auto}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:#fff;border-radius:var(--r3);padding:28px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:scaleIn .2s ease}
+.modal{background:#fff;border-radius:var(--r3);padding:28px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);animation:scaleIn .2s ease;margin:auto}
 @keyframes scaleIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-title{font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-bottom:16px}
 .form-label{display:block;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s500);margin-bottom:4px}
