@@ -251,9 +251,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .btn-secondary{padding:8px 14px;background:none;border:1px solid var(--s200);border-radius:var(--r);font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-family:var(--sans);color:var(--s500);cursor:pointer}
 
 /* admin-only visibility */
-.admin-only{display:none}
-.admin-mode .admin-only{display:block}
-.admin-mode .admin-only.flex{display:flex}
+.admin-only{display:none !important}
+.admin-mode .admin-only{display:block !important}
+.admin-mode .admin-only.flex{display:flex !important}
+.admin-mode .admin-only.iflex{display:inline-flex !important}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--s900);color:#fff;padding:8px 18px;border-radius:20px;font-size:.73rem;font-weight:600;font-family:var(--sans);opacity:0;transition:all .25s;z-index:1000;pointer-events:none;white-space:nowrap}
@@ -1955,7 +1956,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await load();
   hideSaving('✅ 불러오기 완료', 800);
   document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || 'My Blog';
-  showSection('home');
+  showSection('landing');
+  setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
 });
 let cvDragSrcIdx = null;
