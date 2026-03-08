@@ -463,6 +463,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .paper-summary-inp:focus{border-color:var(--blue)}
 @media(max-width:600px){.paper-meta-grid,.paper-fields-grid{grid-template-columns:1fr}}
 
+
+/* CV entry compact (desc 없을 때) */
+.cv-entry-compact{padding:14px 20px}
+.cv-entry-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:.72rem;font-weight:600;color:var(--blue);text-decoration:none;background:var(--blue-bg);padding:3px 10px;border-radius:10px;transition:background .15s}
+.cv-entry-link:hover{background:#dbeafe}
+/* custom link row in modal */
+.custom-link-row{display:flex;gap:6px;align-items:center}
+.custom-link-row .form-input{margin-bottom:0}
+.custom-link-del{width:28px;height:28px;border-radius:50%;background:none;border:1px solid var(--s200);color:var(--s400);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.custom-link-del:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2}
+
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
@@ -754,6 +765,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <label class="form-label">자기소개</label><textarea class="form-textarea" id="inp-bio" placeholder="자기소개..."></textarea>
     <label class="form-label">GitHub URL</label><input class="form-input" id="inp-github" placeholder="https://github.com/...">
     <label class="form-label">이메일</label><input class="form-input" id="inp-email" placeholder="email@example.com">
+    <div style="height:1px;background:var(--s200);margin:6px 0 10px"></div>
+    <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:8px">추가 링크</div>
+    <div id="custom-links-wrap" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px"></div>
+    <button type="button" onclick="addCustomLinkRow()" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px dashed var(--s300);border-radius:var(--r);background:none;font-size:.7rem;font-weight:600;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--s300)';this.style.color='var(--s400)'">+ 링크 추가</button>
     <div style="height:1px;background:var(--s200);margin:8px 0 12px"></div>
     <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px">홈 페이지 소개</div>
     <label class="form-label">메인 타이틀 — 한국어 (| 로 줄바꿈)</label><input class="form-input" id="inp-landing-title" placeholder="생각을 기록하고,|지식을 나눕니다">
@@ -790,6 +805,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <input class="form-input" id="inp-entry-date" placeholder="예: 2023 ~ Present">
     <label class="form-label">내용 (선택)</label>
     <textarea class="form-textarea" id="inp-entry-desc" placeholder="상세 내용..."></textarea>
+    <label class="form-label">링크 (선택)</label>
+    <div style="display:flex;gap:6px">
+      <input class="form-input" id="inp-entry-link-label" placeholder="링크 이름 (예: GitHub)" style="width:36%;margin-bottom:0">
+      <input class="form-input" id="inp-entry-link-url" placeholder="https://..." style="flex:1;margin-bottom:0">
+    </div>
+    <div style="margin-bottom:11px"></div>
     <label class="form-label">태그 (쉼표로 구분, 선택)</label>
     <input class="form-input" id="inp-entry-tags" placeholder="예: ML, PyTorch, Computer Vision">
     <div class="modal-actions">
@@ -940,6 +961,7 @@ async function load() {
         name: r.name || '', handle: r.email ? r.email.split('@')[0] : '',
         bio: r.bio || '', blogName: r.name || 'My Blog',
         github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
+        customLinks: r.custom_links || [],
         landingTitle: r.landing_title || '생각을 기록하고,|지식을 나눕니다',
         landingTitleEn: r.landing_title_en || 'Thoughts, recorded.|Knowledge, shared.',
         landingDesc: r.landing_desc || '공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',
@@ -1032,6 +1054,7 @@ async function saveProfileToDB() {
     email: profile.email,
     github: profile.github,
     avatar_url: profile.avatar || null,
+    custom_links: profile.customLinks || [],
     landing_title: profile.landingTitle || null,
     landing_title_en: profile.landingTitleEn || null,
     landing_desc: profile.landingDesc || null,
@@ -1096,7 +1119,7 @@ let posts      = [];
 let papers     = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
-let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
 
 let currentPostId   = null;
 let currentSection  = null;
@@ -1268,6 +1291,7 @@ function renderLanding() {
     const links = [];
     if (profile.github) links.push(`<a class="lau-link" href="${esc(profile.github)}" target="_blank">GH · ${esc(profile.github.replace('https://github.com/',''))}</a>`);
     if (profile.email) links.push(`<a class="lau-link" href="mailto:${esc(profile.email)}">✉ ${esc(profile.email)}</a>`);
+    (profile.customLinks||[]).forEach(l=>{ if(l.url) links.push(`<a class="lau-link" href="${esc(l.url)}" target="_blank">${esc(l.label||l.url)}</a>`); });
     linksEl.innerHTML = links.join('');
   }
 
@@ -1318,6 +1342,7 @@ function renderHome() {
   const linkItems=[];
   if(profile.github) linkItems.push(`<a class="link-item" href="${esc(profile.github)}" target="_blank"><span class="link-icon">GH</span>${esc(profile.github.replace('https://github.com/','@'))}</a>`);
   if(profile.email)  linkItems.push(`<a class="link-item" href="mailto:${esc(profile.email)}"><span class="link-icon">@</span>${esc(profile.email)}</a>`);
+  (profile.customLinks||[]).forEach(l=>{ if(l.url) linkItems.push(`<a class="link-item" href="${esc(l.url)}" target="_blank"><span class="link-icon">${esc((l.label||'🔗').slice(0,3))}</span>${esc(l.label||l.url)}</a>`); });
   linksEl.innerHTML=linkItems.length?linkItems.join(''):'<span style="font-size:.72rem;color:var(--s400)">링크 없음</span>';
   document.getElementById('home-links-card').style.display=linkItems.length||isAdmin?'block':'none';
 
@@ -1377,7 +1402,8 @@ const layout = sec.layout || 'list';
              ondrop="onEntDrop(event,${sIdx},${eIdx})"
              ondragend="onDragEnd()"` : '';
 
-        html += `<div class="cv-entry" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
+        const hasDesc = entry.desc && entry.desc.trim();
+        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
             <button class="btn-sm admin-only" onclick="openEditEntry('${sec.id}','${entry.id}')">✎</button>
@@ -1388,10 +1414,11 @@ const layout = sec.layout || 'list';
             ${entry.date ? `<div class="cv-entry-date">${esc(entry.date)}</div>` : ''}
           </div>
           ${entry.sub  ? `<div class="cv-entry-sub">${esc(entry.sub)}</div>` : ''}
-          ${entry.desc ? `<div class="cv-entry-desc">${esc(entry.desc)}</div>` : ''}
+          ${hasDesc ? `<div class="cv-entry-desc">${esc(entry.desc)}</div>` : ''}
           ${entry.tags && entry.tags.length
             ? `<div class="cv-entry-tags">${entry.tags.map(t=>`<span class="cv-entry-tag">${esc(t)}</span>`).join('')}</div>`
             : ''}
+          ${entry.linkUrl ? `<a class="cv-entry-link" href="${esc(entry.linkUrl)}" target="_blank" onclick="event.stopPropagation()">↗ ${esc(entry.linkLabel||entry.linkUrl)}</a>` : ''}
         </div>`;
       });
       html += `</div>`;
@@ -1523,7 +1550,7 @@ function saveSection() {
 function openAddEntry(secId) {
   editingEntrySectionId=secId; editingEntryId=null;
   document.getElementById('add-entry-title').textContent='항목 추가';
-  ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags'].forEach(id=>document.getElementById(id).value='');
+  ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags','inp-entry-link-label','inp-entry-link-url'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('modal-add-entry').style.display='flex';
   setTimeout(()=>document.getElementById('inp-entry-title').focus(),100);
 }
@@ -1538,6 +1565,8 @@ function openEditEntry(secId,entryId) {
   document.getElementById('inp-entry-date').value=entry.date||'';
   document.getElementById('inp-entry-desc').value=entry.desc||'';
   document.getElementById('inp-entry-tags').value=(entry.tags||[]).join(', ');
+  document.getElementById('inp-entry-link-label').value=entry.linkLabel||'';
+  document.getElementById('inp-entry-link-url').value=entry.linkUrl||'';
   document.getElementById('modal-add-entry').style.display='flex';
 }
 function saveEntry() {
@@ -1548,14 +1577,16 @@ function saveEntry() {
   const desc =document.getElementById('inp-entry-desc').value.trim();
   const tagsRaw=document.getElementById('inp-entry-tags').value;
   const tags=tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
+  const linkLabel=document.getElementById('inp-entry-link-label').value.trim();
+  const linkUrl=document.getElementById('inp-entry-link-url').value.trim();
 
   const sec=cvSections.find(s=>s.id===editingEntrySectionId);
   if(!sec) return;
   if(editingEntryId) {
     const i=sec.entries.findIndex(e=>e.id===editingEntryId);
-    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags};
+    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags,linkLabel,linkUrl};
   } else {
-    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags});
+    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags,linkLabel,linkUrl});
   }
   save();saveCvSections();closeModal('modal-add-entry');renderCvArea();
 }
@@ -1686,6 +1717,41 @@ function setTagFilter(section,tag) { filterTag[section]=filterTag[section]===tag
 function toggleSort(section) { sortDesc[section]=!sortDesc[section];section==='posts'?renderPostsPage():renderPaperPage(); }
 
 // ── ARTICLE ───────────────────────────────────────────────────────
+
+
+// ── CUSTOM LINKS ─────────────────────────────────────────────────
+function renderCustomLinkInputs(links) {
+  const wrap = document.getElementById('custom-links-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = (links||[]).map((l,i)=>`
+    <div class="custom-link-row" id="clr-${i}">
+      <input class="form-input" style="width:32%" placeholder="이름 (예: LinkedIn)" value="${esc(l.label||'')}" data-ci="${i}" data-field="label">
+      <input class="form-input" style="flex:1" placeholder="https://..." value="${esc(l.url||'')}" data-ci="${i}" data-field="url">
+      <button class="custom-link-del" onclick="removeCustomLinkRow(${i})">×</button>
+    </div>`).join('');
+}
+function addCustomLinkRow() {
+  const links = collectCustomLinks();
+  links.push({label:'',url:''});
+  renderCustomLinkInputs(links);
+}
+function removeCustomLinkRow(idx) {
+  const links = collectCustomLinks();
+  links.splice(idx,1);
+  renderCustomLinkInputs(links);
+}
+function collectCustomLinks() {
+  const wrap = document.getElementById('custom-links-wrap');
+  if(!wrap) return [];
+  const rows = wrap.querySelectorAll('.custom-link-row');
+  const result = [];
+  rows.forEach(row=>{
+    const label = row.querySelector('[data-field="label"]')?.value.trim()||'';
+    const url   = row.querySelector('[data-field="url"]')?.value.trim()||'';
+    if(url) result.push({label,url});
+  });
+  return result;
+}
 
 // ── PAPER META HELPERS ────────────────────────────────────────────
 function readPaperFields() {
@@ -1939,6 +2005,7 @@ function openProfileEdit(){
   document.getElementById('inp-bio').value=profile.bio;
   document.getElementById('inp-github').value=profile.github;
   document.getElementById('inp-email').value=profile.email;
+  renderCustomLinkInputs(profile.customLinks||[]);
   document.getElementById('inp-landing-title').value=profile.landingTitle||'';
   document.getElementById('inp-landing-title-en').value=profile.landingTitleEn||'';
   document.getElementById('inp-landing-desc').value=profile.landingDesc||'';
@@ -1952,6 +2019,7 @@ function saveProfile(){
   profile.bio            =document.getElementById('inp-bio').value.trim();
   profile.github         =document.getElementById('inp-github').value.trim();
   profile.email          =document.getElementById('inp-email').value.trim();
+  profile.customLinks = collectCustomLinks();
   profile.landingTitle   =document.getElementById('inp-landing-title').value.trim()||'생각을 기록하고,|지식을 나눕니다';
   profile.landingTitleEn =document.getElementById('inp-landing-title-en').value.trim()||'Thoughts, recorded.|Knowledge, shared.';
   profile.landingDesc    =document.getElementById('inp-landing-desc').value.trim();
