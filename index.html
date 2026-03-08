@@ -656,7 +656,7 @@ async function load() {
     }
 
     if (cvRes.data) cvSections = cvRes.data.map(r => ({
-      id: r.id, name: r.title, entries: r.items || [], layout: 'list'
+      id: r.id, name: r.title, entries: r.items || [], layout: r.layout || 'list'
     }));
 
     if (profileRes.data) {
@@ -722,7 +722,7 @@ async function saveCategories() {
 async function saveCvSections() {
   showSaving('저장 중...');
   const rows = cvSections.map((sec, i) => ({
-    id: sec.id, title: sec.name, items: sec.entries || [], sort_order: i
+    id: sec.id, title: sec.name, items: sec.entries || [], sort_order: i, layout: sec.layout || 'list'
   }));
   // delete removed sections
   if (rows.length > 0) {
