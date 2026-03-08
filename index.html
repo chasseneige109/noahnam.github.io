@@ -958,8 +958,8 @@ async function load() {
     if (profileRes.data) {
       const r = profileRes.data;
       profile = {
-        name: r.name || '', handle: r.email ? r.email.split('@')[0] : '',
-        bio: r.bio || '', blogName: r.name || 'My Blog',
+        name: r.name || '', handle: r.handle || (r.email ? r.email.split('@')[0] : ''),
+        bio: r.bio || '', blogName: r.blog_name || r.name || 'My Blog',
         github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
         customLinks: r.custom_links || [],
         landingTitle: r.landing_title || '생각을 기록하고,|지식을 나눕니다',
@@ -1049,7 +1049,9 @@ async function saveProfileToDB() {
   showSaving('저장 중...');
   const row = {
     id: 1,
-    name: profile.name || profile.blogName,
+    name: profile.name,
+    handle: profile.handle || null,
+    blog_name: profile.blogName || null,
     bio: profile.bio,
     email: profile.email,
     github: profile.github,
