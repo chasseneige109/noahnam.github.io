@@ -292,6 +292,50 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .upload-progress{height:4px;background:var(--s200);border-radius:2px;overflow:hidden;margin-top:8px;display:none}
 .upload-progress-bar{height:100%;background:var(--blue);border-radius:2px;transition:width .3s}
 
+/* ── LANDING HOME ── */
+.landing-hero{padding:80px 0 60px;text-align:center}
+.landing-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:24px}
+.landing-title{font-family:var(--serif);font-size:3rem;font-weight:700;color:var(--s900);line-height:1.15;letter-spacing:-.03em;margin-bottom:18px}
+.landing-title span{color:var(--blue)}
+.landing-desc{font-size:.95rem;color:var(--s600);line-height:1.8;max-width:520px;margin:0 auto 36px}
+.landing-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.landing-btn-primary{display:flex;align-items:center;gap:8px;padding:11px 24px;background:var(--s900);color:#fff;border:none;border-radius:24px;font-size:.78rem;font-weight:700;letter-spacing:.04em;font-family:var(--sans);cursor:pointer;transition:all .2s}
+.landing-btn-primary:hover{background:var(--blue);transform:translateY(-2px)}
+.landing-btn-secondary{display:flex;align-items:center;gap:8px;padding:11px 24px;background:none;color:var(--s700);border:1px solid var(--s200);border-radius:24px;font-size:.78rem;font-weight:700;letter-spacing:.04em;font-family:var(--sans);cursor:pointer;transition:all .2s}
+.landing-btn-secondary:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.landing-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:0 0 60px}
+.landing-card{padding:28px 30px;border-radius:var(--r3);cursor:pointer;transition:all .25s}
+.landing-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+.lc-icon{font-size:1.6rem;margin-bottom:14px}
+.lc-title{font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-bottom:6px}
+.lc-desc{font-size:.8rem;color:var(--s600);line-height:1.7}
+.lc-arrow{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-size:.7rem;font-weight:700;color:var(--blue);letter-spacing:.04em}
+.landing-divider{height:1px;background:var(--s200);margin:0 0 48px}
+.landing-section-label{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.landing-section-label::before{content:"";display:block;width:18px;height:2px;background:#bfdbfe}
+.recent-posts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:80px}
+.recent-card{padding:20px 22px;border-radius:var(--r2);cursor:pointer;transition:all .2s}
+.recent-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+.rc-type{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);background:var(--s100);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px}
+.rc-title{font-family:var(--serif);font-size:.9rem;font-weight:700;color:var(--s900);line-height:1.4;margin-bottom:4px}
+.rc-date{font-family:var(--mono);font-size:.6rem;color:var(--s400)}
+@media(max-width:680px){.landing-cards,.recent-posts-grid{grid-template-columns:1fr}.landing-title{font-size:2.1rem}}
+/* ── LANDING AUTHOR CARD ── */
+.landing-author-card{display:flex;align-items:flex-start;gap:24px;padding:28px 32px;border-radius:var(--r3);position:relative}
+.lau-avatar{width:72px;height:72px;border-radius:50%;background:var(--s100);border:2px solid var(--s200);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:var(--blue);flex-shrink:0;overflow:hidden}
+.lau-avatar img{width:100%;height:100%;object-fit:cover}
+.lau-info{flex:1;min-width:0}
+.lau-name{font-size:1.1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-bottom:2px}
+.lau-handle{font-family:var(--mono);font-size:.65rem;color:var(--s400);margin-bottom:10px}
+.lau-bio{font-size:.83rem;color:var(--s700);line-height:1.7;margin-bottom:10px}
+.lau-links{display:flex;gap:8px;flex-wrap:wrap}
+.lau-link{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;color:var(--s500);text-decoration:none;background:var(--s100);padding:3px 10px;border-radius:10px;transition:all .15s}
+.lau-link:hover{background:var(--blue-bg);color:var(--blue)}
+.lau-me-btn{position:absolute;top:28px;right:28px;padding:6px 14px;background:none;border:1px solid var(--s200);border-radius:20px;font-size:.68rem;font-weight:700;color:var(--s500);font-family:var(--sans);cursor:pointer;transition:all .2s;white-space:nowrap}
+.lau-me-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+@media(max-width:600px){.landing-author-card{flex-direction:column;gap:16px}.lau-me-btn{position:static;margin-top:8px}}
+
+
 </style>
 </head>
 <body>
@@ -299,12 +343,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 <div class="z1">
 
 <nav class="topnav">
-  <span class="nav-logo" onclick="showSection('home')">
+  <span class="nav-logo" onclick="showSection('landing')">
     <span class="nav-dot"></span>
     <span id="nav-blog-name">My Blog</span>
   </span>
   <div class="nav-tabs">
-    <button class="nav-tab" id="tab-home"  onclick="showSection('home')">Home</button>
+    <button class="nav-tab" id="tab-landing" onclick="showSection('landing')">Home</button>
+    <button class="nav-tab" id="tab-home"  onclick="showSection('home')">Me</button>
     <button class="nav-tab" id="tab-posts" onclick="showSection('posts')">Posts</button>
     <button class="nav-tab" id="tab-paper" onclick="showSection('paper')">Paper Review</button>
   </div>
@@ -316,6 +361,65 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     </div>
   <button class="btn-unlock" id="btn-unlock" onclick="openPwModal()">🔒</button>
 </nav>
+
+<div id="page-landing" class="page">
+  <div class="wrap">
+
+    <!-- Hero -->
+    <div class="landing-hero">
+      <div class="landing-badge">✦ Personal Space</div>
+      <h1 class="landing-title" id="landing-title-text">생각을 기록하고,<br><span>지식을 나눕니다</span></h1>
+      <p class="landing-desc" id="landing-hero-desc">공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다. 자유롭게 둘러보세요.</p>
+      <div class="landing-btns">
+        <button class="landing-btn-primary" onclick="showSection('posts')">✍ Posts 보기</button>
+        <button class="landing-btn-secondary" onclick="showSection('paper')">📄 Paper Review</button>
+        <button class="landing-btn-secondary admin-only" onclick="openProfileEdit()" style="border-style:dashed">✎ 홈 수정</button>
+      </div>
+    </div>
+
+    <div class="landing-divider"></div>
+
+    <!-- Author intro -->
+    <div class="landing-section-label">작성자</div>
+    <div class="gc landing-author-card" id="landing-author">
+      <div class="lau-avatar" id="landing-av">?</div>
+      <div class="lau-info">
+        <div class="lau-name" id="landing-author-name">이름을 설정하세요</div>
+        <div class="lau-handle" id="landing-author-handle">@handle</div>
+        <div class="lau-bio" id="landing-author-bio"></div>
+        <div class="lau-links" id="landing-author-links"></div>
+      </div>
+      <button class="lau-me-btn" onclick="showSection('home')">프로필 전체 보기 →</button>
+    </div>
+
+    <div style="height:48px"></div>
+    <div class="landing-divider"></div>
+
+    <!-- Section cards -->
+    <div class="landing-section-label">이런 공간이에요</div>
+    <div class="landing-cards">
+      <div class="gc gc-hover landing-card" onclick="showSection('posts')">
+        <div class="lc-icon">✍️</div>
+        <div class="lc-title">Posts</div>
+        <div class="lc-desc">공부하며 정리한 글들, 개발 기록, 그리고 일상적인 생각들을 담습니다.</div>
+        <div class="lc-arrow">둘러보기 →</div>
+      </div>
+      <div class="gc gc-hover landing-card" onclick="showSection('paper')">
+        <div class="lc-icon">📄</div>
+        <div class="lc-title">Paper Review</div>
+        <div class="lc-desc">읽은 논문들을 정리하고 핵심 내용을 요약한 리뷰를 올립니다.</div>
+        <div class="lc-arrow">둘러보기 →</div>
+      </div>
+    </div>
+
+    <div class="landing-divider"></div>
+
+    <!-- Recent posts -->
+    <div class="landing-section-label">최근 글</div>
+    <div class="recent-posts-grid" id="landing-recent"></div>
+
+  </div>
+</div>
 
 <div id="page-home" class="page">
   <div class="wrap">
@@ -489,6 +593,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <label class="form-label">자기소개</label><textarea class="form-textarea" id="inp-bio" placeholder="자기소개..."></textarea>
     <label class="form-label">GitHub URL</label><input class="form-input" id="inp-github" placeholder="https://github.com/...">
     <label class="form-label">이메일</label><input class="form-input" id="inp-email" placeholder="email@example.com">
+    <div style="height:1px;background:var(--s200);margin:8px 0 12px"></div>
+    <div style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px">홈 페이지 소개</div>
+    <label class="form-label">메인 타이틀 (줄바꿈은 | 로 구분)</label><input class="form-input" id="inp-landing-title" placeholder="생각을 기록하고,|지식을 나눕니다">
+    <label class="form-label">강조 단어 (타이틀 마지막 부분)</label><input class="form-input" id="inp-landing-highlight" placeholder="지식을 나눕니다">
+    <label class="form-label">한 줄 설명</label><textarea class="form-textarea" id="inp-landing-desc" placeholder="블로그 소개 한 줄..." style="min-height:55px"></textarea>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-profile')">취소</button>
       <button class="btn-primary" onclick="saveProfile()">저장</button>
@@ -664,7 +773,10 @@ async function load() {
       profile = {
         name: r.name || '', handle: r.email ? r.email.split('@')[0] : '',
         bio: r.bio || '', blogName: r.name || 'My Blog',
-        github: r.github || '', email: r.email || '', avatar: r.avatar_url || ''
+        github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
+        landingTitle: r.landing_title || '생각을 기록하고,|지식을 나눕니다',
+        landingHighlight: r.landing_highlight || '지식을 나눕니다',
+        landingDesc: r.landing_desc || '공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다. 자유롭게 둘러보세요.'
       };
     }
   } catch(e) {
@@ -745,6 +857,9 @@ async function saveProfileToDB() {
     email: profile.email,
     github: profile.github,
     avatar_url: profile.avatar || null,
+    landing_title: profile.landingTitle || null,
+    landing_highlight: profile.landingHighlight || null,
+    landing_desc: profile.landingDesc || null,
   };
   const { error } = await supa.from('profile').upsert(row);
   if (error) { hideSaving('❌ 저장 실패', 0); return; }
@@ -805,7 +920,7 @@ let posts      = [];
 let papers     = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
-let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'' };
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',landingTitle:'생각을 기록하고,|지식을 나눕니다',landingHighlight:'지식을 나눕니다',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다. 자유롭게 둘러보세요.' };
 
 let currentPostId   = null;
 let currentSection  = null;
@@ -914,14 +1029,70 @@ function showSection(name) {
 }
 
 function renderCurrentPage() {
+  if(currentPageName==='landing') renderLanding();
   if(currentPageName==='home')  renderHome();
   if(currentPageName==='posts') renderPostsPage();
   if(currentPageName==='paper') renderPaperPage();
 }
 
+function renderLanding() {
+  // Hero title & desc from profile
+  const titleEl = document.getElementById('landing-title-text');
+  if (titleEl) {
+    const parts = (profile.landingTitle || '생각을 기록하고,|지식을 나눕니다').split('|');
+    const highlight = profile.landingHighlight || parts[parts.length-1];
+    titleEl.innerHTML = parts.map((p,i) =>
+      i === parts.length-1 ? `<span>${esc(p)}</span>` : esc(p) + '<br>'
+    ).join('');
+  }
+  const descEl = document.getElementById('landing-hero-desc');
+  if (descEl) descEl.textContent = profile.landingDesc || '';
+
+  // Author card
+  const avEl = document.getElementById('landing-av');
+  if (avEl) {
+    if (profile.avatar) avEl.innerHTML = `<img src="${esc(profile.avatar)}">`;
+    else avEl.textContent = profile.name ? profile.name[0].toUpperCase() : '?';
+  }
+  const nameEl = document.getElementById('landing-author-name');
+  if (nameEl) nameEl.textContent = profile.name || '이름을 설정하세요';
+  const handleEl = document.getElementById('landing-author-handle');
+  if (handleEl) handleEl.textContent = '@' + (profile.handle || 'handle');
+  const bioEl = document.getElementById('landing-author-bio');
+  if (bioEl) bioEl.textContent = profile.bio || '';
+  const linksEl = document.getElementById('landing-author-links');
+  if (linksEl) {
+    const links = [];
+    if (profile.github) links.push(`<a class="lau-link" href="${esc(profile.github)}" target="_blank">GH · ${esc(profile.github.replace('https://github.com/',''))}</a>`);
+    if (profile.email) links.push(`<a class="lau-link" href="mailto:${esc(profile.email)}">✉ ${esc(profile.email)}</a>`);
+    linksEl.innerHTML = links.join('');
+  }
+
+  // Recent posts
+  const recent = [...posts, ...papers]
+    .sort((a,b) => b.createdAt - a.createdAt)
+    .slice(0, 4);
+  const el = document.getElementById('landing-recent');
+  if (!el) return;
+  if (!recent.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px 0;font-size:.8rem;color:var(--s400)">아직 작성된 글이 없습니다.</div>';
+    return;
+  }
+  el.innerHTML = recent.map(p => {
+    const isPaper = papers.includes(p);
+    const section = isPaper ? 'paper' : 'posts';
+    const typeLabel = isPaper ? 'Paper Review' : 'Post';
+    return `<div class="gc gc-hover recent-card" onclick="openPost(${p.id},'${section}')">
+      <div class="rc-type">${typeLabel}</div>
+      <div class="rc-title">${esc(p.title)}</div>
+      <div class="rc-date">${fmtDate(p.createdAt)}</div>
+    </div>`;
+  }).join('');
+}
+
 function goBack() {
   if(currentSection) showSection(currentSection);
-  else showSection('home');
+  else showSection('landing');
 }
 
 // ── HOME ──────────────────────────────────────────────────────────
@@ -1456,19 +1627,25 @@ function openProfileEdit(){
   document.getElementById('inp-bio').value=profile.bio;
   document.getElementById('inp-github').value=profile.github;
   document.getElementById('inp-email').value=profile.email;
+  document.getElementById('inp-landing-title').value=profile.landingTitle||'';
+  document.getElementById('inp-landing-highlight').value=profile.landingHighlight||'';
+  document.getElementById('inp-landing-desc').value=profile.landingDesc||'';
   document.getElementById('modal-profile').style.display='flex';
 }
 function saveProfile(){
-  profile.name    =document.getElementById('inp-name').value.trim();
-  profile.handle  =document.getElementById('inp-handle').value.trim().replace('@','');
-  profile.blogName=document.getElementById('inp-blog-name').value.trim()||'My Blog';
-  profile.bio     =document.getElementById('inp-bio').value.trim();
-  profile.github  =document.getElementById('inp-github').value.trim();
-  profile.email   =document.getElementById('inp-email').value.trim();
+  profile.name           =document.getElementById('inp-name').value.trim();
+  profile.handle         =document.getElementById('inp-handle').value.trim().replace('@','');
+  profile.blogName       =document.getElementById('inp-blog-name').value.trim()||'My Blog';
+  profile.bio            =document.getElementById('inp-bio').value.trim();
+  profile.github         =document.getElementById('inp-github').value.trim();
+  profile.email          =document.getElementById('inp-email').value.trim();
+  profile.landingTitle   =document.getElementById('inp-landing-title').value.trim()||'생각을 기록하고,|지식을 나눕니다';
+  profile.landingHighlight=document.getElementById('inp-landing-highlight').value.trim()||'지식을 나눕니다';
+  profile.landingDesc    =document.getElementById('inp-landing-desc').value.trim();
   save();closeModal('modal-profile');
   document.getElementById('nav-blog-name').textContent=profile.blogName||'My Blog';
   saveProfileToDB();
-  renderHome();toast('저장되었습니다.');
+  renderHome();renderLanding();toast('저장되었습니다.');
 }
 function openAvatarEdit(){
   if(!isAdmin) return;
