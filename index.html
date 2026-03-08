@@ -207,6 +207,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .btn-cancel:hover{border-color:var(--s400);color:var(--s700)}
 .editor-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--s200)}
 .editor-row-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);flex-shrink:0;font-family:var(--sans);width:60px}
+
+.cat-sel-wrap{position:relative;display:inline-flex;align-items:center}
+.cat-del-btn{position:absolute;top:-5px;right:-5px;width:14px;height:14px;border-radius:50%;background:var(--s400);color:#fff;border:none;font-size:.55rem;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;padding:0;transition:background .15s}
+.cat-sel-wrap:hover .cat-del-btn{display:flex}
+.cat-del-btn:hover{background:#ef4444}
 .cat-sel-btn{padding:3px 11px;border-radius:20px;font-size:.68rem;font-weight:600;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s600);transition:all .15s}
 .cat-sel-btn:hover,.cat-sel-btn.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
 .cat-new-inp{border:1px solid var(--s200);border-radius:20px;padding:3px 11px;font-size:.68rem;font-family:var(--sans);color:var(--s700);outline:none;transition:border-color .15s;width:120px}
@@ -400,6 +405,36 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .lau-link:hover{background:var(--blue-bg);color:var(--blue)}
 .lau-me-btn{position:absolute;top:28px;right:28px;padding:6px 14px;background:none;border:1px solid var(--s200);border-radius:20px;font-size:.68rem;font-weight:700;color:var(--s500);font-family:var(--sans);cursor:pointer;transition:all .2s;white-space:nowrap}
 .lau-me-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+
+/* ── FOLDER SIDEBAR ── */
+.folder-card{padding:12px 14px;border-radius:var(--r2)}
+.folder-all{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s;margin-bottom:4px}
+.folder-all:hover{background:var(--blue-bg)}
+.folder-all.active{background:var(--blue-bg)}
+.folder-all.active .folder-all-name{color:var(--blue);font-weight:700}
+.folder-all-icon{font-size:.85rem;flex-shrink:0}
+.folder-all-name{font-size:.8rem;font-weight:600;color:var(--s700);flex:1}
+.folder-all-count{font-family:var(--mono);font-size:.6rem;color:var(--s400);background:var(--s100);padding:1px 6px;border-radius:8px}
+
+.folder-item{margin-bottom:2px}
+.folder-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s;user-select:none}
+.folder-row:hover{background:var(--s100)}
+.folder-row.active{background:var(--blue-bg)}
+.folder-row.active .folder-name{color:var(--blue);font-weight:700}
+.folder-toggle{font-size:.55rem;color:var(--s300);transition:transform .2s;flex-shrink:0;width:10px}
+.folder-toggle.open{transform:rotate(90deg)}
+.folder-icon{font-size:.82rem;flex-shrink:0}
+.folder-name{font-size:.8rem;font-weight:600;color:var(--s700);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.folder-count{font-family:var(--mono);font-size:.6rem;color:var(--s400);background:var(--s100);padding:1px 6px;border-radius:8px;flex-shrink:0}
+.folder-row.active .folder-count{background:rgba(59,130,246,.12);color:var(--blue)}
+
+.folder-posts{padding-left:22px;overflow:hidden;transition:max-height .25s ease}
+.folder-post-item{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s}
+.folder-post-item:hover{background:var(--s100)}
+.folder-post-item:hover .folder-post-title{color:var(--blue)}
+.folder-post-dot{width:4px;height:4px;border-radius:50%;background:var(--s300);flex-shrink:0}
+.folder-post-title{font-size:.75rem;color:var(--s600);line-height:1.4;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
@@ -1471,6 +1506,8 @@ function askDeleteCvEntry(secId,entryId) {
 }
 
 // ── POSTS/PAPER FILTER SIDEBAR ────────────────────────────────────
+let folderOpen = { posts:{}, paper:{} };
+
 function buildFilterSidebar(containerId, section) {
   const el=document.getElementById(containerId);
   const list=section==='posts'?posts:papers;
@@ -1479,22 +1516,42 @@ function buildFilterSidebar(containerId, section) {
   const fc=filterCat[section], ft=filterTag[section];
   let html='';
 
-  if(cats.length) {
-    html+=`<div class="gc cat-card">
-      <div class="sec-label">카테고리</div>
-      <div class="cat-item" onclick="setCatFilter('${section}',null)">
-        <span class="cat-name ${!fc?'active':''}">전체</span>
-        <span class="cat-count">${list.length}</span>
-      </div>
-      ${cats.map(c=>{
-        const cnt=list.filter(p=>p.cat===c).length;
-        return `<div class="cat-item" onclick="setCatFilter('${section}','${esc(c)}')">
-          <span class="cat-name ${fc===c?'active':''}">${esc(c)}</span>
-          <span class="cat-count">${cnt}</span>
-        </div>`;
-      }).join('')}
+  // Folder-style category tree
+  html+=`<div class="gc folder-card">
+    <div class="sec-label" style="margin-bottom:8px">Categories</div>
+    <div class="folder-all ${!fc?'active':''}" onclick="setCatFilter('${section}',null)">
+      <span class="folder-all-icon">🗂</span>
+      <span class="folder-all-name">All</span>
+      <span class="folder-all-count">${list.length}</span>
     </div>`;
+
+  if(cats.length) {
+    cats.forEach(c => {
+      const catPosts = list.filter(p=>p.cat===c);
+      const cnt = catPosts.length;
+      const isOpen = folderOpen[section][c] || false;
+      const isActive = fc===c;
+      html+=`<div class="folder-item">
+        <div class="folder-row ${isActive?'active':''}" onclick="toggleFolder('${section}','${esc(c)}')">
+          <span class="folder-toggle ${isOpen?'open':''}">▶</span>
+          <span class="folder-icon">${isOpen?'📂':'📁'}</span>
+          <span class="folder-name">${esc(c)}</span>
+          <span class="folder-count">${cnt}</span>
+        </div>
+        <div class="folder-posts" id="fp-${section}-${esc(c)}" style="max-height:${isOpen?'600px':'0'}">
+          ${catPosts.sort((a,b)=>b.createdAt-a.createdAt).map(p=>`
+          <div class="folder-post-item" onclick="openPost(${p.id},'${section}')">
+            <span class="folder-post-dot"></span>
+            <span class="folder-post-title">${esc(p.title)}</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    });
+  } else {
+    html+=`<div style="font-size:.75rem;color:var(--s400);padding:8px">카테고리 없음</div>`;
   }
+
+  html+=`</div>`;
 
   if(allTags.size) {
     html+=`<div class="gc tag-card">
@@ -1506,6 +1563,13 @@ function buildFilterSidebar(containerId, section) {
   }
 
   el.innerHTML=html;
+}
+
+function toggleFolder(section, cat) {
+  const isOpen = folderOpen[section][cat];
+  folderOpen[section][cat] = !isOpen;
+  // also set category filter
+  setCatFilter(section, !isOpen ? cat : null);
 }
 
 // ── POSTS/PAPER PAGES ─────────────────────────────────────────────
@@ -1676,7 +1740,10 @@ function selectSection(sec,btn) {
 function renderEditorCats() {
   const cats=categories[editingSection]||[];
   document.getElementById('editor-cat-btns').innerHTML=cats.map(c=>
-    `<button class="cat-sel-btn ${editorCat===c?'sel':''}" onclick="selectCat('${esc(c)}')">${esc(c)}</button>`
+    `<span class="cat-sel-wrap">
+      <button class="cat-sel-btn ${editorCat===c?'sel':''}" onclick="selectCat('${esc(c)}')">${esc(c)}</button>
+      <button class="cat-del-btn" onclick="deleteCat('${esc(c)}')" title="삭제">×</button>
+    </span>`
   ).join('');
 }
 function selectCat(cat){editorCat=editorCat===cat?'':cat;renderEditorCats();}
@@ -1687,6 +1754,14 @@ function addNewCat(){
   if(!categories[editingSection].includes(v)) categories[editingSection].push(v);
   editorCat=v; document.getElementById('cat-new-inp').value='';
   save(); saveCategories(); renderEditorCats();
+}
+async function deleteCat(cat){
+  categories[editingSection]=(categories[editingSection]||[]).filter(c=>c!==cat);
+  if(editorCat===cat) editorCat='';
+  save(); renderEditorCats();
+  // DB에서도 삭제
+  await supa.from('categories').delete().eq('id', editingSection+'_'+cat);
+  toast('카테고리 삭제됨');
 }
 function renderEditorTags(){
   document.getElementById('editor-tag-list').innerHTML=editorTags.map(t=>
