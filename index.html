@@ -262,8 +262,75 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px}
-@media(max-width:860px){.two-col,.three-col-sidebar{grid-template-columns:1fr}.profile-sidebar,.filter-sidebar{position:static}}
-@media(max-width:600px){.topnav{padding:0 14px}.nav-tabs{gap:0}.a-title{font-size:1.65rem}}
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .two-col,.three-col-sidebar{grid-template-columns:1fr}
+  .profile-sidebar,.filter-sidebar{position:static}
+}
+@media(max-width:680px){
+  .landing-cards,.recent-posts-grid{grid-template-columns:1fr}
+  .landing-title{font-size:2.1rem}
+}
+@media(max-width:600px){
+  /* nav */
+  .topnav{padding:0 10px;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+  .nav-tabs{gap:0;flex-shrink:0}
+  .nav-tab{padding:5px 8px;font-size:.62rem;letter-spacing:.03em}
+  .nav-logo{font-size:.88rem}
+  .lang-toggle{margin-right:4px;flex-shrink:0}
+  .lang-btn{padding:3px 7px;font-size:.6rem}
+  .btn-unlock{padding:6px 8px;font-size:.72rem;flex-shrink:0}
+  .admin-badge{display:none}
+  .btn-admin-toggle{padding:5px 8px;font-size:.62rem}
+
+  /* landing hero */
+  .landing-hero{padding:48px 0 36px}
+  .landing-title{font-size:1.75rem}
+  .landing-desc{font-size:.85rem}
+  .landing-btns{flex-direction:column;align-items:center;gap:8px}
+  .landing-btn-primary,.landing-btn-secondary{width:100%;max-width:280px;justify-content:center}
+
+  /* author card */
+  .landing-author-card{flex-direction:column;gap:16px;padding:20px}
+  .lau-me-btn{position:static;margin-top:8px;width:100%;text-align:center}
+  .lau-avatar{width:56px;height:56px;font-size:1.4rem}
+
+  /* landing cards */
+  .landing-cards,.recent-posts-grid{grid-template-columns:1fr}
+  .landing-card{padding:20px}
+
+  /* article */
+  .a-title{font-size:1.5rem}
+  .article-wrap{padding:0 16px 60px}
+
+  /* editor */
+  .editor-wrap{padding:0 16px 60px}
+  .editor-toolbar{gap:1px}
+  .tb-btn{padding:3px 6px;font-size:.65rem}
+
+  /* post cards */
+  .post-card{padding:18px}
+
+  /* cv */
+  .cv-entries-grid{grid-template-columns:1fr}
+  .cv-entry{padding:16px 18px}
+
+  /* wrap */
+  .wrap{padding:0 14px}
+  .two-col{padding:24px 0 60px;gap:24px}
+  .three-col-sidebar{padding:24px 0 60px;gap:20px}
+
+  /* modal */
+  .modal{padding:20px;border-radius:var(--r2)}
+
+  /* profile sidebar */
+  .profile-card{padding:20px}
+  .p-name{font-size:1rem}
+}
+@media(max-width:400px){
+  .nav-tab{padding:5px 6px;font-size:.58rem}
+  .landing-title{font-size:1.5rem}
+}
 .katex{color:var(--s800)}
 /* ── MEDIA IN ARTICLE ── */
 .media-img-wrap{margin:1.8em 0;text-align:center}
@@ -319,7 +386,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .rc-type{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);background:var(--s100);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:8px}
 .rc-title{font-family:var(--serif);font-size:.9rem;font-weight:700;color:var(--s900);line-height:1.4;margin-bottom:4px}
 .rc-date{font-family:var(--mono);font-size:.6rem;color:var(--s400)}
-@media(max-width:680px){.landing-cards,.recent-posts-grid{grid-template-columns:1fr}.landing-title{font-size:2.1rem}}
 /* ── LANDING AUTHOR CARD ── */
 .landing-author-card{display:flex;align-items:flex-start;gap:24px;padding:28px 32px;border-radius:var(--r3);position:relative}
 .lau-avatar{width:72px;height:72px;border-radius:50%;background:var(--s100);border:2px solid var(--s200);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:var(--blue);flex-shrink:0;overflow:hidden}
@@ -333,7 +399,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .lau-link:hover{background:var(--blue-bg);color:var(--blue)}
 .lau-me-btn{position:absolute;top:28px;right:28px;padding:6px 14px;background:none;border:1px solid var(--s200);border-radius:20px;font-size:.68rem;font-weight:700;color:var(--s500);font-family:var(--sans);cursor:pointer;transition:all .2s;white-space:nowrap}
 .lau-me-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
-@media(max-width:600px){.landing-author-card{flex-direction:column;gap:16px}.lau-me-btn{position:static;margin-top:8px}}
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
