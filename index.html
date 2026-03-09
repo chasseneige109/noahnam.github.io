@@ -965,9 +965,11 @@ button, a, label { touch-action: manipulation; }
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   pointer-events: none;
-  transition: opacity .6s cubic-bezier(.4,0,.2,1);
+  transition: opacity .9s cubic-bezier(.4,0,.2,1),
+              filter .9s cubic-bezier(.4,0,.2,1),
+              transform .9s cubic-bezier(.4,0,.2,1);
 }
-#intro-overlay.out  { opacity: 0; }
+#intro-overlay.out  { opacity: 0; filter: blur(6px); transform: scale(1.015); }
 #intro-overlay.gone { display: none; }
 
 /* 블로그 이름 — 큰 타이포 */
@@ -979,7 +981,10 @@ button, a, label { touch-action: manipulation; }
   letter-spacing: -.04em;
   opacity: 0;
   clip-path: inset(0 100% 0 0);
-  animation: intro-wipe .65s cubic-bezier(.77,0,.18,1) .1s forwards;
+  /* animation은 JS에서 이름 세팅 후 class로 트리거 */
+}
+.intro-title.go {
+  animation: intro-wipe .65s cubic-bezier(.77,0,.18,1) forwards;
 }
 @keyframes intro-wipe {
   to { opacity:1; clip-path: inset(0 0% 0 0); }
@@ -989,7 +994,10 @@ button, a, label { touch-action: manipulation; }
 .intro-dots {
   display: flex; gap: 6px; margin-top: 20px;
   opacity: 0;
-  animation: intro-fade-in .3s ease .5s forwards;
+  /* dots도 title과 같이 JS로 트리거 */
+}
+.intro-dots.go {
+  animation: intro-fade-in .3s ease .45s forwards;
 }
 .intro-dot-item {
   width: 5px; height: 5px; border-radius: 50%;
@@ -3349,9 +3357,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
   // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
-  const introName = document.getElementById('intro-name-text');
-  if (introName) introName.textContent = profile.blogName || profile.name || 'My Blog';
-  window.dispatchEvent(new Event('blog-ready'));
+  window.dispatchEvent(new CustomEvent('blog-ready', {
+    detail: { name: profile.blogName || profile.name || 'My Blog' }
+  }));
 });
 let cvDragSrcIdx = null;
 
@@ -3458,7 +3466,23 @@ particlesJS("particles-js",{
 // ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var dismissed = false;
-  var startTime = Date.now();
+  var animStarted = false;
+
+  function startAnim(name) {
+    if (animStarted) return;
+    animStarted = true;
+    var titleEl = document.getElementById('intro-name-text');
+    var dotsEl  = document.querySelector('.intro-dots');
+    // 이름 먼저 세팅
+    if (titleEl && name) titleEl.textContent = name;
+    // 그 다음 프레임에서 애니 트리거 (레이아웃 플러시 보장)
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        if (titleEl) titleEl.classList.add('go');
+        if (dotsEl)  dotsEl.classList.add('go');
+      });
+    });
+  }
 
   function dismissIntro() {
     if (dismissed) return;
@@ -3466,18 +3490,18 @@ particlesJS("particles-js",{
     var el = document.getElementById('intro-overlay');
     if (!el) return;
     el.classList.add('out');
-    setTimeout(function(){ el.classList.add('gone'); }, 650);
+    setTimeout(function(){ el.classList.add('gone'); }, 950);
   }
 
-  window.addEventListener('blog-ready', function(){
-    // 최소 900ms 노출 보장
-    var elapsed = Date.now() - startTime;
-    var delay = Math.max(0, 900 - elapsed);
-    setTimeout(dismissIntro, delay);
+  window.addEventListener('blog-ready', function(e){
+    var name = e.detail && e.detail.name;
+    startAnim(name);
+    // 애니가 시작된 후 최소 1초 노출
+    setTimeout(dismissIntro, 1000);
   });
 
-  // 안전장치: 3초 후 강제 퇴장
-  setTimeout(dismissIntro, 3000);
+  // 안전장치: 4초 후 강제 퇴장 (네트워크 느릴 때)
+  setTimeout(function(){ startAnim(''); dismissIntro(); }, 4000);
 })();
 </script>
 
