@@ -2161,7 +2161,7 @@ function openWrite(sectionHint) {
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   window.scrollTo(0,0);
 }
-function openEdit(id,section) {
+async function openEdit(id,section) {
   if(!isAdmin) return;
   const list=section==='posts'?posts:papers;
   const p=list.find(x=>x.id===id);
