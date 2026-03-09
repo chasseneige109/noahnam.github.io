@@ -1434,8 +1434,6 @@ function renderHome() {
   document.getElementById('home-name').textContent   = profile.name||'이름을 설정하세요';
   document.getElementById('home-handle').textContent = '@'+(profile.handle||'handle');
   document.getElementById('home-bio').textContent    = profile.bio||'';
-  document.getElementById('home-post-cnt').textContent  = posts.length;
-  document.getElementById('home-paper-cnt').textContent = papers.length;
   document.getElementById('nav-blog-name').textContent  = profile.blogName||'My Blog';
 
   const av=document.getElementById('home-av');
