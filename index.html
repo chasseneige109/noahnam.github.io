@@ -1518,7 +1518,7 @@ const layout = sec.layout || 'list';
 
         const hasDesc = entry.desc && entry.desc.trim();
         const eStyle = entry.style && entry.style!=='default' ? ` style-${entry.style}` : '';
-        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}${eStyle}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>`
+        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}${eStyle}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
             <button class="btn-sm admin-only" onclick="openEditEntry('${sec.id}','${entry.id}')">✎</button>
