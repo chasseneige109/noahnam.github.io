@@ -1100,21 +1100,21 @@ function hideSaving(msg, delay) {
 async function load() {
   try {
     const [postsRes, papersRes, catsRes, cvRes, profileRes] = await Promise.all([
-      supa.from('posts').select('id,title,category,tags,created_at,updated_at').order('id', { ascending: false }),
-      supa.from('papers').select('id,title,category,tags,created_at,updated_at,authors,year,venue,arxiv,code_link,summary1,summary2,summary3').order('id', { ascending: false }),
+      supa.from('posts').select('id,title,category,tags,created_at,updated_at,content').order('id', { ascending: false }),
+      supa.from('papers').select('id,title,category,tags,created_at,updated_at,content,authors,year,venue,arxiv,code_link,summary1,summary2,summary3').order('id', { ascending: false }),
       supa.from('categories').select('*'),
       supa.from('cv_sections').select('*').order('sort_order'),
       supa.from('profile').select('*').eq('id', 1).single(),
     ]);
 
     if (postsRes.data) posts = postsRes.data.map(r => ({
-      id: r.id, title: r.title, body: null, cat: r.category,
+      id: r.id, title: r.title, body: null, preview: (r.content||'').substring(0,200), cat: r.category,
       tags: r.tags || [], createdAt: new Date(r.created_at).getTime(),
       updatedAt: new Date(r.updated_at).getTime()
     }));
 
     if (papersRes.data) papers = papersRes.data.map(r => ({
-      id: r.id, title: r.title, body: null, cat: r.category,
+      id: r.id, title: r.title, body: null, preview: (r.content||'').substring(0,200), cat: r.category,
       tags: r.tags || [], createdAt: new Date(r.created_at).getTime(),
       updatedAt: new Date(r.updated_at).getTime(),
       authors: r.authors || '', year: r.year || '',
@@ -1944,7 +1944,7 @@ function postCardHTML(p,section) {
   return `<div class="gc gc-hover post-card" onclick="openPost(${p.id},'${section}')">
     <div class="pc-top">${cat}${tags}</div>
     <div class="pc-title">${esc(p.title)}</div>
-    <div class="pc-excerpt">${esc(excerpt(p.body))}</div>
+    <div class="pc-excerpt">${esc(excerpt(p.preview||p.body))}</div>
     <div class="pc-footer">
       <span class="pc-date">${fmtDate(p.createdAt)}</span>
       <div class="pc-actions admin-only" onclick="event.stopPropagation()">
