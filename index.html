@@ -962,6 +962,7 @@ async function load() {
         bio: r.bio || '', blogName: r.blog_name || r.name || 'My Blog',
         github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
         customLinks: r.custom_links || [],
+        adminPw: r.admin_pw || null,
         landingTitle: r.landing_title || '생각을 기록하고,|지식을 나눕니다',
         landingTitleEn: r.landing_title_en || 'Thoughts, recorded.|Knowledge, shared.',
         landingDesc: r.landing_desc || '공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',
@@ -1057,6 +1058,7 @@ async function saveProfileToDB() {
     github: profile.github,
     avatar_url: profile.avatar || null,
     custom_links: profile.customLinks || [],
+    admin_pw: profile.adminPw || null,
     landing_title: profile.landingTitle || null,
     landing_title_en: profile.landingTitleEn || null,
     landing_desc: profile.landingDesc || null,
@@ -1121,7 +1123,7 @@ let posts      = [];
 let papers     = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
-let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
 
 let currentPostId   = null;
 let currentSection  = null;
@@ -1158,34 +1160,51 @@ function save() {
 
 // ── ADMIN ─────────────────────────────────────────────────────────
 function openPwModal() {
-  const stored = localStorage.getItem(PW_KEY);
-  if (!stored) {
+  // 비번은 Supabase profile에서 가져온 값 기준
+  if (!profile.adminPw) {
+    // 비번 미설정 — 설정 모달
     document.getElementById('set-pw1').value='';
     document.getElementById('set-pw2').value='';
     document.getElementById('set-pw-error').style.display='none';
     document.getElementById('modal-set-pw').style.display='flex';
   } else {
+    // 비번 있음 — 로그인 모달
     document.getElementById('pw-input').value='';
     document.getElementById('pw-error').style.display='none';
     document.getElementById('modal-pw').style.display='flex';
     setTimeout(()=>document.getElementById('pw-input').focus(),100);
   }
 }
-function setPw() {
+async function setPw() {
   const v1=document.getElementById('set-pw1').value;
   const v2=document.getElementById('set-pw2').value;
   if(!v1){toast('비밀번호를 입력하세요.');return;}
   if(v1!==v2){document.getElementById('set-pw-error').style.display='block';return;}
-  localStorage.setItem(PW_KEY,btoa(v1));
+  // 이미 DB에 비번이 있으면 설정 불가 (다른 기기에서 설정 시도 방지)
+  const {data} = await supa.from('profile').select('admin_pw').eq('id',1).single();
+  if(data && data.admin_pw) {
+    closeModal('modal-set-pw');
+    toast('이미 비밀번호가 설정되어 있습니다.');
+    // 로그인 모달로 전환
+    profile.adminPw = data.admin_pw;
+    setTimeout(openPwModal, 400);
+    return;
+  }
+  const hashed = btoa(v1);
+  profile.adminPw = hashed;
+  await supa.from('profile').upsert({id:1, admin_pw: hashed});
   closeModal('modal-set-pw');
   enterAdmin();
   toast('비밀번호가 설정되었습니다.');
 }
 function checkPw() {
-  const stored=localStorage.getItem(PW_KEY);
   const input=document.getElementById('pw-input').value;
-  if(stored&&btoa(input)===stored){closeModal('modal-pw');enterAdmin();}
-  else document.getElementById('pw-error').style.display='block';
+  if(profile.adminPw && btoa(input)===profile.adminPw){
+    closeModal('modal-pw');
+    enterAdmin();
+  } else {
+    document.getElementById('pw-error').style.display='block';
+  }
 }
 function enterAdmin() {
   isAdmin=true;
