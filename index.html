@@ -477,9 +477,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 
 /* ── ENTRY STYLE PICKER ── */
-.entry-style-picker{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.entry-style-picker{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
 .entry-style-opt{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
-.entry-style-opt .esp-preview{width:80px;height:56px;border-radius:10px;border:2px solid var(--s200);display:flex;flex-direction:column;justify-content:center;padding:8px 10px;transition:border-color .15s;background:#fff;overflow:hidden}
+.entry-style-opt .esp-preview{width:88px;height:60px;border-radius:10px;border:2px solid var(--s200);display:flex;flex-direction:column;justify-content:center;padding:8px 10px;transition:border-color .15s;background:#fff;overflow:hidden}
 .entry-style-opt.active .esp-preview{border-color:var(--blue);box-shadow:0 0 0 3px #bfdbfe}
 .entry-style-opt:hover .esp-preview{border-color:var(--blue)}
 .esp-label{font-size:.6rem;font-weight:700;color:var(--s400);letter-spacing:.04em}
@@ -487,31 +487,65 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .esp-title{font-size:.55rem;font-weight:700;color:var(--s900);line-height:1.2}
 .esp-sub{font-size:.48rem;color:var(--blue);margin-top:2px}
 .esp-date{font-size:.45rem;color:var(--s400);font-family:var(--mono)}
-.esp-chip{font-size:.45rem;background:var(--blue);color:#fff;padding:1px 5px;border-radius:4px;display:inline-block}
-/* timeline preview */
-.esp-timeline{flex-direction:row!important;gap:6px;align-items:center}
+/* 카드 프리뷰: 파란 왼쪽 테두리 */
+.esp-card{border-left:3px solid var(--blue)!important}
+/* 타임라인 프리뷰 */
+.esp-tl-wrap{flex-direction:row!important;gap:6px;align-items:center}
 .esp-tl-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0}
-/* highlight preview */
-.esp-highlight{background:var(--blue)!important;border-color:var(--blue)!important}
-/* minimal preview */
-.esp-minimal{border-color:transparent!important;background:var(--s100)!important}
+/* 텍스트 프리뷰: 박스 없음 */
+.esp-text{border:none!important;border-bottom:1.5px solid var(--s200)!important;border-radius:0!important;background:transparent!important;padding-left:0!important}
 
 /* ── CV ENTRY STYLES ── */
 /* default: 기존 스타일 */
+/* ── CV 엔트리 3가지 스타일 ── */
+
+/* 카드 (기본) — 박스 그대로 */
+/* default/card: 기존 .cv-entry 스타일 그대로 사용 */
+.cv-entry.style-card{border-left:3px solid var(--blue)}
+
+/* 타임라인 — 왼쪽에 점+세로선 */
+.cv-entry.style-timeline{
+  padding-left:36px;background:rgba(255,255,255,.85);
+  backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);
+  box-shadow:var(--shadow);border-radius:var(--r3);
+}
+.cv-entry.style-timeline::before{
+  content:'';position:absolute;left:16px;top:24px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--blue);border:2px solid #fff;
+  box-shadow:0 0 0 2px var(--blue);
+}
+/* 섹션 안에서 타임라인 세로선 연결 */
+.cv-entries-wrap .cv-entry.style-timeline+.cv-entry.style-timeline::after{
+  content:'';position:absolute;left:19px;bottom:calc(100% + 2px);
+  width:2px;height:12px;background:var(--s200);
+}
+
+/* 텍스트 — 박스 없이 글자만 */
+.cv-entry.style-text{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:10px 4px !important;
+  border-bottom:1px solid var(--s100) !important;
+}
+.cv-entry.style-text:last-child{border-bottom:none !important}
+.cv-entry.style-text .cv-entry-title{font-size:.95rem;color:var(--s900)}
+.cv-entry.style-text .cv-entry-sub{font-size:.78rem}
+.cv-entry.style-text .cv-entry-desc{font-size:.8rem;color:var(--s600)}
+.cv-entry.style-text .cv-entry-date{font-size:.72rem}
+.cv-entry.style-text .cv-entry-admin{top:8px;right:4px}
+
+/* 기존 badge/highlight/minimal → 각각 매핑 (데이터 호환) */
 .cv-entry.style-badge{border-left:3px solid var(--blue)}
-.cv-entry.style-badge .cv-entry-tags{margin-top:6px}
-.cv-entry.style-timeline{padding-left:32px}
-.cv-entry.style-timeline::before{content:'';position:absolute;left:16px;top:22px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue)}
-.cv-entry.style-highlight{background:linear-gradient(135deg,var(--blue) 0%,#1d4ed8 100%);border-color:transparent;color:#fff}
-.cv-entry.style-highlight .cv-entry-title{color:#fff}
-.cv-entry.style-highlight .cv-entry-sub{color:rgba(255,255,255,.8)}
-.cv-entry.style-highlight .cv-entry-desc{color:rgba(255,255,255,.85)}
-.cv-entry.style-highlight .cv-entry-date{color:rgba(255,255,255,.6)}
-.cv-entry.style-highlight .cv-entry-tag{background:rgba(255,255,255,.2);color:#fff}
-.cv-entry.style-highlight .cv-entry-link{background:rgba(255,255,255,.2);color:#fff}
-.cv-entry.style-highlight .cv-entry-link:hover{background:rgba(255,255,255,.3)}
-.cv-entry.style-minimal{background:transparent;border:none;box-shadow:none;border-bottom:1px solid var(--s200);border-radius:0;padding:14px 0}
-.cv-entry.style-minimal:last-child{border-bottom:none}
+.cv-entry.style-highlight{border-left:3px solid var(--blue)}
+.cv-entry.style-minimal{
+  background:transparent !important;border:none !important;
+  box-shadow:none !important;border-radius:0 !important;
+  padding:10px 4px !important;border-bottom:1px solid var(--s100) !important;
+}
+.cv-entry.style-minimal:last-child{border-bottom:none !important}
 
 /* ── RESEARCH INTERESTS ── */
 .interest-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--blue);margin:3px}
@@ -1072,24 +1106,16 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <label class="form-label">카드 스타일</label>
     <div class="entry-style-picker" id="entry-style-picker">
       <div class="entry-style-opt active" data-style="default" onclick="selectEntryStyle('default',this)">
-        <div class="esp-preview esp-default"><div class="esp-title">제목</div><div class="esp-sub">부제</div></div>
-        <div class="esp-label">기본</div>
-      </div>
-      <div class="entry-style-opt" data-style="badge" onclick="selectEntryStyle('badge',this)">
-        <div class="esp-preview esp-badge"><span class="esp-chip">태그</span><div class="esp-title" style="margin-top:6px">제목</div></div>
-        <div class="esp-label">뱃지형</div>
+        <div class="esp-preview"><div class="esp-title">제목</div><div class="esp-sub">부제</div><div class="esp-date">2024</div></div>
+        <div class="esp-label">카드</div>
       </div>
       <div class="entry-style-opt" data-style="timeline" onclick="selectEntryStyle('timeline',this)">
-        <div class="esp-preview esp-timeline"><div class="esp-tl-dot"></div><div><div class="esp-title">제목</div><div class="esp-date">2024</div></div></div>
+        <div class="esp-preview esp-tl-wrap"><div class="esp-tl-dot"></div><div><div class="esp-title">제목</div><div class="esp-date">2024</div></div></div>
         <div class="esp-label">타임라인</div>
       </div>
-      <div class="entry-style-opt" data-style="highlight" onclick="selectEntryStyle('highlight',this)">
-        <div class="esp-preview esp-highlight"><div class="esp-title" style="color:#fff">제목</div><div class="esp-sub" style="color:rgba(255,255,255,.7)">부제</div></div>
-        <div class="esp-label">강조</div>
-      </div>
-      <div class="entry-style-opt" data-style="minimal" onclick="selectEntryStyle('minimal',this)">
-        <div class="esp-preview esp-minimal"><div class="esp-title">제목</div></div>
-        <div class="esp-label">미니멀</div>
+      <div class="entry-style-opt" data-style="text" onclick="selectEntryStyle('text',this)">
+        <div class="esp-preview esp-text"><div class="esp-title">제목</div><div class="esp-sub">부제</div></div>
+        <div class="esp-label">텍스트</div>
       </div>
     </div>
     <input type="hidden" id="inp-entry-style" value="default">
@@ -1779,7 +1805,12 @@ ${isAdmin ? `<div class="layout-toggle">
              ondragend="onDragEnd()"` : '';
 
         const hasDesc = entry.desc && entry.desc.trim();
-        const eStyle = entry.style && entry.style!=='default' ? ` style-${entry.style}` : '';
+        // 스타일 매핑: badge/highlight→default, minimal→text
+        let _es = entry.style||'default';
+        if(_es==='badge'||_es==='highlight'||_es==='card') _es='default';
+        if(_es==='minimal') _es='text';
+        const eStyle = _es!=='default' ? ` style-${_es}` : '';
+        const isTextStyle = _es === 'text';
         const span = entry.span;
         const eColSpan = span==='full' ? 'grid-column:1/-1' : (span && span!='1') ? `grid-column:span ${span}` : '';
         const eColStart = entry.colStart && entry.colStart!=='auto' ? `grid-column-start:${entry.colStart}` : '';
@@ -1788,7 +1819,7 @@ ${isAdmin ? `<div class="layout-toggle">
         const isDark = entry.color==='#1e293b';
         const darkCls = isDark ? ' entry-dark' : '';
         const inlineStyle = [eColSpan, eColStart, eHeight, eBg].filter(Boolean).join(';');
-        html += `<div class="cv-entry${!hasDesc&&!eHeight?' cv-entry-compact':''}${eStyle}${darkCls}" id="ent-${sIdx}-${eIdx}" style="${inlineStyle}" ${adminEntryDrag}>
+        html += `<div class="cv-entry${isTextStyle?' cv-entry-compact':!hasDesc&&!eHeight?' cv-entry-compact':''}${eStyle}${darkCls}" id="ent-${sIdx}-${eIdx}" style="${inlineStyle}" ${adminEntryDrag}>
           ${entry.icon ? `<div class="cv-entry-icon">${esc(entry.icon)}</div>` : ''}
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
@@ -1958,7 +1989,11 @@ function openEditEntry(secId,entryId) {
   document.getElementById('inp-entry-tags').value=(entry.tags||[]).join(', ');
   document.getElementById('inp-entry-link-label').value=entry.linkLabel||'';
   document.getElementById('inp-entry-link-url').value=entry.linkUrl||'';
-  selectEntryStyle(entry.style||'default', document.querySelector(`.entry-style-opt[data-style="${entry.style||'default'}"]`));
+  // 구 스타일 → 새 스타일 매핑
+  var mappedStyle = entry.style||'default';
+  if(mappedStyle==='badge'||mappedStyle==='highlight'||mappedStyle==='card') mappedStyle='default';
+  if(mappedStyle==='minimal') mappedStyle='text';
+  selectEntryStyle(mappedStyle, document.querySelector(`.entry-style-opt[data-style="${mappedStyle}"]`));
   document.getElementById('inp-entry-icon').value = entry.icon||'';
   selectColor(entry.color||'', document.querySelector(`.color-swatch[data-color="${entry.color||''}"]`));
   selectSpan(entry.span||'1', document.querySelector(`.span-btn[data-span="${entry.span||'1'}"]`));
