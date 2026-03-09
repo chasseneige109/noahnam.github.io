@@ -988,7 +988,7 @@ button, a, label { touch-action: manipulation; }
   color: var(--blue);
   width: 0; opacity: 0; overflow: hidden;
   transform: scale(0.5) rotate(-45deg);
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   line-height: 1;
 }
 .intro-logo.go { width: 1.2em; opacity: 1; transform: scale(1) rotate(0); margin-right: 0.2em; }
@@ -3326,36 +3326,123 @@ function excerpt(b){if(!b) return '';return b.replace(/#{1,6} /g,'').replace(/\*
 function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
-<script>
 // ── INIT ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  // [수정] 흰 바탕 시간을 줄이기 위해 DB 로딩(await load)보다 애니메이션 시작을 위로 올림
-  let tempName = 'My Blog';
-  try { 
-    const cached = localStorage.getItem('blog_profile');
-    if(cached) tempName = JSON.parse(cached).blogName || tempName; 
-  } catch(e){}
-
-  // 애니메이션 즉시 시작 신호
-  window.dispatchEvent(new CustomEvent('blog-ready', { detail: { name: tempName } }));
-
-  // 데이터 로딩은 백그라운드에서 진행
   showSaving('⏳ 데이터 불러오는 중...');
-  await load(); 
+  await load();
   hideSaving('✅ 불러오기 완료', 800);
-  
-  const finalName = profile.blogName || profile.name || 'My Blog';
-  document.getElementById('nav-blog-name').textContent = finalName;
-  const introTitle = document.getElementById('intro-name-text');
-  if (introTitle) introTitle.textContent = finalName;
-
+  document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || 'My Blog';
   showSection('landing');
   setLang(currentLang);
+  document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
+  // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
+  window.dispatchEvent(new CustomEvent('blog-ready', {
+    detail: { name: profile.blogName || profile.name || 'My Blog' }
+  }));
 });
+let cvDragSrcIdx = null;
 
-// ... 중간의 cvDrag 관련 코드는 그대로 두세요 ...
+function cvDragStart(e, idx) {
+  cvDragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '0.5';
+}
 
-// ── 입장 애니메이션 (수정 버전) ───────────────────────────────────────────
+function cvDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+}
+
+function cvDrop(e, targetIdx) {
+  e.preventDefault();
+  if (cvDragSrcIdx === null || cvDragSrcIdx === targetIdx) return;
+  const moved = cvSections.splice(cvDragSrcIdx, 1)[0];
+  cvSections.splice(targetIdx, 0, moved);
+  cvDragSrcIdx = null;
+  save();
+  renderCvArea();
+}
+</script>
+
+<script>
+particlesJS("particles-js",{
+  particles:{
+    number:{value:40,density:{enable:true,value_area:1200}},
+    color:{value:"#3b82f6"},shape:{type:"circle"},
+    opacity:{value:.18,random:false},size:{value:2.5,random:true},
+    line_linked:{enable:true,distance:160,color:"#93c5fd",opacity:.15,width:1},
+    move:{enable:true,speed:0.8,direction:"none",random:false,straight:false,out_mode:"out",bounce:false}
+  },
+  interactivity:{
+    detect_on:"window",
+    events:{onhover:{enable:true,mode:"grab"},onclick:{enable:false},resize:true},
+    modes:{grab:{distance:180,line_linked:{opacity:.35}}}
+  },
+  retina_detect:true
+});
+</script>
+
+<script>
+/* 모바일 JS — 원본 함수 wrapping, class 기반 제어 */
+(function(){
+  var mob=function(){return window.matchMedia('(max-width:768px)').matches;};
+
+  function syncNav(name){
+    if(!mob()) return;
+    document.querySelectorAll('.mbn-btn').forEach(function(b){b.classList.remove('on');});
+    var t=document.getElementById('mbn-'+name);
+    if(t) t.classList.add('on');
+    var wrap=document.getElementById('mbn-wrap');
+    var fab=document.getElementById('mbn-fab');
+    var ed=(name==='write'||name==='article');
+    if(wrap){ if(ed) wrap.classList.add('mbn-hidden'); else wrap.classList.remove('mbn-hidden'); }
+    if(fab){
+      if(!ed&&window.isAdmin&&(name==='posts'||name==='paper')) fab.classList.add('show');
+      else fab.classList.remove('show');
+    }
+  }
+
+  function restoreNav(){
+    if(!mob()) return;
+    var wrap=document.getElementById('mbn-wrap');
+    if(wrap) wrap.classList.remove('mbn-hidden');
+  }
+
+  // 파티클 모바일 끔
+  if(mob()){ var p=document.getElementById('particles-js'); if(p) p.style.display='none'; }
+
+  var _show=window.showSection;
+  window.showSection=function(n){_show.call(this,n);syncNav(n);};
+
+  var _enter=window.enterAdmin;
+  window.enterAdmin=function(){_enter.call(this);syncNav(window.currentPageName);};
+
+  var _lock=window.lockAdmin;
+  window.lockAdmin=function(){
+    _lock.call(this);
+    var fab=document.getElementById('mbn-fab');
+    if(fab) fab.classList.remove('show');
+  };
+
+  var _op=window.openPost;
+  window.openPost=function(id,sec){var r=_op.call(this,id,sec);syncNav('article');return r;};
+
+  var _ow=window.openWrite;
+  window.openWrite=function(h){_ow.call(this,h);syncNav('write');};
+
+  var _oe=window.openEdit;
+  window.openEdit=function(id,sec){var r=_oe.call(this,id,sec);syncNav('write');return r;};
+
+  var _gb=window.goBack;
+  window.goBack=function(){restoreNav();_gb.call(this);};
+
+  var _cw=window.cancelWrite;
+  window.cancelWrite=function(){restoreNav();_cw.call(this);};
+})();
+</script>
+
+<script>
+// ── 입장 애니메이션 (Fast 버전) ───────────────────────────────────────────
 (function(){
   var dismissed = false;
   var animStarted = false;
@@ -3367,14 +3454,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     var logoEl  = document.getElementById('intro-logo');
     if (titleEl && name) titleEl.textContent = name;
 
+    // 이름 즉시 등장
     requestAnimationFrame(function(){
       if (titleEl) titleEl.classList.add('show');
     });
 
-    // [수정] 로고가 뜨기까지의 대기시간 단축 (300 -> 150)
+    // 0.3초 뒤 로고가 이름을 밀어냄
     setTimeout(function() {
       if (logoEl) logoEl.classList.add('go');
-    }, 150);
+    }, 300);
   }
 
   function dismissIntro() {
@@ -3388,11 +3476,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   window.addEventListener('blog-ready', function(e){
     startAnim(e.detail && e.detail.name);
-    // [수정] 로고 움직임을 더 오래 보여주기 위해 종료 시간 연장 (900 -> 1300)
-    setTimeout(dismissIntro, 1300); 
+    // 전체 과정을 0.9초 안에 끝내고 바로 본문 노출
+    setTimeout(dismissIntro, 900); 
   });
 
-  setTimeout(function(){ startAnim(''); dismissIntro(); }, 2500); 
+  // 안전장치 (로딩 지연 시 2초 후 강제 종료)
+  setTimeout(function(){ startAnim(''); dismissIntro(); }, 2000); 
 })();
 </script>
 
