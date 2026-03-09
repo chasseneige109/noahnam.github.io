@@ -957,51 +957,52 @@ button, a, label { touch-action: manipulation; }
 
 
 /* ══════════════════════════════════════════════════
-   입장 애니메이션 — split reveal
+   입장 애니메이션
    ══════════════════════════════════════════════════ */
 #intro-overlay {
   position: fixed; inset: 0; z-index: 99999;
+  background: #fff;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   pointer-events: none;
-  display: grid; grid-template-rows: 1fr 1fr;
+  transition: opacity .6s cubic-bezier(.4,0,.2,1);
 }
+#intro-overlay.out  { opacity: 0; }
 #intro-overlay.gone { display: none; }
 
-/* 위/아래 패널 */
-.intro-panel {
-  background: #0f172a;
-  transition: transform .7s cubic-bezier(.76,0,.24,1);
+/* 블로그 이름 — 큰 타이포 */
+.intro-title {
+  font-family: var(--sans);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -.04em;
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  animation: intro-wipe .65s cubic-bezier(.77,0,.18,1) .1s forwards;
 }
-.intro-panel-top  { transform-origin: top; }
-.intro-panel-bot  { transform-origin: bottom; }
-#intro-overlay.split .intro-panel-top { transform: translateY(-100%); }
-#intro-overlay.split .intro-panel-bot { transform: translateY(100%); }
+@keyframes intro-wipe {
+  to { opacity:1; clip-path: inset(0 0% 0 0); }
+}
 
-/* 중앙 텍스트 */
-.intro-center {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 12px;
-  pointer-events: none;
+/* 점 3개 로딩 인디케이터 */
+.intro-dots {
+  display: flex; gap: 6px; margin-top: 20px;
+  opacity: 0;
+  animation: intro-fade-in .3s ease .5s forwards;
 }
-.intro-wordmark {
-  display: flex; align-items: center; gap: 10px;
-  opacity: 0; transform: translateY(12px);
-  animation: intro-up .5s cubic-bezier(.4,0,.2,1) .08s forwards;
+.intro-dot-item {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #cbd5e1;
+  animation: intro-bounce 1s ease-in-out infinite;
 }
-.intro-mark-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #3b82f6; flex-shrink: 0;
+.intro-dot-item:nth-child(2) { animation-delay: .15s; }
+.intro-dot-item:nth-child(3) { animation-delay: .3s; }
+@keyframes intro-bounce {
+  0%,100% { transform: translateY(0); background: #cbd5e1; }
+  50%      { transform: translateY(-5px); background: #3b82f6; }
 }
-.intro-mark-name {
-  font-family: var(--sans); font-size: 1.1rem; font-weight: 800;
-  color: #f8fafc; letter-spacing: -.02em;
-}
-.intro-line {
-  width: 0; height: 1px; background: #3b82f6;
-  animation: intro-line-grow .55s cubic-bezier(.4,0,.2,1) .25s forwards;
-}
-@keyframes intro-up   { to { opacity:1; transform:translateY(0); } }
-@keyframes intro-line-grow { to { width: 80px; } }
+@keyframes intro-fade-in { to { opacity:1; } }
 
 /* 페이지 전환 fade */
 .page.active { animation: page-fade-in .3s ease forwards; }
@@ -1030,14 +1031,11 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 </head>
 <body>
 <div id="intro-overlay">
-  <div class="intro-panel intro-panel-top"></div>
-  <div class="intro-panel intro-panel-bot"></div>
-  <div class="intro-center">
-    <div class="intro-wordmark">
-      <div class="intro-mark-dot"></div>
-      <span class="intro-mark-name" id="intro-name-text">My Blog</span>
-    </div>
-    <div class="intro-line"></div>
+  <div class="intro-title" id="intro-name-text">My Blog</div>
+  <div class="intro-dots">
+    <div class="intro-dot-item"></div>
+    <div class="intro-dot-item"></div>
+    <div class="intro-dot-item"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3456,33 +3454,32 @@ particlesJS("particles-js",{
 })();
 </script>
 
-// ── 입장 애니메이션 (split reveal) ─────────────────────────────
+<script>
+// ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var dismissed = false;
+  var startTime = Date.now();
 
   function dismissIntro() {
     if (dismissed) return;
     dismissed = true;
     var el = document.getElementById('intro-overlay');
     if (!el) return;
-    // 커튼 갈라짐
-    el.classList.add('split');
-    // 갈라지는 동안 텍스트 fade out
-    var center = el.querySelector('.intro-center');
-    if (center) { center.style.transition = 'opacity .25s ease'; center.style.opacity = '0'; }
-    // 완전히 열리면 제거
-    setTimeout(function(){ el.classList.add('gone'); }, 750);
+    el.classList.add('out');
+    setTimeout(function(){ el.classList.add('gone'); }, 650);
   }
 
-  // 데이터 로드 완료 시 퇴장
   window.addEventListener('blog-ready', function(){
-    // 최소 0.7초는 보여줌 (너무 빠르면 번쩍임)
-    setTimeout(dismissIntro, 700);
+    // 최소 900ms 노출 보장
+    var elapsed = Date.now() - startTime;
+    var delay = Math.max(0, 900 - elapsed);
+    setTimeout(dismissIntro, delay);
   });
 
-  // 혹시 blog-ready 안 오면 2초 후 강제 퇴장
-  setTimeout(dismissIntro, 2000);
+  // 안전장치: 3초 후 강제 퇴장
+  setTimeout(dismissIntro, 3000);
 })();
+</script>
 
 </body>
 </html>
