@@ -651,6 +651,19 @@ button, a, label { touch-action: manipulation; }
   /* ── iOS input 포커스 줌 방지 ── */
   input, textarea, select { font-size: 16px !important; }
 
+  /* ── 랜딩 author 카드 "전체보기" 버튼 — 모바일에서 겹침 방지 ── */
+  .lau-me-btn {
+    position: static !important;
+    margin-top: 10px !important;
+    width: 100% !important;
+    text-align: center !important;
+    display: block !important;
+  }
+  .landing-author-card {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
   /* ── 상단 nav: nav-tabs 숨김(바텀 네비로 대체), 가로 넘침 방지 ── */
   .topnav {
     padding: 0 12px !important;
@@ -673,8 +686,9 @@ button, a, label { touch-action: manipulation; }
   /* ── 레이아웃 grid → 단일 컬럼 ── */
   .two-col,
   .three-col-sidebar { grid-template-columns: 1fr !important; gap: 16px !important; }
-  .profile-sidebar,
-  .filter-sidebar    { position: static !important; }
+  .profile-sidebar   { position: static !important; }
+  /* filter-sidebar 모바일에서 숨김 — 필터는 filter-bar의 카테고리/태그로 접근 */
+  .filter-sidebar    { display: none !important; }
 
   /* ── 페이지 하단: 바텀 네비 높이만큼 여백 ── */
   .wrap         { padding-bottom: calc(54px + env(safe-area-inset-bottom,0px) + 8px) !important; }
@@ -800,6 +814,25 @@ button, a, label { touch-action: manipulation; }
 .cv-entry.style-line .cv-entry-tags { margin-top: 5px !important; }
 /* admin 버튼 */
 .cv-entry.style-line .cv-entry-admin { top: 2px !important; right: 0 !important; }
+
+
+/* ── Papers 카드 연도/학회 메타 ── */
+.pc-paper-meta {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin: 4px 0 6px;
+}
+.pc-paper-year {
+  font-family: var(--mono); font-size: .62rem; font-weight: 700;
+  color: var(--blue); background: var(--blue-bg);
+  padding: 2px 8px; border-radius: 6px;
+}
+.pc-paper-venue {
+  font-size: .62rem; font-weight: 600;
+  color: var(--s500); background: var(--s100);
+  padding: 2px 8px; border-radius: 6px;
+  max-width: 200px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
 
 </style>
 <script>
@@ -2201,9 +2234,17 @@ function renderPaperPage() {
 function postCardHTML(p,section) {
   const tags=(p.tags||[]).map(t=>`<span class="pc-tag">#${esc(t)}</span>`).join('');
   const cat=p.cat?`<span class="pc-cat">${esc(p.cat)}</span>`:'';
+  // Papers 전용: 연도/학회 메타
+  const paperMeta = section==='paper' ? (()=>{
+    let m='';
+    if(p.year)  m+=`<span class="pc-paper-year">${esc(p.year)}</span>`;
+    if(p.venue) m+=`<span class="pc-paper-venue">${esc(p.venue)}</span>`;
+    return m ? `<div class="pc-paper-meta">${m}</div>` : '';
+  })() : '';
   return `<div class="gc gc-hover post-card" onclick="openPost(${p.id},'${section}')">
     <div class="pc-top">${cat}${tags}</div>
     <div class="pc-title">${esc(p.title)}</div>
+    ${paperMeta}
     <div class="pc-excerpt">${esc(excerpt(p.preview||p.body))}</div>
     <div class="pc-footer">
       <span class="pc-date">${fmtDate(p.createdAt)}</span>
