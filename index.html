@@ -892,6 +892,60 @@ button, a, label { touch-action: manipulation; }
   }
 }
 
+
+/* ── 임시저장 UI ── */
+.draft-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-radius: var(--r2);
+  background: var(--s100); border: 1px solid var(--s200);
+  margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
+}
+.draft-bar-left { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.draft-autosave-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--s300); flex-shrink: 0;
+  transition: background .3s;
+}
+.draft-autosave-dot.saved { background: #22c55e; }
+.draft-autosave-dot.saving { background: #f59e0b; animation: pulse-dot .6s infinite alternate; }
+@keyframes pulse-dot { from { opacity: 1; } to { opacity: .3; } }
+.draft-status { font-size: .65rem; color: var(--s400); font-family: var(--mono); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.draft-bar-right { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-draft-save { padding: 4px 10px; border-radius: 8px; font-size: .65rem; font-weight: 700; background: var(--blue-bg); color: var(--blue); border: 1px solid #bfdbfe; cursor: pointer; touch-action: manipulation; }
+.btn-draft-clear { padding: 4px 10px; border-radius: 8px; font-size: .65rem; font-weight: 700; background: none; color: var(--s400); border: 1px solid var(--s200); cursor: pointer; touch-action: manipulation; }
+
+/* 임시저장 목록 패널 */
+.draft-list-panel {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--r2);
+  background: #fffbeb; border: 1px solid #fde68a;
+  margin-bottom: 12px;
+}
+.draft-list-panel.show { display: flex; }
+.draft-list-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.draft-list-title { font-size: .72rem; font-weight: 700; color: #92400e; }
+.btn-draft-close { background: none; border: none; color: var(--s400); cursor: pointer; font-size: .85rem; padding: 0 2px; }
+.draft-list-items { display: flex; flex-direction: column; gap: 5px; max-height: 240px; overflow-y: auto; }
+.draft-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border-radius: var(--r);
+  background: #fff; border: 1px solid #fde68a;
+  gap: 8px; cursor: pointer; transition: background .15s;
+}
+.draft-item:hover { background: #fef9c3; }
+.draft-item-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.draft-item-title { font-size: .78rem; font-weight: 700; color: var(--s800); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.draft-item-meta  { font-size: .62rem; color: #b45309; font-family: var(--mono); }
+.draft-item-right { display: flex; gap: 4px; flex-shrink: 0; }
+.btn-draft-restore { padding: 4px 10px; border-radius: 8px; font-size: .62rem; font-weight: 700; background: #f59e0b; color: #fff; border: none; cursor: pointer; touch-action: manipulation; }
+.btn-draft-discard { padding: 4px 8px; border-radius: 8px; font-size: .62rem; font-weight: 700; background: none; color: var(--s400); border: 1px solid var(--s200); cursor: pointer; touch-action: manipulation; }
+.draft-list-empty { font-size: .72rem; color: #b45309; padding: 4px 0; }
+
 </style>
 <script>
 // 핀치줌, 더블탭줌 완전 차단
@@ -1097,6 +1151,26 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <div style="display:flex;gap:8px">
         <button class="btn-cancel" onclick="cancelWrite()">취소</button>
         <button class="btn-pub" onclick="publishPost()">발행하기</button>
+      </div>
+    </div>
+    <!-- 임시저장 목록 패널 -->
+    <div class="draft-list-panel" id="draft-list-panel">
+      <div class="draft-list-header">
+        <span class="draft-list-title">💾 임시저장 목록</span>
+        <button class="btn-draft-close" onclick="draftClosePanel()">✕</button>
+      </div>
+      <div class="draft-list-items" id="draft-list-items"></div>
+    </div>
+    <!-- 자동저장 상태 바 -->
+    <div class="draft-bar">
+      <div class="draft-bar-left">
+        <div class="draft-autosave-dot" id="draft-dot"></div>
+        <span class="draft-status" id="draft-status">자동저장 대기 중</span>
+      </div>
+      <div class="draft-bar-right">
+        <button class="btn-draft-save" onclick="draftSaveNow()">임시저장</button>
+        <button class="btn-draft-save" onclick="draftOpenPanel()" style="background:var(--s100);color:var(--s600);border-color:var(--s200)">목록 📋</button>
+        <button class="btn-draft-clear" onclick="draftClear()">초기화</button>
       </div>
     </div>
     <div class="editor-row">
@@ -2563,6 +2637,10 @@ function openWrite(sectionHint) {
   document.getElementById('page-write').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   window.scrollTo(0,0);
+  // draft
+  draftDirty=false; currentDraftId=null;
+  draftStartWatcher();
+  setTimeout(draftCheckRestore, 150);
 }
 async function openEdit(id,section) {
   if(!isAdmin) return;
@@ -2588,11 +2666,225 @@ async function openEdit(id,section) {
   document.getElementById('page-write').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   window.scrollTo(0,0);
+  // draft: 수정 중엔 restore 배너 안 띄움, watcher만
+  draftDirty=false;
+  draftStartWatcher();
 }
 function cancelWrite() {
+  // 나갈 때 변경사항 있으면 자동저장
+  if(draftDirty) draftSaveNow();
+  draftStopWatcher();
   if(editingPostId!==null) openPost(editingPostId,editingSection);
   else showSection(editingSection||'posts');
 }
+
+// ── 임시저장 시스템 (Supabase — 기기 간 공유, 다중 저장) ─────
+// Supabase drafts 테이블:
+//   id bigint generated always as identity primary key,
+//   data jsonb,
+//   updated_at timestamptz default now()
+
+let draftTimer   = null;
+let draftDirty   = false;
+let draftSaving  = false;
+let currentDraftId = null; // 현재 편집 중인 draft row id
+
+function draftGetFields() {
+  return {
+    section:   editingSection || 'posts',
+    editingId: editingPostId,
+    title:     document.getElementById('editor-title')?.value || '',
+    body:      document.getElementById('editor-body')?.value  || '',
+    cat:       editorCat || '',
+    tags:      [...(editorTags||[])],
+    authors:   document.getElementById('pf-authors')?.value   || '',
+    year:      document.getElementById('pf-year')?.value      || '',
+    venue:     document.getElementById('pf-venue')?.value     || '',
+    arxiv:     document.getElementById('pf-arxiv')?.value     || '',
+    code:      document.getElementById('pf-code')?.value      || '',
+    s1:        document.getElementById('pf-s1')?.value        || '',
+    s2:        document.getElementById('pf-s2')?.value        || '',
+    s3:        document.getElementById('pf-s3')?.value        || '',
+  };
+}
+
+function draftSetFields(d) {
+  if (!d) return;
+  if (d.section) {
+    editingSection = d.section;
+    selectSection(d.section, document.getElementById('sec-btn-' + d.section));
+  }
+  const titleEl = document.getElementById('editor-title');
+  const bodyEl  = document.getElementById('editor-body');
+  if (titleEl) { titleEl.value = d.title || ''; autoResize(titleEl); }
+  if (bodyEl)  { bodyEl.value  = d.body  || ''; }
+  editorCat  = d.cat  || '';
+  editorTags = d.tags || [];
+  renderEditorCats(); renderEditorTags();
+  ['authors','year','venue','arxiv','code','s1','s2','s3'].forEach(k => {
+    const el = document.getElementById('pf-' + k); if (el) el.value = d[k] || '';
+  });
+}
+
+function draftSetStatus(state, msg) {
+  const dot    = document.getElementById('draft-dot');
+  const status = document.getElementById('draft-status');
+  if (dot)    { dot.classList.remove('saving','saved'); if (state) dot.classList.add(state); }
+  if (status) status.textContent = msg;
+}
+
+async function draftSaveNow() {
+  if (draftSaving) return;
+  const d = draftGetFields();
+  if (!d.title.trim() && !d.body.trim()) {
+    draftSetStatus('', '내용 없음 — 저장 건너뜀'); return;
+  }
+  draftSaving = true;
+  draftSetStatus('saving', '저장 중...');
+  try {
+    const now = new Date().toISOString();
+    let error;
+    if (currentDraftId) {
+      // 기존 draft 업데이트
+      ({ error } = await supa.from('drafts').update({ data: d, updated_at: now }).eq('id', currentDraftId));
+    } else {
+      // 새 draft 생성
+      const { data: inserted, error: insErr } = await supa.from('drafts').insert({ data: d, updated_at: now }).select('id').single();
+      error = insErr;
+      if (inserted) currentDraftId = inserted.id;
+    }
+    if (error) throw error;
+    const t  = new Date();
+    const ts = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}:${t.getSeconds().toString().padStart(2,'0')}`;
+    draftSetStatus('saved', `저장됨 ${ts}`);
+    draftDirty = false;
+    setTimeout(() => { const dot=document.getElementById('draft-dot'); if(dot) dot.classList.remove('saved'); }, 2000);
+  } catch(e) {
+    draftSetStatus('', '저장 실패 — 네트워크 확인');
+  } finally {
+    draftSaving = false;
+  }
+}
+
+let draftDebounceTimer = null;
+
+function draftMarkDirty() {
+  draftDirty = true;
+  const dot = document.getElementById('draft-dot');
+  if (dot) { dot.classList.remove('saved'); dot.classList.add('saving'); }
+  // 타이핑 멈추고 2초 후 자동저장 (debounce)
+  clearTimeout(draftDebounceTimer);
+  draftDebounceTimer = setTimeout(() => { if (draftDirty) draftSaveNow(); }, 2000);
+}
+
+function draftStartWatcher() {
+  ['editor-title','editor-body','pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', draftMarkDirty);
+  });
+}
+
+function draftStopWatcher() {
+  clearTimeout(draftDebounceTimer);
+  draftDebounceTimer = null;
+}
+
+// 에디터 초기화 (새 글)
+function draftClear() {
+  if (!confirm('작성 중인 내용을 모두 지우시겠습니까?')) return;
+  document.getElementById('editor-title').value = '';
+  document.getElementById('editor-body').value  = '';
+  editorCat=''; editorTags=[];
+  renderEditorCats(); renderEditorTags();
+  ['pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  currentDraftId = null;
+  draftDirty = false;
+  draftSetStatus('', '초기화됨');
+}
+
+// 목록 패널 열기
+async function draftOpenPanel() {
+  const panel = document.getElementById('draft-list-panel');
+  const items = document.getElementById('draft-list-items');
+  if (!panel || !items) return;
+  items.innerHTML = '<div class="draft-list-empty">불러오는 중...</div>';
+  panel.classList.add('show');
+  try {
+    const { data, error } = await supa.from('drafts').select('id, data, updated_at').order('updated_at', { ascending: false });
+    if (error) throw error;
+    if (!data || !data.length) {
+      items.innerHTML = '<div class="draft-list-empty">저장된 임시글이 없습니다.</div>'; return;
+    }
+    items.innerHTML = data.map(row => {
+      const d   = row.data || {};
+      const t   = new Date(row.updated_at);
+      const ts  = `${t.getFullYear()}.${(t.getMonth()+1).toString().padStart(2,'0')}.${t.getDate().toString().padStart(2,'0')} ${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+      const ttl = d.title?.trim() || '(제목 없음)';
+      const sec = d.section === 'paper' ? '📄 Papers' : '✍️ Posts';
+      return `<div class="draft-item">
+        <div class="draft-item-left">
+          <div class="draft-item-title">${esc(ttl)}</div>
+          <div class="draft-item-meta">${sec} · ${ts}</div>
+        </div>
+        <div class="draft-item-right">
+          <button class="btn-draft-restore" onclick="draftLoadRow(${row.id})">불러오기</button>
+          <button class="btn-draft-discard" onclick="draftDeleteRow(${row.id}, this)">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    items.innerHTML = '<div class="draft-list-empty">불러오기 실패</div>';
+  }
+}
+
+function draftClosePanel() {
+  const panel = document.getElementById('draft-list-panel');
+  if (panel) panel.classList.remove('show');
+}
+
+async function draftLoadRow(id) {
+  try {
+    const { data, error } = await supa.from('drafts').select('data').eq('id', id).single();
+    if (error || !data) { toast('불러오기 실패'); return; }
+    draftSetFields(data.data);
+    currentDraftId = id; // 이 draft를 계속 수정
+    draftClosePanel();
+    toast('임시저장을 불러왔습니다.');
+    draftSetStatus('', '임시저장 복원됨');
+  } catch(e) { toast('불러오기 실패'); }
+}
+
+async function draftDeleteRow(id, btn) {
+  if (btn) btn.disabled = true;
+  await supa.from('drafts').delete().eq('id', id);
+  if (currentDraftId === id) currentDraftId = null;
+  // 목록 새로고침
+  draftOpenPanel();
+  toast('임시저장 삭제됨');
+}
+
+// 글쓰기 열 때 draft 개수 표시
+async function draftCheckRestore() {
+  try {
+    const { count } = await supa.from('drafts').select('id', { count: 'exact', head: true });
+    if (!count) return;
+    draftSetStatus('', `임시저장 ${count}개 — 목록 버튼으로 확인`);
+  } catch(e) {}
+}
+
+// 발행 완료 후 현재 draft 삭제
+async function draftClearAfterPublish() {
+  draftStopWatcher();
+  if (currentDraftId) {
+    await supa.from('drafts').delete().eq('id', currentDraftId);
+    currentDraftId = null;
+  }
+  draftSetStatus('', '발행 완료 — 임시저장 삭제됨');
+}
+// ────────────────────────────────────────────────────────────────
+
 function publishPost() {
   const title=document.getElementById('editor-title').value.trim();
   const body=document.getElementById('editor-body').value.trim();
@@ -2610,6 +2902,7 @@ function publishPost() {
     savePost(updated, editingSection).then(ok=>{
       if(ok){
         toast('수정되었습니다.');
+        draftClearAfterPublish();
         // 수정 완료 후 즉각적인 UI 반영을 위한 렌더링 호출
         if(editingSection === 'posts') renderPostsPage();
         else renderPaperPage();
@@ -2632,6 +2925,7 @@ function publishPost() {
     savePost(np, editingSection).then(ok=>{
       if(ok){
         toast('발행되었습니다.');
+        draftClearAfterPublish();
         // 발행 완료 후 즉각적인 UI 반영을 위한 렌더링 호출
         if(editingSection === 'posts') renderPostsPage();
         else renderPaperPage();
