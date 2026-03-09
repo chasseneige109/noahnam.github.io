@@ -280,7 +280,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 }
 @media(max-width:600px){
   /* nav */
-  .topnav{padding:0 10px;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+  .topnav{padding:0 10px;gap:4px;flex-wrap:nowrap;overflow-x:hidden}
   .nav-tabs{gap:0;flex-shrink:0}
   .nav-tab{padding:5px 8px;font-size:.62rem;letter-spacing:.03em}
   .nav-logo{font-size:.88rem}
@@ -647,6 +647,12 @@ button, a, label { touch-action: manipulation; }
   /* ── 가로 넘침 완전 차단 ── */
   html, body { overflow-x: hidden !important; width: 100% !important; }
   * { max-width: 100%; box-sizing: border-box; }
+  /* hover transform 모바일 제거 (레이아웃 틀어짐 방지) */
+  .post-card:hover { transform: none !important; }
+  /* wrap 좌우 패딩 보장 */
+  .wrap { padding-left: 14px !important; padding-right: 14px !important; }
+  /* three-col-sidebar 자식 div overflow 방지 */
+  .three-col-sidebar > div { min-width: 0; overflow: hidden; }
 
   /* ── iOS input 포커스 줌 방지 ── */
   input, textarea, select { font-size: 16px !important; }
@@ -850,9 +856,12 @@ button, a, label { touch-action: manipulation; }
     display: flex;
     gap: 6px;
     overflow-x: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding: 2px 0 4px;
+    width: 100%;
+    max-width: 100%;
   }
   .mob-filter-scroll::-webkit-scrollbar { display: none; }
   .mob-filter-chip {
@@ -946,6 +955,70 @@ button, a, label { touch-action: manipulation; }
 .btn-draft-discard { padding: 4px 8px; border-radius: 8px; font-size: .62rem; font-weight: 700; background: none; color: var(--s400); border: 1px solid var(--s200); cursor: pointer; touch-action: manipulation; }
 .draft-list-empty { font-size: .72rem; color: #b45309; padding: 4px 0; }
 
+
+/* ══════════════════════════════════════════════════
+   입장 애니메이션 — split reveal
+   ══════════════════════════════════════════════════ */
+#intro-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  pointer-events: none;
+  display: grid; grid-template-rows: 1fr 1fr;
+}
+#intro-overlay.gone { display: none; }
+
+/* 위/아래 패널 */
+.intro-panel {
+  background: #0f172a;
+  transition: transform .7s cubic-bezier(.76,0,.24,1);
+}
+.intro-panel-top  { transform-origin: top; }
+.intro-panel-bot  { transform-origin: bottom; }
+#intro-overlay.split .intro-panel-top { transform: translateY(-100%); }
+#intro-overlay.split .intro-panel-bot { transform: translateY(100%); }
+
+/* 중앙 텍스트 */
+.intro-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  pointer-events: none;
+}
+.intro-wordmark {
+  display: flex; align-items: center; gap: 10px;
+  opacity: 0; transform: translateY(12px);
+  animation: intro-up .5s cubic-bezier(.4,0,.2,1) .08s forwards;
+}
+.intro-mark-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #3b82f6; flex-shrink: 0;
+}
+.intro-mark-name {
+  font-family: var(--sans); font-size: 1.1rem; font-weight: 800;
+  color: #f8fafc; letter-spacing: -.02em;
+}
+.intro-line {
+  width: 0; height: 1px; background: #3b82f6;
+  animation: intro-line-grow .55s cubic-bezier(.4,0,.2,1) .25s forwards;
+}
+@keyframes intro-up   { to { opacity:1; transform:translateY(0); } }
+@keyframes intro-line-grow { to { width: 80px; } }
+
+/* 페이지 전환 fade */
+.page.active { animation: page-fade-in .3s ease forwards; }
+@keyframes page-fade-in {
+  from { opacity:0; transform:translateY(5px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+
+/* Papers 섹션 설명 */
+.paper-section-desc {
+  font-size: .82rem; color: var(--s500); line-height: 1.7;
+  margin-bottom: 14px; padding: 10px 14px;
+  border-left: 3px solid var(--blue);
+  background: var(--blue-bg); border-radius: 0 var(--r) var(--r) 0;
+}
+
 </style>
 <script>
 // 핀치줌, 더블탭줌 완전 차단
@@ -956,6 +1029,17 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 </script>
 </head>
 <body>
+<div id="intro-overlay">
+  <div class="intro-panel intro-panel-top"></div>
+  <div class="intro-panel intro-panel-bot"></div>
+  <div class="intro-center">
+    <div class="intro-wordmark">
+      <div class="intro-mark-dot"></div>
+      <span class="intro-mark-name" id="intro-name-text">My Blog</span>
+    </div>
+    <div class="intro-line"></div>
+  </div>
+</div>
 <div id="particles-js"></div>
 <div class="z1">
 
@@ -1108,6 +1192,9 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <div class="filter-sidebar" id="paper-filter-sidebar"></div>
       <div>
         <div id="paper-mob-filter" class="mob-filter-bar"></div>
+        <p class="paper-section-desc i18n"
+           data-ko="읽고 정리한 논문들을 기록하는 장소입니다."
+           data-en="Notes and summaries of papers I've read.">읽고 정리한 논문들을 기록하는 장소입니다.</p>
         <div class="filter-bar">
           <span class="filter-label" id="paper-filter-label">Paper Review</span>
           <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
@@ -3263,6 +3350,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   showSection('landing');
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
+  // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
+  const introName = document.getElementById('intro-name-text');
+  if (introName) introName.textContent = profile.blogName || profile.name || 'My Blog';
+  window.dispatchEvent(new Event('blog-ready'));
 });
 let cvDragSrcIdx = null;
 
@@ -3364,6 +3455,34 @@ particlesJS("particles-js",{
   window.cancelWrite=function(){restoreNav();_cw.call(this);};
 })();
 </script>
+
+// ── 입장 애니메이션 (split reveal) ─────────────────────────────
+(function(){
+  var dismissed = false;
+
+  function dismissIntro() {
+    if (dismissed) return;
+    dismissed = true;
+    var el = document.getElementById('intro-overlay');
+    if (!el) return;
+    // 커튼 갈라짐
+    el.classList.add('split');
+    // 갈라지는 동안 텍스트 fade out
+    var center = el.querySelector('.intro-center');
+    if (center) { center.style.transition = 'opacity .25s ease'; center.style.opacity = '0'; }
+    // 완전히 열리면 제거
+    setTimeout(function(){ el.classList.add('gone'); }, 750);
+  }
+
+  // 데이터 로드 완료 시 퇴장
+  window.addEventListener('blog-ready', function(){
+    // 최소 0.7초는 보여줌 (너무 빠르면 번쩍임)
+    setTimeout(dismissIntro, 700);
+  });
+
+  // 혹시 blog-ready 안 오면 2초 후 강제 퇴장
+  setTimeout(dismissIntro, 2000);
+})();
 
 </body>
 </html>
