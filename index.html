@@ -1019,42 +1019,28 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <div class="modal-title" id="media-modal-title">미디어 삽입</div>
 
     <div id="media-image">
-      <div class="upload-area" id="img-upload-area" onclick="document.getElementById('media-file-inp').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleImgDrop(event)">
-        <div style="font-size:1.5rem">🖼</div>
-        <p>클릭하거나 파일을 끌어다 놓으세요</p>
-        <p style="font-size:.68rem;color:var(--s300)">jpg, png, gif, webp 지원</p>
+      <p style="font-size:.75rem;color:var(--s500);line-height:1.6;margin-bottom:10px">이미지를 외부 서비스(<a href="https://imgbb.com" target="_blank" style="color:var(--blue)">ImgBB</a> 등)에 올린 뒤 URL을 붙여넣으세요.</p>
+      <label class="form-label">이미지 URL</label>
+      <input class="form-input" id="media-url-inp" placeholder="https://i.ibb.co/..." oninput="const v=this.value.trim();const p=document.getElementById('media-preview');const img=document.getElementById('media-preview-img');if(v){img.src=v;p.style.display='block';}else{p.style.display='none';}">
+      <div id="media-preview" style="margin:8px 0;display:none">
+        <img id="media-preview-img" style="max-width:100%;border-radius:var(--r);border:1px solid var(--s200)" onload="this.parentElement.style.display='block'" onerror="this.parentElement.style.display='none'">
       </div>
-      <input type="file" id="media-file-inp" accept="image/*" style="display:none" onchange="handleMediaFile(event)">
-      <div class="upload-progress" id="img-upload-progress"><div class="upload-progress-bar" id="img-progress-bar" style="width:0%"></div></div>
-      <div id="media-preview" style="margin-bottom:10px;display:none">
-        <img id="media-preview-img" style="max-width:100%;border-radius:var(--r);border:1px solid var(--s200)">
-        <div style="font-size:.68rem;color:var(--blue);margin-top:4px;font-family:var(--mono)" id="img-upload-status"></div>
-      </div>
-      <label class="form-label">또는 URL 직접 입력</label>
-      <input class="form-input" id="media-url-inp" placeholder="https://...">
       <label class="form-label">캡션 (선택)</label>
       <input class="form-input" id="media-caption-inp" placeholder="이미지 설명...">
     </div>
 
     <div id="media-video" style="display:none">
-      <label class="form-label">YouTube / 동영상 URL</label>
+      <p style="font-size:.75rem;color:var(--s500);line-height:1.6;margin-bottom:10px">YouTube에 올린 영상의 URL을 붙여넣으세요. (비공개/일부 공개도 됩니다)</p>
+      <label class="form-label">YouTube URL</label>
       <input class="form-input" id="media-video-url" placeholder="https://youtube.com/watch?v=...">
       <label class="form-label">캡션 (선택)</label>
       <input class="form-input" id="media-video-caption" placeholder="동영상 설명...">
     </div>
 
     <div id="media-pdf" style="display:none">
-      <label class="form-label">PDF 파일 업로드</label>
-      <input type="file" id="media-pdf-inp" accept=".pdf" style="display:none" onchange="handlePdfFile(event)">
-      <button onclick="document.getElementById('media-pdf-inp').click()"
-        style="width:100%;padding:10px;border:1px dashed var(--s300);border-radius:var(--r);font-size:.8rem;color:var(--s500);background:none;cursor:pointer;margin-bottom:10px;font-family:var(--sans);transition:all .2s"
-        onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
-        onmouseout="this.style.borderColor='var(--s300)';this.style.color='var(--s500)'">
-        📁 PDF 선택
-      </button>
-      <div id="media-pdf-name" style="font-size:.75rem;color:var(--blue);margin-bottom:8px;font-family:var(--mono)"></div>
-      <label class="form-label">또는 PDF URL</label>
-      <input class="form-input" id="media-pdf-url" placeholder="https://.../file.pdf">
+      <p style="font-size:.75rem;color:var(--s500);line-height:1.6;margin-bottom:10px">PDF를 <a href="https://drive.google.com" target="_blank" style="color:var(--blue)">Google Drive</a>에 올리고 공유 링크를 붙여넣으세요.</p>
+      <label class="form-label">PDF URL</label>
+      <input class="form-input" id="media-pdf-url" placeholder="https://drive.google.com/file/d/...">
       <label class="form-label">표시 이름</label>
       <input class="form-input" id="media-pdf-label" placeholder="논문 제목 등...">
     </div>
@@ -1114,21 +1100,21 @@ function hideSaving(msg, delay) {
 async function load() {
   try {
     const [postsRes, papersRes, catsRes, cvRes, profileRes] = await Promise.all([
-      supa.from('posts').select('*').order('id', { ascending: false }),
-      supa.from('papers').select('*').order('id', { ascending: false }),
+      supa.from('posts').select('id,title,category,tags,created_at,updated_at').order('id', { ascending: false }),
+      supa.from('papers').select('id,title,category,tags,created_at,updated_at,authors,year,venue,arxiv,code_link,summary1,summary2,summary3').order('id', { ascending: false }),
       supa.from('categories').select('*'),
       supa.from('cv_sections').select('*').order('sort_order'),
       supa.from('profile').select('*').eq('id', 1).single(),
     ]);
 
     if (postsRes.data) posts = postsRes.data.map(r => ({
-      id: r.id, title: r.title, body: r.content, cat: r.category,
+      id: r.id, title: r.title, body: null, cat: r.category,
       tags: r.tags || [], createdAt: new Date(r.created_at).getTime(),
       updatedAt: new Date(r.updated_at).getTime()
     }));
 
     if (papersRes.data) papers = papersRes.data.map(r => ({
-      id: r.id, title: r.title, body: r.content, cat: r.category,
+      id: r.id, title: r.title, body: null, cat: r.category,
       tags: r.tags || [], createdAt: new Date(r.created_at).getTime(),
       updatedAt: new Date(r.updated_at).getTime(),
       authors: r.authors || '', year: r.year || '',
@@ -2122,7 +2108,7 @@ function renderPaperMeta(p, section) {
   } else { sumBox.style.display='none'; }
 }
 
-function openPost(id,section) {
+async function openPost(id,section) {
   const list=section==='posts'?posts:papers;
   const p=list.find(x=>x.id===id);
   if(!p) return;
@@ -2131,15 +2117,24 @@ function openPost(id,section) {
     (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')+(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join('');
   document.getElementById('article-title').textContent=p.title;
   document.getElementById('article-date').textContent=fmtDate(p.createdAt);
-  const body=document.getElementById('article-body');
-  body.innerHTML=parseMd(p.body);
   renderPaperMeta(p, section);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   document.getElementById('page-article').classList.add('active');
   window.scrollTo(0,0);
+
+  const bodyEl=document.getElementById('article-body');
+  // 본문이 캐시에 없으면 fetch
+  if(!p.body) {
+    bodyEl.innerHTML='<div style="color:var(--s400);font-size:.85rem;padding:20px 0">불러오는 중...</div>';
+    const table=section==='posts'?'posts':'papers';
+    const {data,error}=await supa.from(table).select('content').eq('id',id).single();
+    if(error||!data){ bodyEl.innerHTML='<div style="color:#ef4444">불러오기 실패</div>'; return; }
+    p.body=data.content; // 캐시에 저장 — 다음 열 때 재사용
+  }
+  bodyEl.innerHTML=parseMd(p.body);
   setTimeout(()=>{
-    if(window.renderMathInElement) renderMathInElement(body,{
+    if(window.renderMathInElement) renderMathInElement(bodyEl,{
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
     });
   },60);
@@ -2173,8 +2168,15 @@ function openEdit(id,section) {
   if(!p) return;
   editingPostId=id; editingSection=section; editorTags=[...(p.tags||[])]; editorCat=p.cat||'';
   document.getElementById('editor-title').value=p.title;
-  document.getElementById('editor-body').value=p.body;
   document.getElementById('editor-mode-label').textContent='글 수정 중';
+  // 본문 캐시 없으면 fetch
+  if(!p.body) {
+    document.getElementById('editor-body').value='불러오는 중...';
+    const table=section==='posts'?'posts':'papers';
+    const {data}=await supa.from(table).select('content').eq('id',id).single();
+    if(data){ p.body=data.content; }
+  }
+  document.getElementById('editor-body').value=p.body||'';
   selectSection(section,document.getElementById('sec-btn-'+section));
   renderEditorCats(); renderEditorTags();
   if(section==='paper') fillPaperFields(p);
@@ -2436,12 +2438,16 @@ h = h.replace(/%%PDF%%([^%]+)%%([^%]*)%%/g, (_, src, label) =>
 }
 // ── MEDIA ─────────────────────────────────────────────────────────
 let currentMediaType = null;
-let mediaBase64      = null;
-let pdfBase64        = null;
 
 function insertMedia(type) {
   currentMediaType = type;
-  mediaBase64 = null; pdfBase64 = null;
+  // 입력칸 초기화
+  ['media-url-inp','media-caption-inp','media-video-url','media-video-caption',
+   'media-pdf-url','media-pdf-label','media-link-url','media-link-text'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  const prev=document.getElementById('media-preview');
+  if(prev) prev.style.display='none';
   ['image','video','pdf','link'].forEach(t => {
     document.getElementById('media-' + t).style.display = t === type ? 'block' : 'none';
   });
@@ -2496,24 +2502,25 @@ function confirmInsertMedia() {
   let tag = '';
 
   if (currentMediaType === 'image') {
-    const src = uploadedImageUrl || document.getElementById('media-url-inp').value.trim();
+    const src = document.getElementById('media-url-inp').value.trim();
     const caption = document.getElementById('media-caption-inp').value.trim();
-    if (!src) { toast('이미지를 선택하거나 URL을 입력하세요.'); return; }
+    if (!src) { toast('이미지 URL을 입력하세요.'); return; }
     tag = `\n%%IMG%%${src}%%${caption}%%\n`;
-    uploadedImageUrl = null;
   }
   else if (currentMediaType === 'video') {
     let url = document.getElementById('media-video-url').value.trim();
     const caption = document.getElementById('media-video-caption').value.trim();
-    if (!url) { toast('URL을 입력하세요.'); return; }
-    // convert youtube watch URL to embed
-    url = url.replace('watch?v=','embed/').replace('youtu.be/','www.youtube.com/embed/');
+    if (!url) { toast('YouTube URL을 입력하세요.'); return; }
+    url = url.replace(/watch\?v=/,'embed/').replace('youtu.be/','www.youtube.com/embed/');
     tag = `\n%%VID%%${url}%%${caption}%%\n`;
   }
   else if (currentMediaType === 'pdf') {
-    const src   = pdfBase64 || document.getElementById('media-pdf-url').value.trim();
+    let src = document.getElementById('media-pdf-url').value.trim();
     const label = document.getElementById('media-pdf-label').value.trim() || 'PDF 파일';
-    if (!src) { toast('PDF를 선택하거나 URL을 입력하세요.'); return; }
+    if (!src) { toast('PDF URL을 입력하세요.'); return; }
+    // Google Drive 공유 링크 → embed URL로 변환
+    const gdMatch = src.match(/\/file\/d\/([^/]+)/);
+    if (gdMatch) src = `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
     tag = `\n%%PDF%%${src}%%${label}%%\n`;
   }
   else if (currentMediaType === 'link') {
