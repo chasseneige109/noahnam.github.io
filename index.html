@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Personal Blog</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -579,6 +579,114 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .lang-btn.active{background:#fff;color:var(--s900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 
 
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE ONLY — PC 스타일 완전 보존, 768px 이하에서만 적용
+   ═══════════════════════════════════════════════════════════════ */
+
+/* 터치 글로벌 */
+*{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-overflow-scrolling:touch}
+input,textarea,button,select,a{touch-action:manipulation}
+/* input 포커스 시 iOS 자동 줌 방지 */
+input,textarea,select{font-size:max(16px,1em)}
+
+/* ── 바텀 네비바 (모바일 전용, 기본 hidden) ── */
+.mobile-bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:56px;
+  background:rgba(248,250,252,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--s200);
+  z-index:300;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.mobile-bottom-nav-inner{display:flex;height:56px}
+.mbn-tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--sans);color:var(--s400);
+  transition:color .15s;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;min-height:44px;
+}
+.mbn-tab.active{color:var(--blue)}
+.mbn-tab.active .mbn-icon{transform:translateY(-1px)}
+.mbn-icon{font-size:1.18rem;line-height:1;transition:transform .15s;display:block}
+.mbn-label{font-size:.52rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+
+/* ── 글쓰기 FAB (관리자 모드 + posts/paper 에서만 JS로 표시) ── */
+.mobile-fab{
+  display:none;
+  position:fixed;
+  right:18px;
+  bottom:calc(56px + env(safe-area-inset-bottom,0px) + 14px);
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue);color:#fff;border:none;
+  font-size:1.3rem;cursor:pointer;z-index:299;
+  box-shadow:0 4px 20px rgba(37,99,235,.45);
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  align-items:center;justify-content:center;
+}
+
+/* ── 모달 드래그 핸들 (모바일에서만 표시) ── */
+.modal-drag-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--s300);margin:0 auto 14px;display:none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   768px 이하 (모바일) — PC 값 override 최소화
+   ═══════════════════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* 바텀 네비 표시 */
+  .mobile-bottom-nav{display:block}
+
+  /* 페이지 하단 여백 (바텀 네비 높이) */
+  .wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+  .article-wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+  .editor-wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+
+  /* 모달 → 바텀 시트 스타일 */
+  .modal-overlay{align-items:flex-end;padding:0}
+  .modal{
+    border-radius:22px 22px 0 0!important;
+    max-width:100%!important;
+    width:100%!important;
+    max-height:90dvh;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important;
+  }
+  .modal-drag-handle{display:block}
+
+  /* PC에서 숨겨진 글쓰기 버튼 대신 FAB 사용 */
+  .btn-write{display:none!important}
+
+  /* 에디터 툴바 — 가로 스크롤 */
+  .editor-toolbar{
+    flex-wrap:nowrap;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding-bottom:4px;
+  }
+  .editor-toolbar::-webkit-scrollbar{display:none}
+
+  /* 필터 사이드바 — 가로 스크롤 */
+  .filter-sidebar{
+    position:static!important;
+    display:flex;flex-direction:row;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;gap:8px;padding-bottom:10px;
+  }
+  .filter-sidebar::-webkit-scrollbar{display:none}
+  .filter-sidebar .gc{min-width:150px;flex-shrink:0}
+
+  /* 폴더 하위 포스트 목록 — 모바일에서 숨김 (공간 절약) */
+  .folder-posts{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -608,6 +716,30 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
   </div>
   <button class="btn-unlock" id="btn-unlock" onclick="openPwModal()">🔒</button>
 </nav>
+
+<!-- ── 모바일 바텀 네비게이션 ── -->
+<div class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <div class="mobile-bottom-nav-inner">
+    <button class="mbn-tab active" id="mbn-landing" onclick="showSection('landing')">
+      <span class="mbn-icon">🏠</span>
+      <span class="mbn-label">Home</span>
+    </button>
+    <button class="mbn-tab" id="mbn-home" onclick="showSection('home')">
+      <span class="mbn-icon">👤</span>
+      <span class="mbn-label">Me</span>
+    </button>
+    <button class="mbn-tab" id="mbn-posts" onclick="showSection('posts')">
+      <span class="mbn-icon">✍️</span>
+      <span class="mbn-label">Posts</span>
+    </button>
+    <button class="mbn-tab" id="mbn-paper" onclick="showSection('paper')">
+      <span class="mbn-icon">📄</span>
+      <span class="mbn-label">Papers</span>
+    </button>
+  </div>
+</div>
+<!-- ── 모바일 글쓰기 FAB ── -->
+<button class="mobile-fab" id="mobile-fab" onclick="openWrite()">✏</button>
 
 <div id="page-landing" class="page">
   <div class="wrap">
@@ -831,6 +963,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 </div><div id="modal-pw" class="modal-overlay" style="display:none" onclick="closeModal('modal-pw',event)">
   <div class="modal" style="max-width:340px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title">🔐 관리자 로그인</div>
     <label class="form-label">비밀번호</label>
     <input class="form-input" id="pw-input" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')checkPw()">
@@ -844,6 +977,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-set-pw" class="modal-overlay" style="display:none" onclick="closeModal('modal-set-pw',event)">
   <div class="modal" style="max-width:340px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title">🔑 비밀번호 설정</div>
     <p style="font-size:.78rem;color:var(--s600);margin-bottom:12px;line-height:1.6">처음 사용 시 관리자 비밀번호를 설정하세요.</p>
     <label class="form-label">새 비밀번호</label>
@@ -859,6 +993,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-profile" class="modal-overlay" style="display:none" onclick="closeModal('modal-profile',event)">
   <div class="modal">
+<div class="modal-drag-handle"></div>
     <div class="modal-title">프로필 수정</div>
     <label class="form-label">이름</label><input class="form-input" id="inp-name" placeholder="이름">
     <label class="form-label">핸들 (@)</label><input class="form-input" id="inp-handle" placeholder="handle">
@@ -885,6 +1020,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-interests" class="modal-overlay" style="display:none" onclick="closeModal('modal-interests',event)">
   <div class="modal" style="max-width:380px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title">Research Interests</div>
     <p style="font-size:.75rem;color:var(--s500);margin-bottom:10px;line-height:1.6">한 줄에 하나씩 입력하세요.<br>이모지로 시작하면 아이콘으로 표시됩니다.<br><span style="color:var(--s400)">예: 🤖 Machine Learning</span></p>
     <textarea class="form-textarea" id="inp-interests" placeholder="🤖 Machine Learning&#10;🧬 Computational Biology&#10;📊 Data Visualization" style="min-height:160px;font-family:var(--sans);font-size:.82rem"></textarea>
@@ -897,6 +1033,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-add-section" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-section',event)">
   <div class="modal" style="max-width:360px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title" id="add-section-title">새 섹션 추가</div>
     <label class="form-label">섹션 이름</label>
     <input class="form-input" id="inp-section-name" placeholder="예: Education, Experience, Projects..." onkeydown="if(event.key==='Enter')saveSection()">
@@ -909,6 +1046,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-add-entry" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-entry',event)">
   <div class="modal" style="max-width:500px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title" id="add-entry-title">항목 추가</div>
 
     <label class="form-label">카드 스타일</label>
@@ -1016,6 +1154,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-media" class="modal-overlay" style="display:none" onclick="closeModal('modal-media',event)">
   <div class="modal" style="max-width:460px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title" id="media-modal-title">미디어 삽입</div>
 
     <div id="media-image">
@@ -1061,6 +1200,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 <div id="modal-delete" class="modal-overlay" style="display:none" onclick="closeModal('modal-delete',event)">
   <div class="modal" style="max-width:320px">
+<div class="modal-drag-handle"></div>
     <div class="modal-title">삭제할까요?</div>
     <p style="font-size:.82rem;color:var(--s500);line-height:1.6">삭제하면 복구할 수 없습니다.</p>
     <div class="modal-actions">
@@ -2607,6 +2747,104 @@ particlesJS("particles-js",{
   },
   retina_detect:true
 });
+</script>
+
+<script>
+/* ── 모바일 전용 JS ── */
+(function(){
+  var isMobile = function(){ return window.innerWidth <= 768; };
+
+  // 바텀 네비 탭 동기화
+  function syncBottomNav(name){
+    if(!isMobile()) return;
+    document.querySelectorAll('.mbn-tab').forEach(function(t){ t.classList.remove('active'); });
+    var tab = document.getElementById('mbn-'+name);
+    if(tab) tab.classList.add('active');
+
+    var nav = document.getElementById('mobile-bottom-nav');
+    var fab = document.getElementById('mobile-fab');
+    var hide = (name === 'write' || name === 'article');
+
+    if(nav) nav.style.display = hide ? 'none' : 'block';
+
+    // FAB: 관리자 + posts/paper 화면에서만
+    if(fab){
+      var showFab = !hide && window.isAdmin && (name==='posts'||name==='paper');
+      fab.style.display = showFab ? 'flex' : 'none';
+    }
+  }
+
+  // 모바일 particles 비활성화 (성능)
+  if(isMobile()){
+    var p = document.getElementById('particles-js');
+    if(p) p.style.display = 'none';
+  }
+
+  // showSection 패치 — 원본 함수 후에 바텀 네비 동기화만 추가
+  var _origShow = window.showSection;
+  window.showSection = function(name){
+    _origShow(name);
+    syncBottomNav(name);
+  };
+
+  // enterAdmin 패치 — FAB 갱신
+  var _origEnter = window.enterAdmin;
+  window.enterAdmin = function(){
+    _origEnter();
+    syncBottomNav(window.currentPageName);
+  };
+
+  // lockAdmin 패치 — FAB 숨김
+  var _origLock = window.lockAdmin;
+  window.lockAdmin = function(){
+    _origLock();
+    var fab = document.getElementById('mobile-fab');
+    if(fab) fab.style.display = 'none';
+  };
+
+  // openPost 패치 — 아티클 열 때 바텀 네비 숨김
+  var _origOpenPost = window.openPost;
+  window.openPost = function(id, section){
+    var result = _origOpenPost(id, section);
+    if(isMobile()){
+      var nav = document.getElementById('mobile-bottom-nav');
+      var fab = document.getElementById('mobile-fab');
+      if(nav) nav.style.display = 'none';
+      if(fab) fab.style.display = 'none';
+    }
+    return result;
+  };
+
+  // openWrite / openEdit 패치 — 에디터 열 때 바텀 네비 숨김
+  function hideNavForEditor(){
+    if(!isMobile()) return;
+    var nav = document.getElementById('mobile-bottom-nav');
+    var fab = document.getElementById('mobile-fab');
+    if(nav) nav.style.display = 'none';
+    if(fab) fab.style.display = 'none';
+  }
+  var _origWrite = window.openWrite;
+  window.openWrite = function(h){
+    _origWrite(h);
+    hideNavForEditor();
+  };
+  var _origEdit = window.openEdit;
+  window.openEdit = function(id, section){
+    var result = _origEdit(id, section);
+    hideNavForEditor();
+    return result;
+  };
+
+  // goBack 패치 — 뒤로 갈 때 바텀 네비 복원
+  var _origBack = window.goBack;
+  window.goBack = function(){
+    _origBack();
+    if(isMobile()){
+      var nav = document.getElementById('mobile-bottom-nav');
+      if(nav) nav.style.display = 'block';
+    }
+  };
+})();
 </script>
 
 </body>
