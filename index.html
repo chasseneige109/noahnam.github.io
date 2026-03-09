@@ -834,6 +834,64 @@ button, a, label { touch-action: manipulation; }
   text-overflow: ellipsis; white-space: nowrap;
 }
 
+
+/* ── 모바일 필터 칩 바 (posts/paper 상단) ── */
+.mob-filter-bar {
+  display: none; /* PC에서 hidden */
+}
+@media (max-width: 768px) {
+  .mob-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .mob-filter-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0 4px;
+  }
+  .mob-filter-scroll::-webkit-scrollbar { display: none; }
+  .mob-filter-chip {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: .68rem;
+    font-weight: 600;
+    background: var(--s100);
+    color: var(--s600);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .15s;
+  }
+  .mob-filter-chip.active {
+    background: var(--blue);
+    color: #fff;
+  }
+  .mob-filter-chip.tag-chip-mob {
+    background: var(--blue-bg);
+    color: var(--blue);
+  }
+  .mob-filter-chip.tag-chip-mob.active {
+    background: var(--blue);
+    color: #fff;
+  }
+  .mob-filter-label {
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--s400);
+    padding: 0 2px;
+  }
+}
+
 </style>
 <script>
 // 핀치줌, 더블탭줌 완전 차단
@@ -979,6 +1037,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <div class="three-col-sidebar">
       <div class="filter-sidebar" id="posts-filter-sidebar"></div>
       <div>
+        <div id="posts-mob-filter" class="mob-filter-bar"></div>
         <div class="filter-bar">
           <span class="filter-label" id="posts-filter-label">Posts</span>
           <button class="sort-btn" onclick="toggleSort('posts')">최신순 ↕</button>
@@ -994,6 +1053,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <div class="three-col-sidebar">
       <div class="filter-sidebar" id="paper-filter-sidebar"></div>
       <div>
+        <div id="paper-mob-filter" class="mob-filter-bar"></div>
         <div class="filter-bar">
           <span class="filter-label" id="paper-filter-label">Paper Review</span>
           <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
@@ -2139,6 +2199,46 @@ function askDeleteCvEntry(secId,entryId) {
 // ── POSTS/PAPER FILTER SIDEBAR ────────────────────────────────────
 let folderOpen = { posts:{}, paper:{} };
 
+
+function buildMobFilter(section) {
+  const mobId = section + '-mob-filter';
+  const el = document.getElementById(mobId);
+  if (!el) return;
+  // 768px 초과면 렌더 안 함
+  if (!window.matchMedia('(max-width:768px)').matches) { el.innerHTML=''; return; }
+
+  const list = section==='posts' ? posts : papers;
+  const cats = categories[section] || [];
+  const allTags = [...new Set(list.flatMap(p=>p.tags||[]))];
+  const fc = filterCat[section], ft = filterTag[section];
+
+  let html = '';
+
+  // 카테고리 칩
+  if (cats.length) {
+    html += `<div class="mob-filter-label">Categories</div>`;
+    html += `<div class="mob-filter-scroll">`;
+    html += `<button class="mob-filter-chip ${!fc?'active':''}" onclick="setCatFilter('${section}',null)">🗂 All (${list.length})</button>`;
+    cats.forEach(c => {
+      const cnt = list.filter(p=>p.cat===c).length;
+      html += `<button class="mob-filter-chip ${fc===c?'active':''}" onclick="setCatFilter('${section}','${c}')">${c} ${cnt}</button>`;
+    });
+    html += `</div>`;
+  }
+
+  // 태그 칩
+  if (allTags.length) {
+    html += `<div class="mob-filter-label">Tags</div>`;
+    html += `<div class="mob-filter-scroll">`;
+    allTags.forEach(t => {
+      html += `<button class="mob-filter-chip tag-chip-mob ${ft===t?'active':''}" onclick="setTagFilter('${section}','${t}')">#${t}</button>`;
+    });
+    html += `</div>`;
+  }
+
+  el.innerHTML = html;
+}
+
 function buildFilterSidebar(containerId, section) {
   const el=document.getElementById(containerId);
   const list=section==='posts'?posts:papers;
@@ -2206,6 +2306,7 @@ function toggleFolder(section, cat) {
 // ── POSTS/PAPER PAGES ─────────────────────────────────────────────
 function renderPostsPage() {
   buildFilterSidebar('posts-filter-sidebar','posts');
+  buildMobFilter('posts');
   let list=[...posts];
   const fc=filterCat.posts,ft=filterTag.posts;
   if(fc) list=list.filter(p=>p.cat===fc);
@@ -2219,6 +2320,7 @@ function renderPostsPage() {
 }
 function renderPaperPage() {
   buildFilterSidebar('paper-filter-sidebar','paper');
+  buildMobFilter('paper');
   let list=[...papers];
   const fc=filterCat.paper,ft=filterTag.paper;
   if(fc) list=list.filter(p=>p.cat===fc);
