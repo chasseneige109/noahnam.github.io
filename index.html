@@ -748,6 +748,59 @@ button, a, label { touch-action: manipulation; }
   .paper-meta-grid, .paper-fields-grid { grid-template-columns: 1fr !important; }
 }
 
+
+/* ── 라인형 스타일 (이미지처럼 왼쪽 제목 + 오른쪽 날짜/내용 한줄) ── */
+.cv-entry.style-line {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 5px 0 !important;
+  border-bottom: 1px solid var(--s100) !important;
+}
+.cv-entry.style-line:last-child { border-bottom: none !important; }
+
+/* 라인형 헤더: 제목 왼쪽, 날짜 오른쪽, 한 줄 */
+.cv-entry.style-line .cv-entry-header {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  margin-bottom: 2px !important;
+  gap: 8px;
+}
+.cv-entry.style-line .cv-entry-title {
+  font-size: .9rem !important;
+  font-weight: 700 !important;
+  color: var(--s900) !important;
+  flex: 1; min-width: 0;
+}
+.cv-entry.style-line .cv-entry-date {
+  font-size: .78rem !important;
+  font-family: var(--mono) !important;
+  color: var(--s500) !important;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 8px !important;
+}
+/* 부제: 이탤릭, 한 줄 아래 */
+.cv-entry.style-line .cv-entry-sub {
+  font-size: .8rem !important;
+  font-style: italic !important;
+  color: var(--s600) !important;
+  font-weight: 400 !important;
+  margin-bottom: 2px !important;
+}
+/* desc: 작은 글씨 */
+.cv-entry.style-line .cv-entry-desc {
+  font-size: .78rem !important;
+  color: var(--s500) !important;
+  line-height: 1.5 !important;
+}
+/* 태그/링크는 그대로 */
+.cv-entry.style-line .cv-entry-tags { margin-top: 5px !important; }
+/* admin 버튼 */
+.cv-entry.style-line .cv-entry-admin { top: 2px !important; right: 0 !important; }
+
 </style>
 <script>
 // 핀치줌, 더블탭줌 완전 차단
@@ -1116,6 +1169,16 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <div class="entry-style-opt" data-style="text" onclick="selectEntryStyle('text',this)">
         <div class="esp-preview esp-text"><div class="esp-title">제목</div><div class="esp-sub">부제</div></div>
         <div class="esp-label">텍스트</div>
+      </div>
+      <div class="entry-style-opt" data-style="line" onclick="selectEntryStyle('line',this)">
+        <div class="esp-preview esp-text" style="padding:6px 8px!important">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;width:100%">
+            <div class="esp-title" style="font-size:.5rem">제목</div>
+            <div class="esp-date" style="font-size:.42rem">2024</div>
+          </div>
+          <div class="esp-sub" style="font-size:.42rem;font-style:italic">부제</div>
+        </div>
+        <div class="esp-label">라인</div>
       </div>
     </div>
     <input type="hidden" id="inp-entry-style" value="default">
@@ -1811,6 +1874,7 @@ ${isAdmin ? `<div class="layout-toggle">
         if(_es==='minimal') _es='text';
         const eStyle = _es!=='default' ? ` style-${_es}` : '';
         const isTextStyle = _es === 'text';
+        const isLineStyle = _es === 'line';
         const span = entry.span;
         const eColSpan = span==='full' ? 'grid-column:1/-1' : (span && span!='1') ? `grid-column:span ${span}` : '';
         const eColStart = entry.colStart && entry.colStart!=='auto' ? `grid-column-start:${entry.colStart}` : '';
@@ -1819,7 +1883,7 @@ ${isAdmin ? `<div class="layout-toggle">
         const isDark = entry.color==='#1e293b';
         const darkCls = isDark ? ' entry-dark' : '';
         const inlineStyle = [eColSpan, eColStart, eHeight, eBg].filter(Boolean).join(';');
-        html += `<div class="cv-entry${isTextStyle?' cv-entry-compact':!hasDesc&&!eHeight?' cv-entry-compact':''}${eStyle}${darkCls}" id="ent-${sIdx}-${eIdx}" style="${inlineStyle}" ${adminEntryDrag}>
+        html += `<div class="cv-entry${(isTextStyle||isLineStyle)?' cv-entry-compact':!hasDesc&&!eHeight?' cv-entry-compact':''}${eStyle}${darkCls}" id="ent-${sIdx}-${eIdx}" style="${inlineStyle}" ${adminEntryDrag}>
           ${entry.icon ? `<div class="cv-entry-icon">${esc(entry.icon)}</div>` : ''}
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
@@ -1993,6 +2057,7 @@ function openEditEntry(secId,entryId) {
   var mappedStyle = entry.style||'default';
   if(mappedStyle==='badge'||mappedStyle==='highlight'||mappedStyle==='card') mappedStyle='default';
   if(mappedStyle==='minimal') mappedStyle='text';
+  if(!['default','timeline','text','line'].includes(mappedStyle)) mappedStyle='default';
   selectEntryStyle(mappedStyle, document.querySelector(`.entry-style-opt[data-style="${mappedStyle}"]`));
   document.getElementById('inp-entry-icon').value = entry.icon||'';
   selectColor(entry.color||'', document.querySelector(`.color-swatch[data-color="${entry.color||''}"]`));
