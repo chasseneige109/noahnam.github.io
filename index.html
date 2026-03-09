@@ -6,6 +6,7 @@
 <title>Personal Blog</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -580,113 +581,104 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 
 
-/* ═══════════════════════════════════════════════════════════════
-   MOBILE ONLY — PC 스타일 완전 보존, 768px 이하에서만 적용
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   MOBILE ONLY — 768px 이하, PC 완전 보존
+   ═══════════════════════════════════════════ */
 
-/* 터치 글로벌 */
+/* 터치 기본 */
 *{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{-webkit-overflow-scrolling:touch}
-input,textarea,button,select,a{touch-action:manipulation}
-/* input 포커스 시 iOS 자동 줌 방지 */
-input,textarea,select{font-size:max(16px,1em)}
+body{-webkit-overflow-scrolling:touch;overscroll-behavior-y:none}
+button,a,label{touch-action:manipulation}
+/* iOS input 자동줌 방지 — 단 font-size는 변경 안 함, transform 사용 */
+@supports(-webkit-touch-callout:none){
+  input:focus,textarea:focus,select:focus{font-size:16px}
+}
 
-/* ── 바텀 네비바 (모바일 전용, 기본 hidden) ── */
-.mobile-bottom-nav{
+/* ── 바텀 네비 (기본 hidden, 모바일에서만 표시) ── */
+.mbn{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
-  height:56px;
-  background:rgba(248,250,252,.97);
+  height:58px;
+  background:rgba(248,250,252,.96);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--s200);
-  z-index:300;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  z-index:400;
 }
-.mobile-bottom-nav-inner{display:flex;height:56px}
-.mbn-tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--sans);color:var(--s400);
-  transition:color .15s;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;min-height:44px;
+/* iOS 홈 인디케이터 safe area */
+@supports(padding:env(safe-area-inset-bottom)){
+  .mbn{padding-bottom:env(safe-area-inset-bottom);height:calc(58px + env(safe-area-inset-bottom))}
 }
-.mbn-tab.active{color:var(--blue)}
-.mbn-tab.active .mbn-icon{transform:translateY(-1px)}
-.mbn-icon{font-size:1.18rem;line-height:1;transition:transform .15s;display:block}
-.mbn-label{font-size:.52rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.mbn-inner{display:flex;height:58px;align-items:stretch}
+.mbn-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;background:none;border:none;cursor:pointer;
+  font-family:var(--sans);color:var(--s400);transition:color .15s;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  min-height:44px;padding:0;
+}
+.mbn-btn.on{color:var(--blue)}
+.mbn-btn.on .mbn-ic{transform:translateY(-1px)}
+.mbn-ic{font-size:1.18rem;line-height:1;transition:transform .15s;display:block}
+.mbn-lb{font-size:.5rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1}
 
-/* ── 글쓰기 FAB (관리자 모드 + posts/paper 에서만 JS로 표시) ── */
-.mobile-fab{
+/* ── 글쓰기 FAB (관리자+posts/paper에서만 JS로 flex) ── */
+.mbn-fab{
   display:none;
-  position:fixed;
-  right:18px;
-  bottom:calc(56px + env(safe-area-inset-bottom,0px) + 14px);
-  width:52px;height:52px;border-radius:50%;
+  position:fixed;right:16px;
+  bottom:calc(58px + env(safe-area-inset-bottom,0px) + 12px);
+  width:50px;height:50px;border-radius:50%;
   background:var(--blue);color:#fff;border:none;
-  font-size:1.3rem;cursor:pointer;z-index:299;
-  box-shadow:0 4px 20px rgba(37,99,235,.45);
+  font-size:1.25rem;cursor:pointer;z-index:399;
+  box-shadow:0 4px 18px rgba(37,99,235,.42);
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;
   align-items:center;justify-content:center;
 }
 
-/* ── 모달 드래그 핸들 (모바일에서만 표시) ── */
-.modal-drag-handle{
-  width:36px;height:4px;border-radius:2px;
-  background:var(--s300);margin:0 auto 14px;display:none;
-}
+/* ── 모달 드래그 핸들 ── */
+.modal-drag-handle{display:none;width:36px;height:4px;border-radius:2px;background:var(--s300);margin:0 auto 14px}
 
-/* ═══════════════════════════════════════════════════════════════
-   768px 이하 (모바일) — PC 값 override 최소화
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   @media 768px
+   ═══════════════════════════════════════════ */
 @media(max-width:768px){
+
   /* 바텀 네비 표시 */
-  .mobile-bottom-nav{display:block}
+  .mbn{display:block}
 
-  /* 페이지 하단 여백 (바텀 네비 높이) */
-  .wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
-  .article-wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
-  .editor-wrap{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+  /* 바텀 네비 높이만큼 페이지 하단 여백 */
+  .wrap{padding-bottom:calc(58px + env(safe-area-inset-bottom,0px) + 8px)}
+  .article-wrap{padding-bottom:calc(58px + env(safe-area-inset-bottom,0px) + 8px)}
+  .editor-wrap{padding-bottom:calc(58px + env(safe-area-inset-bottom,0px) + 8px)}
 
-  /* 모달 → 바텀 시트 스타일 */
-  .modal-overlay{align-items:flex-end;padding:0}
+  /* 모달 → 바텀시트 */
+  .modal-overlay{align-items:flex-end!important;padding:0!important}
   .modal{
     border-radius:22px 22px 0 0!important;
-    max-width:100%!important;
-    width:100%!important;
-    max-height:90dvh;
-    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    max-width:100%!important;width:100%!important;
+    max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))!important;
   }
   .modal-drag-handle{display:block}
 
-  /* PC에서 숨겨진 글쓰기 버튼 대신 FAB 사용 */
-  .btn-write{display:none!important}
-
-  /* 에디터 툴바 — 가로 스크롤 */
+  /* 에디터 툴바 — 가로 스크롤, 줄바꿈 없음 */
   .editor-toolbar{
-    flex-wrap:nowrap;overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    padding-bottom:4px;
+    flex-wrap:nowrap!important;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
   }
   .editor-toolbar::-webkit-scrollbar{display:none}
 
-  /* 필터 사이드바 — 가로 스크롤 */
-  .filter-sidebar{
-    position:static!important;
-    display:flex;flex-direction:row;
-    overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;gap:8px;padding-bottom:10px;
-  }
-  .filter-sidebar::-webkit-scrollbar{display:none}
-  .filter-sidebar .gc{min-width:150px;flex-shrink:0}
+  /* Posts/Paper — 필터 사이드바: 세로 배치 유지, 위에 배치 */
+  /* (three-col-sidebar는 860px에서 이미 1col로 바뀜 — 그대로 사용) */
+  /* 사이드바 내부: category 카드 + tag 카드 세로로 자연스럽게 */
+  .filter-sidebar{position:static!important}
+  .folder-card,.tag-card{border-radius:var(--r2)!important}
 
-  /* 폴더 하위 포스트 목록 — 모바일에서 숨김 (공간 절약) */
-  .folder-posts{display:none!important}
+  /* 글쓰기 버튼 숨김 (FAB으로 대체) */
+  .btn-write{display:none!important}
+  .admin-mode .mbn-fab{display:flex}
 }
+
 </style>
 </head>
 <body>
@@ -718,28 +710,23 @@ input,textarea,select{font-size:max(16px,1em)}
 </nav>
 
 <!-- ── 모바일 바텀 네비게이션 ── -->
-<div class="mobile-bottom-nav" id="mobile-bottom-nav">
-  <div class="mobile-bottom-nav-inner">
-    <button class="mbn-tab active" id="mbn-landing" onclick="showSection('landing')">
-      <span class="mbn-icon">🏠</span>
-      <span class="mbn-label">Home</span>
+<div class="mbn" id="mbn">
+  <div class="mbn-inner">
+    <button class="mbn-btn on" id="mbn-landing" onclick="showSection('landing')">
+      <span class="mbn-ic">🏠</span><span class="mbn-lb">Home</span>
     </button>
-    <button class="mbn-tab" id="mbn-home" onclick="showSection('home')">
-      <span class="mbn-icon">👤</span>
-      <span class="mbn-label">Me</span>
+    <button class="mbn-btn" id="mbn-home" onclick="showSection('home')">
+      <span class="mbn-ic">👤</span><span class="mbn-lb">Me</span>
     </button>
-    <button class="mbn-tab" id="mbn-posts" onclick="showSection('posts')">
-      <span class="mbn-icon">✍️</span>
-      <span class="mbn-label">Posts</span>
+    <button class="mbn-btn" id="mbn-posts" onclick="showSection('posts')">
+      <span class="mbn-ic">✍️</span><span class="mbn-lb">Posts</span>
     </button>
-    <button class="mbn-tab" id="mbn-paper" onclick="showSection('paper')">
-      <span class="mbn-icon">📄</span>
-      <span class="mbn-label">Papers</span>
+    <button class="mbn-btn" id="mbn-paper" onclick="showSection('paper')">
+      <span class="mbn-ic">📄</span><span class="mbn-lb">Papers</span>
     </button>
   </div>
 </div>
-<!-- ── 모바일 글쓰기 FAB ── -->
-<button class="mobile-fab" id="mobile-fab" onclick="openWrite()">✏</button>
+<button class="mbn-fab" id="mbn-fab" onclick="openWrite()">✏</button>
 
 <div id="page-landing" class="page">
   <div class="wrap">
@@ -2750,100 +2737,115 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-/* ── 모바일 전용 JS ── */
+/* ── 모바일 전용 JS (원본 함수 wrapping, 로직 변경 없음) ── */
 (function(){
-  var isMobile = function(){ return window.innerWidth <= 768; };
+  var isMobile = function(){ return window.matchMedia('(max-width:768px)').matches; };
 
-  // 바텀 네비 탭 동기화
-  function syncBottomNav(name){
+  function mbnSync(name){
     if(!isMobile()) return;
-    document.querySelectorAll('.mbn-tab').forEach(function(t){ t.classList.remove('active'); });
-    var tab = document.getElementById('mbn-'+name);
-    if(tab) tab.classList.add('active');
+    document.querySelectorAll('.mbn-btn').forEach(function(b){ b.classList.remove('on'); });
+    var btn = document.getElementById('mbn-'+name);
+    if(btn) btn.classList.add('on');
 
-    var nav = document.getElementById('mobile-bottom-nav');
-    var fab = document.getElementById('mobile-fab');
-    var hide = (name === 'write' || name === 'article');
-
+    var nav = document.getElementById('mbn');
+    var fab = document.getElementById('mbn-fab');
+    // 아티클/에디터 화면에서는 바텀 네비 숨김
+    var hide = (name==='write'||name==='article');
     if(nav) nav.style.display = hide ? 'none' : 'block';
 
     // FAB: 관리자 + posts/paper 화면에서만
     if(fab){
-      var showFab = !hide && window.isAdmin && (name==='posts'||name==='paper');
-      fab.style.display = showFab ? 'flex' : 'none';
+      fab.style.display = (!hide && window.isAdmin && (name==='posts'||name==='paper'))
+        ? 'flex' : 'none';
     }
   }
 
-  // 모바일 particles 비활성화 (성능)
+  function showNav(){
+    if(!isMobile()) return;
+    var nav = document.getElementById('mbn');
+    if(nav) nav.style.display = 'block';
+  }
+
+  // particles 모바일 비활성화
   if(isMobile()){
     var p = document.getElementById('particles-js');
     if(p) p.style.display = 'none';
   }
 
-  // showSection 패치 — 원본 함수 후에 바텀 네비 동기화만 추가
-  var _origShow = window.showSection;
+  /* showSection wrap */
+  var _show = window.showSection;
   window.showSection = function(name){
-    _origShow(name);
-    syncBottomNav(name);
+    _show.call(this, name);
+    mbnSync(name);
   };
 
-  // enterAdmin 패치 — FAB 갱신
-  var _origEnter = window.enterAdmin;
+  /* enterAdmin wrap */
+  var _enter = window.enterAdmin;
   window.enterAdmin = function(){
-    _origEnter();
-    syncBottomNav(window.currentPageName);
+    _enter.call(this);
+    mbnSync(window.currentPageName);
   };
 
-  // lockAdmin 패치 — FAB 숨김
-  var _origLock = window.lockAdmin;
+  /* lockAdmin wrap */
+  var _lock = window.lockAdmin;
   window.lockAdmin = function(){
-    _origLock();
-    var fab = document.getElementById('mobile-fab');
+    _lock.call(this);
+    var fab = document.getElementById('mbn-fab');
     if(fab) fab.style.display = 'none';
   };
 
-  // openPost 패치 — 아티클 열 때 바텀 네비 숨김
-  var _origOpenPost = window.openPost;
+  /* openPost wrap — 아티클 열 때 바텀 네비 숨김 */
+  var _openPost = window.openPost;
   window.openPost = function(id, section){
-    var result = _origOpenPost(id, section);
+    var result = _openPost.call(this, id, section);
     if(isMobile()){
-      var nav = document.getElementById('mobile-bottom-nav');
-      var fab = document.getElementById('mobile-fab');
+      var nav = document.getElementById('mbn');
+      var fab = document.getElementById('mbn-fab');
       if(nav) nav.style.display = 'none';
       if(fab) fab.style.display = 'none';
     }
     return result;
   };
 
-  // openWrite / openEdit 패치 — 에디터 열 때 바텀 네비 숨김
-  function hideNavForEditor(){
-    if(!isMobile()) return;
-    var nav = document.getElementById('mobile-bottom-nav');
-    var fab = document.getElementById('mobile-fab');
-    if(nav) nav.style.display = 'none';
-    if(fab) fab.style.display = 'none';
-  }
-  var _origWrite = window.openWrite;
+  /* openWrite wrap */
+  var _openWrite = window.openWrite;
   window.openWrite = function(h){
-    _origWrite(h);
-    hideNavForEditor();
+    _openWrite.call(this, h);
+    if(isMobile()){
+      var nav = document.getElementById('mbn');
+      var fab = document.getElementById('mbn-fab');
+      if(nav) nav.style.display = 'none';
+      if(fab) fab.style.display = 'none';
+    }
   };
-  var _origEdit = window.openEdit;
+
+  /* openEdit wrap */
+  var _openEdit = window.openEdit;
   window.openEdit = function(id, section){
-    var result = _origEdit(id, section);
-    hideNavForEditor();
+    var result = _openEdit.call(this, id, section);
+    if(isMobile()){
+      var nav = document.getElementById('mbn');
+      var fab = document.getElementById('mbn-fab');
+      if(nav) nav.style.display = 'none';
+      if(fab) fab.style.display = 'none';
+    }
     return result;
   };
 
-  // goBack 패치 — 뒤로 갈 때 바텀 네비 복원
-  var _origBack = window.goBack;
+  /* goBack wrap — 뒤로 갈 때 바텀 네비 복원 */
+  var _goBack = window.goBack;
   window.goBack = function(){
-    _origBack();
-    if(isMobile()){
-      var nav = document.getElementById('mobile-bottom-nav');
-      if(nav) nav.style.display = 'block';
-    }
+    showNav();
+    _goBack.call(this);
   };
+
+  /* cancelWrite wrap */
+  var _cancelWrite = window.cancelWrite;
+  window.cancelWrite = function(){
+    showNav();
+    _cancelWrite.call(this);
+  };
+
 })();
 </script>
 
