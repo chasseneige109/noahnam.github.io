@@ -516,6 +516,63 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .interest-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--blue);margin:3px}
 .interest-chip .interest-icon{font-size:.85rem}
 
+
+/* ── ENTRY ICON ── */
+.cv-entry-icon{font-size:1.6rem;margin-bottom:8px;line-height:1}
+/* ── ENTRY DARK MODE ── */
+.cv-entry.entry-dark{color:#fff}
+.cv-entry.entry-dark .cv-entry-title{color:#f1f5f9}
+.cv-entry.entry-dark .cv-entry-sub{color:#93c5fd}
+.cv-entry.entry-dark .cv-entry-desc{color:#cbd5e1}
+.cv-entry.entry-dark .cv-entry-date{color:#64748b}
+.cv-entry.entry-dark .cv-entry-tag{background:rgba(255,255,255,.1);color:#94a3b8}
+.cv-entry.entry-dark .cv-entry-link{background:rgba(255,255,255,.15);color:#93c5fd}
+/* ── COLOR SWATCHES ── */
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;display:inline-block;flex-shrink:0}
+.color-swatch.active{border-color:var(--blue)!important;box-shadow:0 0 0 2px #bfdbfe}
+.color-swatch:hover{transform:scale(1.15)}
+/* ── SPAN PICKER ── */
+.span-picker{display:flex;gap:6px;margin-bottom:4px}
+.span-btn{padding:5px 14px;border:1.5px solid var(--s200);border-radius:var(--r);font-size:.72rem;font-weight:700;color:var(--s500);background:#fff;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.span-btn.active,.span-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+/* ── LAYOUT BTNS (compact) ── */
+.layout-btn{padding:4px 8px;font-size:.78rem}
+
+
+/* ── ENTRY ICON ── */
+.cv-entry-icon{font-size:1.6rem;margin-bottom:8px;line-height:1}
+.cv-entry.entry-dark{color:#fff}
+.cv-entry.entry-dark .cv-entry-title{color:#f1f5f9}
+.cv-entry.entry-dark .cv-entry-sub{color:#93c5fd}
+.cv-entry.entry-dark .cv-entry-desc{color:#cbd5e1}
+.cv-entry.entry-dark .cv-entry-date{color:#64748b}
+.cv-entry.entry-dark .cv-entry-tag{background:rgba(255,255,255,.1);color:#94a3b8}
+.cv-entry.entry-dark .cv-entry-link{background:rgba(255,255,255,.15);color:#93c5fd}
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;display:inline-block;flex-shrink:0}
+.color-swatch.active{border-color:var(--blue)!important;box-shadow:0 0 0 2px #bfdbfe}
+.color-swatch:hover{transform:scale(1.15)}
+.span-picker{display:flex;gap:6px;margin-bottom:4px}
+.span-btn{padding:5px 14px;border:1.5px solid var(--s200);border-radius:var(--r);font-size:.72rem;font-weight:700;color:var(--s500);background:#fff;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.span-btn.active,.span-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.layout-btn{padding:4px 8px;font-size:.78rem}
+
+
+/* height/colstart pickers reuse span-picker style */
+.height-btn, .colstart-btn { 
+  padding:4px 10px;border-radius:7px;font-size:.65rem;font-weight:700;
+  font-family:var(--sans);border:1px solid var(--s200);background:#fff;
+  color:var(--s500);cursor:pointer;transition:all .15s;
+}
+.height-btn.active, .colstart-btn.active {
+  background:var(--blue);color:#fff;border-color:var(--blue);
+}
+.height-btn:hover:not(.active), .colstart-btn:hover:not(.active) {
+  border-color:var(--blue);color:var(--blue);
+}
+/* when entry has min-height, make content flex so it fills naturally */
+.cv-entry[style*="min-height"] { display:flex;flex-direction:column; }
+.cv-entry[style*="min-height"] .cv-entry-desc { flex:1; }
+
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
@@ -895,6 +952,61 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
     <div style="margin-bottom:11px"></div>
     <label class="form-label">태그 (쉼표로 구분, 선택)</label>
     <input class="form-input" id="inp-entry-tags" placeholder="예: ML, PyTorch, Computer Vision">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px">
+      <div>
+        <label class="form-label">아이콘 / 이모지 (선택)</label>
+        <input class="form-input" id="inp-entry-icon" placeholder="예: 🎓 📌 ⚡" style="font-size:1.1rem">
+      </div>
+      <div>
+        <label class="form-label">배경색 (선택)</label>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding-top:4px" id="color-swatches">
+          <span class="color-swatch active" data-color="" style="background:white;border:2px solid var(--s300)" onclick="selectColor('',this)" title="기본"></span>
+          <span class="color-swatch" data-color="#eff6ff" style="background:#eff6ff" onclick="selectColor('#eff6ff',this)" title="파랑"></span>
+          <span class="color-swatch" data-color="#f0fdf4" style="background:#f0fdf4" onclick="selectColor('#f0fdf4',this)" title="초록"></span>
+          <span class="color-swatch" data-color="#fefce8" style="background:#fefce8" onclick="selectColor('#fefce8',this)" title="노랑"></span>
+          <span class="color-swatch" data-color="#fff1f2" style="background:#fff1f2" onclick="selectColor('#fff1f2',this)" title="빨강"></span>
+          <span class="color-swatch" data-color="#faf5ff" style="background:#faf5ff" onclick="selectColor('#faf5ff',this)" title="보라"></span>
+          <span class="color-swatch" data-color="#f8fafc" style="background:#f8fafc" onclick="selectColor('#f8fafc',this)" title="회색"></span>
+          <span class="color-swatch" data-color="#1e293b" style="background:#1e293b" onclick="selectColor('#1e293b',this)" title="다크"></span>
+        </div>
+        <input type="hidden" id="inp-entry-color" value="">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+      <div>
+        <label class="form-label">카드 너비</label>
+        <div class="span-picker">
+          <button class="span-btn active" data-span="1" onclick="selectSpan(1,this)">1칸</button>
+          <button class="span-btn" data-span="2" onclick="selectSpan(2,this)">2칸</button>
+          <button class="span-btn" data-span="3" onclick="selectSpan(3,this)">3칸</button>
+          <button class="span-btn" data-span="full" onclick="selectSpan('full',this)">전체</button>
+        </div>
+        <input type="hidden" id="inp-entry-span" value="1">
+      </div>
+      <div>
+        <label class="form-label">카드 높이</label>
+        <div class="span-picker">
+          <button class="height-btn active" data-height="auto" onclick="selectHeight('auto',this)">자동</button>
+          <button class="height-btn" data-height="160" onclick="selectHeight('160',this)">중간</button>
+          <button class="height-btn" data-height="240" onclick="selectHeight('240',this)">높게</button>
+          <button class="height-btn" data-height="340" onclick="selectHeight('340',this)">아주 높게</button>
+        </div>
+        <input type="hidden" id="inp-entry-height" value="auto">
+      </div>
+    </div>
+
+    <label class="form-label" style="margin-top:10px">열 시작 위치 (그리드 레이아웃일 때)</label>
+    <div class="span-picker">
+      <button class="colstart-btn active" data-col="auto" onclick="selectColStart('auto',this)">자동</button>
+      <button class="colstart-btn" data-col="1" onclick="selectColStart('1',this)">1열</button>
+      <button class="colstart-btn" data-col="2" onclick="selectColStart('2',this)">2열</button>
+      <button class="colstart-btn" data-col="3" onclick="selectColStart('3',this)">3열</button>
+      <button class="colstart-btn" data-col="4" onclick="selectColStart('4',this)">4열</button>
+    </div>
+    <input type="hidden" id="inp-entry-colstart" value="auto">
+
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-add-entry')">취소</button>
       <button class="btn-primary" onclick="saveEntry()">저장</button>
@@ -1491,9 +1603,11 @@ const layout = sec.layout || 'list';
           ${esc(sec.name)}
         </div>
         <div class="cv-section-actions">
-          ${isAdmin ? `<div class="layout-toggle">
-            <button class="layout-btn ${layout==='list'?'active':''}" onclick="setSecLayout('${sec.id}','list')">≡ 목록</button>
-            <button class="layout-btn ${layout==='grid'?'active':''}" onclick="setSecLayout('${sec.id}','grid')">⊞ 3열</button>
+${isAdmin ? `<div class="layout-toggle">
+            <button class="layout-btn ${layout==='list'?'active':''}" onclick="setSecLayout('${sec.id}','list')" title="목록">≡</button>
+            <button class="layout-btn ${layout==='2'?'active':''}" onclick="setSecLayout('${sec.id}','2')" title="2열">⊟</button>
+            <button class="layout-btn ${layout==='grid'?'active':''}" onclick="setSecLayout('${sec.id}','grid')" title="3열">⊞</button>
+            <button class="layout-btn ${layout==='4'?'active':''}" onclick="setSecLayout('${sec.id}','4')" title="4열">⊟⊟</button>
           </div>` : ''}
           <button class="btn-sm admin-only" onclick="openAddEntry('${sec.id}')">+ 항목 추가</button>
           <button class="btn-sm admin-only" onclick="openEditSection('${sec.id}')">✎</button>
@@ -1506,7 +1620,9 @@ const layout = sec.layout || 'list';
         <span class="admin-only" style="color:var(--blue);cursor:pointer" onclick="openAddEntry('${sec.id}')"> + 추가</span>
       </div>`;
     } else {
-      html += `<div class="${layout==='grid'?'cv-entries-grid':'cv-entries-list'}">`;
+      const gridCols = layout==='2'?2 : layout==='grid'?3 : layout==='4'?4 : null;
+      const gridStyle = gridCols ? `display:grid;grid-template-columns:repeat(${gridCols},1fr);gap:12px` : 'display:flex;flex-direction:column;gap:10px';
+      html += `<div style="${gridStyle}" class="cv-entries-wrap">`;
       sec.entries.forEach((entry, eIdx) => {
         const adminEntryDrag = isAdmin
           ? `draggable="true"
@@ -1518,7 +1634,16 @@ const layout = sec.layout || 'list';
 
         const hasDesc = entry.desc && entry.desc.trim();
         const eStyle = entry.style && entry.style!=='default' ? ` style-${entry.style}` : '';
-        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}${eStyle}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
+        const span = entry.span;
+        const eColSpan = span==='full' ? 'grid-column:1/-1' : (span && span!='1') ? `grid-column:span ${span}` : '';
+        const eColStart = entry.colStart && entry.colStart!=='auto' ? `grid-column-start:${entry.colStart}` : '';
+        const eHeight = entry.height && entry.height!=='auto' ? `min-height:${entry.height}px` : '';
+        const eBg = entry.color ? `background:${entry.color}` : '';
+        const isDark = entry.color==='#1e293b';
+        const darkCls = isDark ? ' entry-dark' : '';
+        const inlineStyle = [eColSpan, eColStart, eHeight, eBg].filter(Boolean).join(';');
+        html += `<div class="cv-entry${!hasDesc&&!eHeight?' cv-entry-compact':''}${eStyle}${darkCls}" id="ent-${sIdx}-${eIdx}" style="${inlineStyle}" ${adminEntryDrag}>
+          ${entry.icon ? `<div class="cv-entry-icon">${esc(entry.icon)}</div>` : ''}
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
             <button class="btn-sm admin-only" onclick="openEditEntry('${sec.id}','${entry.id}')">✎</button>
@@ -1665,8 +1790,12 @@ function saveSection() {
 function openAddEntry(secId) {
   editingEntrySectionId=secId; editingEntryId=null;
   document.getElementById('add-entry-title').textContent='항목 추가';
-  ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags','inp-entry-link-label','inp-entry-link-url'].forEach(id=>document.getElementById(id).value='');
+  ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags','inp-entry-link-label','inp-entry-link-url','inp-entry-icon'].forEach(id=>document.getElementById(id).value='');
   selectEntryStyle('default', document.querySelector('.entry-style-opt[data-style="default"]'));
+  selectHeight('auto', document.querySelector('.height-btn[data-height="auto"]'));
+  selectColStart('auto', document.querySelector('.colstart-btn[data-col="auto"]'));
+  selectColor('', document.querySelector('.color-swatch[data-color=""]'));
+  selectSpan(1, document.querySelector('.span-btn[data-span="1"]'));
   document.getElementById('modal-add-entry').style.display='flex';
   setTimeout(()=>document.getElementById('inp-entry-title').focus(),100);
 }
@@ -1684,6 +1813,11 @@ function openEditEntry(secId,entryId) {
   document.getElementById('inp-entry-link-label').value=entry.linkLabel||'';
   document.getElementById('inp-entry-link-url').value=entry.linkUrl||'';
   selectEntryStyle(entry.style||'default', document.querySelector(`.entry-style-opt[data-style="${entry.style||'default'}"]`));
+  document.getElementById('inp-entry-icon').value = entry.icon||'';
+  selectColor(entry.color||'', document.querySelector(`.color-swatch[data-color="${entry.color||''}"]`));
+  selectSpan(entry.span||'1', document.querySelector(`.span-btn[data-span="${entry.span||'1'}"]`));
+  selectHeight(entry.height||'auto', document.querySelector(`.height-btn[data-height="${entry.height||'auto'}"]`));
+  selectColStart(entry.colStart||'auto', document.querySelector(`.colstart-btn[data-col="${entry.colStart||'auto'}"]`));
   document.getElementById('modal-add-entry').style.display='flex';
 }
 function saveEntry() {
@@ -1697,14 +1831,19 @@ function saveEntry() {
   const linkLabel=document.getElementById('inp-entry-link-label').value.trim();
   const linkUrl=document.getElementById('inp-entry-link-url').value.trim();
   const entryStyle=document.getElementById('inp-entry-style').value||'default';
+  const entryIcon=document.getElementById('inp-entry-icon').value.trim();
+  const entryColor=document.getElementById('inp-entry-color').value;
+  const entrySpan=document.getElementById('inp-entry-span').value||'1';
+  const entryHeight=document.getElementById('inp-entry-height').value||'auto';
+  const entryColStart=document.getElementById('inp-entry-colstart').value||'auto';
 
   const sec=cvSections.find(s=>s.id===editingEntrySectionId);
   if(!sec) return;
   if(editingEntryId) {
     const i=sec.entries.findIndex(e=>e.id===editingEntryId);
-    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle};
+    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle,icon:entryIcon,color:entryColor,span:entrySpan,height:entryHeight,colStart:entryColStart};
   } else {
-    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle});
+    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle,icon:entryIcon,color:entryColor,span:entrySpan,height:entryHeight,colStart:entryColStart});
   }
   save();saveCvSections();closeModal('modal-add-entry');renderCvArea();
 }
@@ -1838,7 +1977,30 @@ function toggleSort(section) { sortDesc[section]=!sortDesc[section];section==='p
 
 
 
+
+// ── COLOR + SPAN PICKERS ──────────────────────────────────────────
+function selectColor(color, el) {
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('inp-entry-color').value = color;
+}
+function selectSpan(span, el) {
+  document.querySelectorAll('.span-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('inp-entry-span').value = span;
+}
 // ── ENTRY STYLE PICKER ────────────────────────────────────────────
+
+function selectHeight(h, el) {
+  document.querySelectorAll('.height-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('inp-entry-height').value = h;
+}
+function selectColStart(c, el) {
+  document.querySelectorAll('.colstart-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('inp-entry-colstart').value = c;
+}
 function selectEntryStyle(style, el) {
   document.querySelectorAll('.entry-style-opt').forEach(o=>o.classList.remove('active'));
   if(el) el.classList.add('active');
