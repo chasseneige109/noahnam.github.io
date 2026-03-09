@@ -474,6 +474,48 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .custom-link-del{width:28px;height:28px;border-radius:50%;background:none;border:1px solid var(--s200);color:var(--s400);font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .custom-link-del:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2}
 
+
+/* ── ENTRY STYLE PICKER ── */
+.entry-style-picker{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.entry-style-opt{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer}
+.entry-style-opt .esp-preview{width:80px;height:56px;border-radius:10px;border:2px solid var(--s200);display:flex;flex-direction:column;justify-content:center;padding:8px 10px;transition:border-color .15s;background:#fff;overflow:hidden}
+.entry-style-opt.active .esp-preview{border-color:var(--blue);box-shadow:0 0 0 3px #bfdbfe}
+.entry-style-opt:hover .esp-preview{border-color:var(--blue)}
+.esp-label{font-size:.6rem;font-weight:700;color:var(--s400);letter-spacing:.04em}
+.entry-style-opt.active .esp-label{color:var(--blue)}
+.esp-title{font-size:.55rem;font-weight:700;color:var(--s900);line-height:1.2}
+.esp-sub{font-size:.48rem;color:var(--blue);margin-top:2px}
+.esp-date{font-size:.45rem;color:var(--s400);font-family:var(--mono)}
+.esp-chip{font-size:.45rem;background:var(--blue);color:#fff;padding:1px 5px;border-radius:4px;display:inline-block}
+/* timeline preview */
+.esp-timeline{flex-direction:row!important;gap:6px;align-items:center}
+.esp-tl-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0}
+/* highlight preview */
+.esp-highlight{background:var(--blue)!important;border-color:var(--blue)!important}
+/* minimal preview */
+.esp-minimal{border-color:transparent!important;background:var(--s100)!important}
+
+/* ── CV ENTRY STYLES ── */
+/* default: 기존 스타일 */
+.cv-entry.style-badge{border-left:3px solid var(--blue)}
+.cv-entry.style-badge .cv-entry-tags{margin-top:6px}
+.cv-entry.style-timeline{padding-left:32px}
+.cv-entry.style-timeline::before{content:'';position:absolute;left:16px;top:22px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 2px var(--blue)}
+.cv-entry.style-highlight{background:linear-gradient(135deg,var(--blue) 0%,#1d4ed8 100%);border-color:transparent;color:#fff}
+.cv-entry.style-highlight .cv-entry-title{color:#fff}
+.cv-entry.style-highlight .cv-entry-sub{color:rgba(255,255,255,.8)}
+.cv-entry.style-highlight .cv-entry-desc{color:rgba(255,255,255,.85)}
+.cv-entry.style-highlight .cv-entry-date{color:rgba(255,255,255,.6)}
+.cv-entry.style-highlight .cv-entry-tag{background:rgba(255,255,255,.2);color:#fff}
+.cv-entry.style-highlight .cv-entry-link{background:rgba(255,255,255,.2);color:#fff}
+.cv-entry.style-highlight .cv-entry-link:hover{background:rgba(255,255,255,.3)}
+.cv-entry.style-minimal{background:transparent;border:none;box-shadow:none;border-bottom:1px solid var(--s200);border-radius:0;padding:14px 0}
+.cv-entry.style-minimal:last-child{border-bottom:none}
+
+/* ── RESEARCH INTERESTS ── */
+.interest-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--blue);margin:3px}
+.interest-chip .interest-icon{font-size:.85rem}
+
 /* ── LANG TOGGLE ── */
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
@@ -581,16 +623,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
           <div class="p-name" id="home-name">이름을 설정하세요</div>
           <div class="p-handle" id="home-handle">@handle</div>
           <div class="p-bio" id="home-bio"></div>
-          <div class="p-divider"></div>
-          <div class="p-stats">
-            <div><div class="stat-n" id="home-post-cnt">0</div><div class="stat-l">Posts</div></div>
-            <div><div class="stat-n" id="home-paper-cnt">0</div><div class="stat-l">Papers</div></div>
-          </div>
-          <button class="btn-ep admin-only" onclick="openProfileEdit()">프로필 수정</button>
+          <button class="btn-ep admin-only" onclick="openProfileEdit()" style="margin-top:12px">프로필 수정</button>
         </div>
         <div class="gc links-card" id="home-links-card">
           <div class="sec-label">Links</div>
           <div id="home-links"></div>
+        </div>
+        <div class="gc links-card" id="home-interests-card" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div class="sec-label" style="margin-bottom:0">Research Interests</div>
+            <button class="admin-only" onclick="openInterestsEdit()" style="font-size:.62rem;color:var(--s400);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:600;transition:color .15s" onmouseover="this.style.color='var(--blue)'" onmouseout="this.style.color='var(--s400)'">✎ 수정</button>
+          </div>
+          <div id="home-interests"></div>
         </div>
       </div>
 
@@ -782,6 +826,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
   </div>
 </div>
 
+<div id="modal-interests" class="modal-overlay" style="display:none" onclick="closeModal('modal-interests',event)">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-title">Research Interests</div>
+    <p style="font-size:.75rem;color:var(--s500);margin-bottom:10px;line-height:1.6">한 줄에 하나씩 입력하세요.<br>이모지로 시작하면 아이콘으로 표시됩니다.<br><span style="color:var(--s400)">예: 🤖 Machine Learning</span></p>
+    <textarea class="form-textarea" id="inp-interests" placeholder="🤖 Machine Learning&#10;🧬 Computational Biology&#10;📊 Data Visualization" style="min-height:160px;font-family:var(--sans);font-size:.82rem"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-interests')">취소</button>
+      <button class="btn-primary" onclick="saveInterests()">저장</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-add-section" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-section',event)">
   <div class="modal" style="max-width:360px">
     <div class="modal-title" id="add-section-title">새 섹션 추가</div>
@@ -795,9 +851,35 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 </div>
 
 <div id="modal-add-entry" class="modal-overlay" style="display:none" onclick="closeModal('modal-add-entry',event)">
-  <div class="modal" style="max-width:460px">
+  <div class="modal" style="max-width:500px">
     <div class="modal-title" id="add-entry-title">항목 추가</div>
-    <label class="form-label">제목</label>
+
+    <label class="form-label">카드 스타일</label>
+    <div class="entry-style-picker" id="entry-style-picker">
+      <div class="entry-style-opt active" data-style="default" onclick="selectEntryStyle('default',this)">
+        <div class="esp-preview esp-default"><div class="esp-title">제목</div><div class="esp-sub">부제</div></div>
+        <div class="esp-label">기본</div>
+      </div>
+      <div class="entry-style-opt" data-style="badge" onclick="selectEntryStyle('badge',this)">
+        <div class="esp-preview esp-badge"><span class="esp-chip">태그</span><div class="esp-title" style="margin-top:6px">제목</div></div>
+        <div class="esp-label">뱃지형</div>
+      </div>
+      <div class="entry-style-opt" data-style="timeline" onclick="selectEntryStyle('timeline',this)">
+        <div class="esp-preview esp-timeline"><div class="esp-tl-dot"></div><div><div class="esp-title">제목</div><div class="esp-date">2024</div></div></div>
+        <div class="esp-label">타임라인</div>
+      </div>
+      <div class="entry-style-opt" data-style="highlight" onclick="selectEntryStyle('highlight',this)">
+        <div class="esp-preview esp-highlight"><div class="esp-title" style="color:#fff">제목</div><div class="esp-sub" style="color:rgba(255,255,255,.7)">부제</div></div>
+        <div class="esp-label">강조</div>
+      </div>
+      <div class="entry-style-opt" data-style="minimal" onclick="selectEntryStyle('minimal',this)">
+        <div class="esp-preview esp-minimal"><div class="esp-title">제목</div></div>
+        <div class="esp-label">미니멀</div>
+      </div>
+    </div>
+    <input type="hidden" id="inp-entry-style" value="default">
+
+    <label class="form-label" style="margin-top:4px">제목</label>
     <input class="form-input" id="inp-entry-title" placeholder="예: SungKyunKwan University">
     <label class="form-label">부제 (선택)</label>
     <input class="form-input" id="inp-entry-sub" placeholder="예: Biomechatronics · 2023~Present">
@@ -962,6 +1044,7 @@ async function load() {
         bio: r.bio || '', blogName: r.blog_name || r.name || 'My Blog',
         github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
         customLinks: r.custom_links || [],
+        interests: r.interests || [],
         adminPw: r.admin_pw || null,
         landingTitle: r.landing_title || '생각을 기록하고,|지식을 나눕니다',
         landingTitleEn: r.landing_title_en || 'Thoughts, recorded.|Knowledge, shared.',
@@ -1058,6 +1141,7 @@ async function saveProfileToDB() {
     github: profile.github,
     avatar_url: profile.avatar || null,
     custom_links: profile.customLinks || [],
+    interests: profile.interests || [],
     admin_pw: profile.adminPw || null,
     landing_title: profile.landingTitle || null,
     landing_title_en: profile.landingTitleEn || null,
@@ -1123,7 +1207,7 @@ let posts      = [];
 let papers     = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
-let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],interests:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
 
 let currentPostId   = null;
 let currentSection  = null;
@@ -1367,6 +1451,17 @@ function renderHome() {
   linksEl.innerHTML=linkItems.length?linkItems.join(''):'<span style="font-size:.72rem;color:var(--s400)">링크 없음</span>';
   document.getElementById('home-links-card').style.display=linkItems.length||isAdmin?'block':'none';
 
+  // Research Interests
+  const interestsEl=document.getElementById('home-interests');
+  const interestsCard=document.getElementById('home-interests-card');
+  const interests=profile.interests||[];
+  if(interestsEl) {
+    interestsEl.innerHTML=interests.length
+      ? interests.map(it=>`<span class="interest-chip"><span class="interest-icon">${esc(it.icon||'\u{1F52C}')}</span>${esc(it.label)}</span>`).join('')
+      : (isAdmin?'<span style="font-size:.72rem;color:var(--s400)">수정 버튼으로 추가하세요</span>':'');
+  }
+  if(interestsCard) interestsCard.style.display=interests.length||isAdmin?'block':'none';
+
   // CV sections
   renderCvArea();
 }
@@ -1424,7 +1519,8 @@ const layout = sec.layout || 'list';
              ondragend="onDragEnd()"` : '';
 
         const hasDesc = entry.desc && entry.desc.trim();
-        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>
+        const eStyle = entry.style && entry.style!=='default' ? ` style-${entry.style}` : '';
+        html += `<div class="cv-entry${!hasDesc?' cv-entry-compact':''}${eStyle}" id="ent-${sIdx}-${eIdx}" ${adminEntryDrag}>`
           <div class="cv-entry-admin">
             ${isAdmin ? `<span style="color:var(--s300);cursor:grab;font-size:.9rem;padding:2px 4px">⠿</span>` : ''}
             <button class="btn-sm admin-only" onclick="openEditEntry('${sec.id}','${entry.id}')">✎</button>
@@ -1572,6 +1668,7 @@ function openAddEntry(secId) {
   editingEntrySectionId=secId; editingEntryId=null;
   document.getElementById('add-entry-title').textContent='항목 추가';
   ['inp-entry-title','inp-entry-sub','inp-entry-date','inp-entry-desc','inp-entry-tags','inp-entry-link-label','inp-entry-link-url'].forEach(id=>document.getElementById(id).value='');
+  selectEntryStyle('default', document.querySelector('.entry-style-opt[data-style="default"]'));
   document.getElementById('modal-add-entry').style.display='flex';
   setTimeout(()=>document.getElementById('inp-entry-title').focus(),100);
 }
@@ -1588,6 +1685,7 @@ function openEditEntry(secId,entryId) {
   document.getElementById('inp-entry-tags').value=(entry.tags||[]).join(', ');
   document.getElementById('inp-entry-link-label').value=entry.linkLabel||'';
   document.getElementById('inp-entry-link-url').value=entry.linkUrl||'';
+  selectEntryStyle(entry.style||'default', document.querySelector(`.entry-style-opt[data-style="${entry.style||'default'}"]`));
   document.getElementById('modal-add-entry').style.display='flex';
 }
 function saveEntry() {
@@ -1600,14 +1698,15 @@ function saveEntry() {
   const tags=tagsRaw.split(',').map(t=>t.trim()).filter(Boolean);
   const linkLabel=document.getElementById('inp-entry-link-label').value.trim();
   const linkUrl=document.getElementById('inp-entry-link-url').value.trim();
+  const entryStyle=document.getElementById('inp-entry-style').value||'default';
 
   const sec=cvSections.find(s=>s.id===editingEntrySectionId);
   if(!sec) return;
   if(editingEntryId) {
     const i=sec.entries.findIndex(e=>e.id===editingEntryId);
-    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags,linkLabel,linkUrl};
+    if(i>=0) sec.entries[i]={...sec.entries[i],title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle};
   } else {
-    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags,linkLabel,linkUrl});
+    sec.entries.push({id:'e'+Date.now(),title,sub,date,desc,tags,linkLabel,linkUrl,style:entryStyle});
   }
   save();saveCvSections();closeModal('modal-add-entry');renderCvArea();
 }
@@ -1739,6 +1838,36 @@ function toggleSort(section) { sortDesc[section]=!sortDesc[section];section==='p
 
 // ── ARTICLE ───────────────────────────────────────────────────────
 
+
+
+// ── ENTRY STYLE PICKER ────────────────────────────────────────────
+function selectEntryStyle(style, el) {
+  document.querySelectorAll('.entry-style-opt').forEach(o=>o.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('inp-entry-style').value = style;
+}
+
+// ── RESEARCH INTERESTS ────────────────────────────────────────────
+function openInterestsEdit() {
+  const interests = profile.interests||[];
+  document.getElementById('inp-interests').value = interests.map(i=>(i.icon?i.icon+' ':'')+i.label).join('\n');
+  document.getElementById('modal-interests').style.display='flex';
+}
+function saveInterests() {
+  const raw = document.getElementById('inp-interests').value;
+  profile.interests = raw.split('\n').map(line=>{
+    const trimmed = line.trim();
+    if(!trimmed) return null;
+    // emoji detection: first char if it's not ASCII
+    const firstChar = [...trimmed][0];
+    const isEmoji = firstChar && firstChar.codePointAt(0) > 255;
+    if(isEmoji) return {icon:firstChar, label:trimmed.slice(firstChar.length).trim()};
+    return {icon:'', label:trimmed};
+  }).filter(Boolean);
+  save(); saveProfileToDB();
+  closeModal('modal-interests');
+  renderHome(); toast('저장되었습니다.');
+}
 
 // ── CUSTOM LINKS ─────────────────────────────────────────────────
 function renderCustomLinkInputs(links) {
