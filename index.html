@@ -2553,7 +2553,7 @@ function openPdf(type, src) {
 
 // ── UTILS ─────────────────────────────────────────────────────────
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function excerpt(b){return b.replace(/#{1,6} /g,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/`/g,'').replace(/\$\$[\s\S]*?\$\$/g,'[수식]').replace(/\$[^$]+\$/g,'[수식]').substring(0,110).trim()+'...';}
+function excerpt(b){if(!b) return '';return b.replace(/#{1,6} /g,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/`/g,'').replace(/\$\$[\s\S]*?\$\$/g,'[수식]').replace(/\$[^$]+\$/g,'[수식]').substring(0,110).trim()+'...';}
 function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
