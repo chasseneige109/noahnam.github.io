@@ -3502,25 +3502,22 @@ particlesJS("particles-js",{
     // t≈0: 이름 fade-up in
     if (titleEl) titleEl.classList.add('visible');
 
-    // t=1100ms: 이름 exit (오른쪽)
+    // t=700ms: 이름 exit (오른쪽), ✦ spring in 동시에
     setTimeout(function(){
       if (titleEl) titleEl.classList.add('exit');
-      // t+160ms: ✦ spring in
+      // ✦는 이름과 거의 동시 — 이름 exit 시작하자마자 등장
       setTimeout(function(){
         if (markEl) markEl.classList.add('visible');
-      }, 160);
-    }, 1100);
+      }, 80);
+    }, 700);
 
-    // t=2000ms: ✦ exit
-    setTimeout(function(){
-      if (markEl) markEl.classList.add('exit');
-    }, 2000);
-
-    // t=2200ms: 오버레이 fade out
+    // t=700+500+800ms: 이름 + ✦ 함께 남아있다가 오버레이 fade out
+    // (이름은 exit transition 끝난 뒤 자연스럽게 안 보임, ✦는 계속 visible)
+    // t=2000ms: 오버레이 fade out (이름+✦ 둘 다 오버레이가 fade되며 사라짐)
     setTimeout(function(){
       overlayEl.classList.add('hiding');
       setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
-    }, 2200);
+    }, 2000);
 
   }); });
 })();
