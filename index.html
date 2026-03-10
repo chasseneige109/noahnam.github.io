@@ -973,12 +973,12 @@ button, a, label { touch-action: manipulation; }
 .intro-stage {
   position: relative;
   display: flex; align-items: center; justify-content: center;
+  gap: 12px;
   min-width: 200px; height: 56px;
 }
 
 /* 블로그 이름 — 처음부터 렌더되어 있고 JS로 opacity 조작 */
 .intro-title {
-  position: absolute;
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
   font-weight: 800;
@@ -987,7 +987,6 @@ button, a, label { touch-action: manipulation; }
   white-space: nowrap;
   opacity: 0;
   transform: translateY(8px);
-  /* transition으로 부드럽게 — animation 쓰면 reflow 때 번쩍임 */
   transition: opacity .5s cubic-bezier(.4,0,.2,1),
               transform .5s cubic-bezier(.4,0,.2,1);
 }
@@ -995,16 +994,15 @@ button, a, label { touch-action: manipulation; }
   opacity: 1;
   transform: translateY(0);
 }
+/* exit: 사라지지 않고 오른쪽으로만 이동 — opacity 그대로 */
 .intro-title.exit {
-  opacity: 0;
-  transform: translateX(55px);
-  transition: opacity .5s cubic-bezier(.4,0,.2,1),
-              transform .5s cubic-bezier(.4,0,.2,1);
+  opacity: 1;
+  transform: translateX(14px);
+  transition: transform .55s cubic-bezier(.4,0,.2,1);
 }
 
 /* ✦ 마크 */
 .intro-mark {
-  position: absolute;
   font-size: 2.2rem;
   line-height: 1;
   color: #2563eb;
@@ -1012,15 +1010,13 @@ button, a, label { touch-action: manipulation; }
   transform: scale(.5) rotate(-15deg);
   transition: opacity .5s cubic-bezier(.34,1.4,.64,1),
               transform .5s cubic-bezier(.34,1.4,.64,1);
+  /* 처음엔 공간 안 차지하게 */
+  width: 0; overflow: visible;
 }
 .intro-mark.visible {
   opacity: 1;
   transform: scale(1) rotate(0deg);
-}
-.intro-mark.exit {
-  opacity: 0;
-  transform: scale(.7) rotate(8deg);
-  transition: opacity .4s ease, transform .4s ease;
+  width: auto;
 }
 
 /* 페이지 전환 fade */
@@ -1051,8 +1047,8 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <body>
 <div id="intro-overlay">
   <div class="intro-stage">
-    <div class="intro-title" id="intro-name-text"></div>
     <div class="intro-mark" id="intro-mark">✦</div>
+    <div class="intro-title" id="intro-name-text"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3499,25 +3495,20 @@ particlesJS("particles-js",{
   //   rAF 2번: DOM paint 완료 후 시작
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
 
-    // t≈0: 이름 fade-up in
+    // t=0: 이름 fade-up in
     if (titleEl) titleEl.classList.add('visible');
 
-    // t=700ms: 이름 exit (오른쪽), ✦ spring in 동시에
+    // t=700ms: ✦ spring-in, 이름은 살짝 오른쪽으로 밀리며 나란히
     setTimeout(function(){
-      if (titleEl) titleEl.classList.add('exit');
-      // ✦는 이름과 거의 동시 — 이름 exit 시작하자마자 등장
-      setTimeout(function(){
-        if (markEl) markEl.classList.add('visible');
-      }, 80);
+      if (markEl) markEl.classList.add('visible');
+      if (titleEl) titleEl.classList.add('exit'); // opacity 유지, 살짝 이동만
     }, 700);
 
-    // t=700+500+800ms: 이름 + ✦ 함께 남아있다가 오버레이 fade out
-    // (이름은 exit transition 끝난 뒤 자연스럽게 안 보임, ✦는 계속 visible)
-    // t=2000ms: 오버레이 fade out (이름+✦ 둘 다 오버레이가 fade되며 사라짐)
+    // t=2100ms: 오버레이 fade-out — 이름+✦ 함께 사라짐
     setTimeout(function(){
       overlayEl.classList.add('hiding');
       setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
-    }, 2000);
+    }, 2100);
 
   }); });
 })();
