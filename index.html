@@ -964,73 +964,65 @@ button, a, label { touch-action: manipulation; }
   background: #fff;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
-  transition: opacity 1s cubic-bezier(.4,0,.2,1);
+  transition: opacity 1.1s cubic-bezier(.4,0,.2,1);
 }
 #intro-overlay.out  { opacity: 0; }
 #intro-overlay.gone { display: none; }
 
-/* 중앙 컨테이너 */
 .intro-stage {
   position: relative;
-  display: flex; align-items: center; justify-content: center;
-  width: clamp(200px, 60vw, 480px);
-  height: 80px;
+  display: flex; align-items: center; gap: 14px;
+}
+
+/* 파란 점 — nav-dot과 동일한 감성 */
+.intro-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #2563eb;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0);
+}
+/* phase 1: 점 등장 */
+.intro-dot.appear {
+  animation: idot-pop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+/* phase 3: 이름 사라진 뒤 점만 pulse */
+.intro-dot.pulse {
+  animation: idot-pulse 1s ease-in-out infinite;
+}
+@keyframes idot-pop {
+  to { opacity:1; transform:scale(1); }
+}
+@keyframes idot-pulse {
+  0%,100% { transform:scale(1);    opacity:1; }
+  50%     { transform:scale(1.45); opacity:.6; }
 }
 
 /* 블로그 이름 */
 .intro-title {
-  position: absolute;
   font-family: var(--sans);
-  font-size: clamp(1.5rem, 4.5vw, 2.4rem);
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -.04em;
+  letter-spacing: -.03em;
   white-space: nowrap;
   opacity: 0;
-  transform: translateX(0);
+  transform: translateY(8px);
+  will-change: transform, opacity;
 }
-/* phase 1: 페이드인 */
-.intro-title.show {
-  animation: itl-in .5s cubic-bezier(.4,0,.2,1) forwards;
+/* phase 1: 이름 슬라이드업 등장 */
+.intro-title.appear {
+  animation: itl-in .45s cubic-bezier(.4,0,.2,1) .18s forwards;
 }
-/* phase 2: 오른쪽으로 슬라이드 아웃 */
-.intro-title.fly {
-  animation: itl-fly .55s cubic-bezier(.4,0,.2,1) forwards;
+/* phase 2: 이름 페이드아웃 (충분히 보여준 뒤) */
+.intro-title.leave {
+  animation: itl-out .5s cubic-bezier(.4,0,.2,1) forwards;
 }
-@keyframes itl-in  {
-  from { opacity:0; transform:translateX(-12px); }
-  to   { opacity:1; transform:translateX(0); }
+@keyframes itl-in {
+  to { opacity:1; transform:translateY(0); }
 }
-@keyframes itl-fly {
-  from { opacity:1; transform:translateX(0); }
-  to   { opacity:0; transform:translateX(52px); }
-}
-
-/* 다이아몬드 — 이름 날아간 자리에 등장 */
-.intro-diamond {
-  position: absolute;
-  width: 22px; height: 22px;
-  background: #3b82f6;
-  border-radius: 4px;
-  transform: rotate(45deg) scale(0);
-  opacity: 0;
-}
-.intro-diamond.pop {
-  animation: idm-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
-}
-/* 안쪽 하이라이트 */
-.intro-diamond::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  background: rgba(255,255,255,.35);
-  border-radius: 2px;
-  transform: rotate(0deg);
-}
-@keyframes idm-pop {
-  0%   { transform:rotate(45deg) scale(0);   opacity:0; }
-  60%  { transform:rotate(45deg) scale(1.18); opacity:1; }
-  100% { transform:rotate(45deg) scale(1);   opacity:1; }
+@keyframes itl-out {
+  to { opacity:0; transform:translateY(-6px); }
 }
 
 /* 페이지 전환 fade */
@@ -1061,8 +1053,8 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <body>
 <div id="intro-overlay">
   <div class="intro-stage">
+    <div class="intro-dot" id="intro-dot"></div>
     <div class="intro-title" id="intro-name-text"></div>
-    <div class="intro-diamond" id="intro-diamond"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3484,67 +3476,63 @@ particlesJS("particles-js",{
 <script>
 // ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
-  var dismissed = false;
-  var blogName  = '';   // blog-ready 오면 여기 저장
+  var dismissed     = false;
   var readyReceived = false;
+  var pendingDismiss = false;
 
+  var dotEl     = document.getElementById('intro-dot');
   var titleEl   = document.getElementById('intro-name-text');
-  var diamondEl = document.getElementById('intro-diamond');
   var overlayEl = document.getElementById('intro-overlay');
 
-  // ── 페이즈 타임라인 (데이터와 무관하게 즉시 시작) ──
-  // t=0      : 이름 페이드인 (blog-ready 오면 이름 업데이트)
-  // t=800ms  : 이름 오른쪽으로 fly-out
-  // t=1050ms : 다이아몬드 pop-in
-  // t=1700ms : overlay fade-out (단, blog-ready 아직 안 왔으면 대기)
-
-  // 이름이 확정되면 바로 반영 (아직 show 중일 때)
-  function applyName() {
-    if (titleEl && blogName) titleEl.textContent = blogName;
-  }
-
-  // phase 1: 이름 등장
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      if (titleEl) titleEl.classList.add('show');
-    });
-  });
-
-  // phase 2: 이름 fly-out → 다이아몬드 등장
-  setTimeout(function(){
-    if (titleEl)   { titleEl.classList.remove('show');   titleEl.classList.add('fly'); }
-    setTimeout(function(){
-      if (diamondEl) diamondEl.classList.add('pop');
-    }, 120);
-  }, 820);
-
-  // phase 3: 퇴장 — blog-ready 대기
-  function tryDismiss() {
-    if (dismissed) return;
-    dismissed = true;
-    if (overlayEl) overlayEl.classList.add('out');
-    setTimeout(function(){
-      if (overlayEl) overlayEl.classList.add('gone');
-    }, 1050);
-  }
-
-  // 1700ms 지점: blog-ready 왔으면 퇴장, 아니면 대기
-  setTimeout(function(){
-    if (readyReceived) tryDismiss();
-    else window._introPending = true;
-  }, 1700);
-
-  // blog-ready 수신
+  // blog-ready 오면 이름 반영 (애니 중이어도 즉시)
   window.addEventListener('blog-ready', function(e){
     readyReceived = true;
-    blogName = (e.detail && e.detail.name) || '';
-    applyName();
-    // 애니가 아직 진행 중이면 끝날 때까지 기다림
-    if (window._introPending) tryDismiss();
+    var name = (e.detail && e.detail.name) || '';
+    if (titleEl && name) titleEl.textContent = name;
+    if (pendingDismiss) tryDismiss();
   });
 
-  // 안전장치: 5초 후 강제 퇴장
-  setTimeout(tryDismiss, 5000);
+  function tryDismiss() {
+    if (!readyReceived) { pendingDismiss = true; return; }
+    if (dismissed) return;
+    dismissed = true;
+    overlayEl.classList.add('out');
+    setTimeout(function(){ overlayEl.classList.add('gone'); }, 1150);
+  }
+
+  // 타임라인 시작
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    // t≈0: 점 pop
+    if (dotEl) dotEl.classList.add('appear');
+
+    // t=180ms: 이름 슬라이드업
+    setTimeout(function(){
+      if (titleEl) titleEl.classList.add('appear');
+    }, 180);
+
+    // t=1600ms: 이름 fade-out
+    setTimeout(function(){
+      if (titleEl) {
+        titleEl.classList.remove('appear');
+        titleEl.classList.add('leave');
+      }
+    }, 1600);
+
+    // t=1900ms: 점 pulse
+    setTimeout(function(){
+      if (dotEl) { dotEl.classList.remove('appear'); dotEl.classList.add('pulse'); }
+    }, 1900);
+
+    // t=2400ms: 퇴장 시도 (blog-ready 안 왔으면 대기)
+    setTimeout(function(){
+      tryDismiss();
+    }, 2400);
+
+    // 안전장치: 6초 후 강제 퇴장
+    setTimeout(function(){
+      if (!dismissed) { readyReceived = true; tryDismiss(); }
+    }, 6000);
+  }); });
 })();
 </script>
 
