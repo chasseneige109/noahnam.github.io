@@ -964,68 +964,63 @@ button, a, label { touch-action: manipulation; }
   background: #fff;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
+  /* 퇴장 transition만 여기서 — 등장은 JS가 제어 */
+  transition: opacity 1s cubic-bezier(.4,0,.2,1);
 }
-#intro-overlay.gone { display: none; }
+#intro-overlay.hiding { opacity: 0; }
+#intro-overlay.gone   { display: none; }
 
 .intro-stage {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  height: 60px;
+  min-width: 200px; height: 56px;
 }
 
-/* 블로그 이름 */
+/* 블로그 이름 — 처음부터 렌더되어 있고 JS로 opacity 조작 */
 .intro-title {
+  position: absolute;
   font-family: var(--sans);
-  font-size: clamp(1.4rem, 4vw, 2.1rem);
+  font-size: clamp(1.35rem, 4vw, 2.1rem);
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -.03em;
   white-space: nowrap;
-  position: absolute;
-  /* 시작: 보이지 않음 */
   opacity: 0;
-  transform: translateY(10px);
-  transition: none;
+  transform: translateY(8px);
+  /* transition으로 부드럽게 — animation 쓰면 reflow 때 번쩍임 */
+  transition: opacity .5s cubic-bezier(.4,0,.2,1),
+              transform .5s cubic-bezier(.4,0,.2,1);
 }
-.intro-title.in {
-  animation: itl-in .5s cubic-bezier(.4,0,.2,1) forwards;
+.intro-title.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
-.intro-title.out {
-  animation: itl-out .55s cubic-bezier(.4,0,.2,1) forwards;
+.intro-title.exit {
+  opacity: 0;
+  transform: translateX(55px);
+  transition: opacity .5s cubic-bezier(.4,0,.2,1),
+              transform .5s cubic-bezier(.4,0,.2,1);
 }
-@keyframes itl-in  { to { opacity:1; transform:translateY(0); } }
-@keyframes itl-out { to { opacity:0; transform:translateX(60px); } }
 
-/* ✦ 다이아몬드 마크 */
+/* ✦ 마크 */
 .intro-mark {
   position: absolute;
-  font-size: 2rem;
-  color: #2563eb;
+  font-size: 2.2rem;
   line-height: 1;
+  color: #2563eb;
   opacity: 0;
-  transform: scale(0.4) rotate(-20deg);
-  transition: none;
+  transform: scale(.5) rotate(-15deg);
+  transition: opacity .5s cubic-bezier(.34,1.4,.64,1),
+              transform .5s cubic-bezier(.34,1.4,.64,1);
 }
-.intro-mark.in {
-  animation: imark-in .55s cubic-bezier(.34,1.4,.64,1) forwards;
+.intro-mark.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
-.intro-mark.out {
-  animation: imark-out .5s cubic-bezier(.4,0,.2,1) forwards;
-}
-@keyframes imark-in  {
-  to { opacity:1; transform:scale(1) rotate(0deg); }
-}
-@keyframes imark-out {
-  to { opacity:0; transform:scale(0.6) rotate(10deg); }
-}
-
-/* 전체 오버레이 fade-out */
-#intro-overlay.fade-out {
-  animation: iovl-out .9s cubic-bezier(.4,0,.2,1) forwards;
-}
-@keyframes iovl-out {
-  0%   { opacity:1; }
-  100% { opacity:0; }
+.intro-mark.exit {
+  opacity: 0;
+  transform: scale(.7) rotate(8deg);
+  transition: opacity .4s ease, transform .4s ease;
 }
 
 /* 페이지 전환 fade */
@@ -3477,52 +3472,55 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-// ── 입장 애니메이션 — 데이터 로드와 완전히 독립 ─────────────
+// ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var titleEl   = document.getElementById('intro-name-text');
   var markEl    = document.getElementById('intro-mark');
   var overlayEl = document.getElementById('intro-overlay');
 
-  // blog-ready: 이름만 업데이트 (in 애니 중이면 반영됨)
-  // 오버레이 퇴장은 타임라인이 알아서 함
+  // ① 이름: localStorage 캐시에서 즉시 읽기 (Supabase 기다릴 필요 없음)
+  try {
+    var cached = localStorage.getItem('blog_profile');
+    if (cached) {
+      var p = JSON.parse(cached);
+      var n = p.blogName || p.name || '';
+      if (n && titleEl) titleEl.textContent = n;
+    }
+  } catch(e) {}
+
+  // ② blog-ready 오면 혹시 이름 바뀐 경우만 조용히 업데이트
   window.addEventListener('blog-ready', function(e){
     var name = (e.detail && e.detail.name) || '';
-    if (titleEl && name && titleEl.textContent !== name) {
+    if (name && titleEl && titleEl.textContent !== name)
       titleEl.textContent = name;
-    }
   });
 
-  // 고정 타임라인
+  // ③ 타임라인 — transition 기반이라 reflow 번쩍임 없음
+  //   rAF 2번: DOM paint 완료 후 시작
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
 
-    // t=0: 이름 slide-up in
-    if (titleEl) titleEl.classList.add('in');
+    // t≈0: 이름 fade-up in
+    if (titleEl) titleEl.classList.add('visible');
 
-    // t=1200ms: 이름 slide-right out
+    // t=1100ms: 이름 exit (오른쪽)
     setTimeout(function(){
-      if (titleEl) {
-        titleEl.classList.remove('in');
-        titleEl.classList.add('out');
-      }
-      // t=1200+150ms: ✦ spring-in
+      if (titleEl) titleEl.classList.add('exit');
+      // t+160ms: ✦ spring in
       setTimeout(function(){
-        if (markEl) markEl.classList.add('in');
-      }, 150);
-    }, 1200);
+        if (markEl) markEl.classList.add('visible');
+      }, 160);
+    }, 1100);
 
-    // t=2050ms: ✦ fade out
+    // t=2000ms: ✦ exit
     setTimeout(function(){
-      if (markEl) {
-        markEl.classList.remove('in');
-        markEl.classList.add('out');
-      }
-    }, 2050);
+      if (markEl) markEl.classList.add('exit');
+    }, 2000);
 
-    // t=2300ms: 오버레이 fade-out
+    // t=2200ms: 오버레이 fade out
     setTimeout(function(){
-      overlayEl.classList.add('fade-out');
-      setTimeout(function(){ overlayEl.classList.add('gone'); }, 920);
-    }, 2300);
+      overlayEl.classList.add('hiding');
+      setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
+    }, 2200);
 
   }); });
 })();
