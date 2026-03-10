@@ -962,55 +962,76 @@ button, a, label { touch-action: manipulation; }
 #intro-overlay {
   position: fixed; inset: 0; z-index: 99999;
   background: #fff;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   pointer-events: none;
-  transition: opacity .9s cubic-bezier(.4,0,.2,1),
-              filter .9s cubic-bezier(.4,0,.2,1),
-              transform .9s cubic-bezier(.4,0,.2,1);
+  transition: opacity 1s cubic-bezier(.4,0,.2,1);
 }
-#intro-overlay.out  { opacity: 0; filter: blur(6px); transform: scale(1.015); }
+#intro-overlay.out  { opacity: 0; }
 #intro-overlay.gone { display: none; }
 
-/* 블로그 이름 — 큰 타이포 */
+/* 중앙 컨테이너 */
+.intro-stage {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: clamp(200px, 60vw, 480px);
+  height: 80px;
+}
+
+/* 블로그 이름 */
 .intro-title {
+  position: absolute;
   font-family: var(--sans);
-  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  font-size: clamp(1.5rem, 4.5vw, 2.4rem);
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -.04em;
+  white-space: nowrap;
   opacity: 0;
-  clip-path: inset(0 100% 0 0);
-  /* animation은 JS에서 이름 세팅 후 class로 트리거 */
+  transform: translateX(0);
 }
-.intro-title.go {
-  animation: intro-wipe .65s cubic-bezier(.77,0,.18,1) forwards;
+/* phase 1: 페이드인 */
+.intro-title.show {
+  animation: itl-in .5s cubic-bezier(.4,0,.2,1) forwards;
 }
-@keyframes intro-wipe {
-  to { opacity:1; clip-path: inset(0 0% 0 0); }
+/* phase 2: 오른쪽으로 슬라이드 아웃 */
+.intro-title.fly {
+  animation: itl-fly .55s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes itl-in  {
+  from { opacity:0; transform:translateX(-12px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes itl-fly {
+  from { opacity:1; transform:translateX(0); }
+  to   { opacity:0; transform:translateX(52px); }
 }
 
-/* 점 3개 로딩 인디케이터 */
-.intro-dots {
-  display: flex; gap: 6px; margin-top: 20px;
+/* 다이아몬드 — 이름 날아간 자리에 등장 */
+.intro-diamond {
+  position: absolute;
+  width: 22px; height: 22px;
+  background: #3b82f6;
+  border-radius: 4px;
+  transform: rotate(45deg) scale(0);
   opacity: 0;
-  /* dots도 title과 같이 JS로 트리거 */
 }
-.intro-dots.go {
-  animation: intro-fade-in .3s ease .45s forwards;
+.intro-diamond.pop {
+  animation: idm-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
 }
-.intro-dot-item {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #cbd5e1;
-  animation: intro-bounce 1s ease-in-out infinite;
+/* 안쪽 하이라이트 */
+.intro-diamond::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: rgba(255,255,255,.35);
+  border-radius: 2px;
+  transform: rotate(0deg);
 }
-.intro-dot-item:nth-child(2) { animation-delay: .15s; }
-.intro-dot-item:nth-child(3) { animation-delay: .3s; }
-@keyframes intro-bounce {
-  0%,100% { transform: translateY(0); background: #cbd5e1; }
-  50%      { transform: translateY(-5px); background: #3b82f6; }
+@keyframes idm-pop {
+  0%   { transform:rotate(45deg) scale(0);   opacity:0; }
+  60%  { transform:rotate(45deg) scale(1.18); opacity:1; }
+  100% { transform:rotate(45deg) scale(1);   opacity:1; }
 }
-@keyframes intro-fade-in { to { opacity:1; } }
 
 /* 페이지 전환 fade */
 .page.active { animation: page-fade-in .3s ease forwards; }
@@ -1039,11 +1060,9 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 </head>
 <body>
 <div id="intro-overlay">
-  <div class="intro-title" id="intro-name-text">My Blog</div>
-  <div class="intro-dots">
-    <div class="intro-dot-item"></div>
-    <div class="intro-dot-item"></div>
-    <div class="intro-dot-item"></div>
+  <div class="intro-stage">
+    <div class="intro-title" id="intro-name-text"></div>
+    <div class="intro-diamond" id="intro-diamond"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3466,42 +3485,66 @@ particlesJS("particles-js",{
 // ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var dismissed = false;
-  var animStarted = false;
+  var blogName  = '';   // blog-ready 오면 여기 저장
+  var readyReceived = false;
 
-  function startAnim(name) {
-    if (animStarted) return;
-    animStarted = true;
-    var titleEl = document.getElementById('intro-name-text');
-    var dotsEl  = document.querySelector('.intro-dots');
-    // 이름 먼저 세팅
-    if (titleEl && name) titleEl.textContent = name;
-    // 그 다음 프레임에서 애니 트리거 (레이아웃 플러시 보장)
+  var titleEl   = document.getElementById('intro-name-text');
+  var diamondEl = document.getElementById('intro-diamond');
+  var overlayEl = document.getElementById('intro-overlay');
+
+  // ── 페이즈 타임라인 (데이터와 무관하게 즉시 시작) ──
+  // t=0      : 이름 페이드인 (blog-ready 오면 이름 업데이트)
+  // t=800ms  : 이름 오른쪽으로 fly-out
+  // t=1050ms : 다이아몬드 pop-in
+  // t=1700ms : overlay fade-out (단, blog-ready 아직 안 왔으면 대기)
+
+  // 이름이 확정되면 바로 반영 (아직 show 중일 때)
+  function applyName() {
+    if (titleEl && blogName) titleEl.textContent = blogName;
+  }
+
+  // phase 1: 이름 등장
+  requestAnimationFrame(function(){
     requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        if (titleEl) titleEl.classList.add('go');
-        if (dotsEl)  dotsEl.classList.add('go');
-      });
+      if (titleEl) titleEl.classList.add('show');
     });
-  }
-
-  function dismissIntro() {
-    if (dismissed) return;
-    dismissed = true;
-    var el = document.getElementById('intro-overlay');
-    if (!el) return;
-    el.classList.add('out');
-    setTimeout(function(){ el.classList.add('gone'); }, 950);
-  }
-
-  window.addEventListener('blog-ready', function(e){
-    var name = e.detail && e.detail.name;
-    startAnim(name);
-    // 애니가 시작된 후 최소 1초 노출
-    setTimeout(dismissIntro, 1000);
   });
 
-  // 안전장치: 4초 후 강제 퇴장 (네트워크 느릴 때)
-  setTimeout(function(){ startAnim(''); dismissIntro(); }, 4000);
+  // phase 2: 이름 fly-out → 다이아몬드 등장
+  setTimeout(function(){
+    if (titleEl)   { titleEl.classList.remove('show');   titleEl.classList.add('fly'); }
+    setTimeout(function(){
+      if (diamondEl) diamondEl.classList.add('pop');
+    }, 120);
+  }, 820);
+
+  // phase 3: 퇴장 — blog-ready 대기
+  function tryDismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    if (overlayEl) overlayEl.classList.add('out');
+    setTimeout(function(){
+      if (overlayEl) overlayEl.classList.add('gone');
+    }, 1050);
+  }
+
+  // 1700ms 지점: blog-ready 왔으면 퇴장, 아니면 대기
+  setTimeout(function(){
+    if (readyReceived) tryDismiss();
+    else window._introPending = true;
+  }, 1700);
+
+  // blog-ready 수신
+  window.addEventListener('blog-ready', function(e){
+    readyReceived = true;
+    blogName = (e.detail && e.detail.name) || '';
+    applyName();
+    // 애니가 아직 진행 중이면 끝날 때까지 기다림
+    if (window._introPending) tryDismiss();
+  });
+
+  // 안전장치: 5초 후 강제 퇴장
+  setTimeout(tryDismiss, 5000);
 })();
 </script>
 
