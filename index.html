@@ -964,65 +964,68 @@ button, a, label { touch-action: manipulation; }
   background: #fff;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
-  transition: opacity 1.1s cubic-bezier(.4,0,.2,1);
 }
-#intro-overlay.out  { opacity: 0; }
 #intro-overlay.gone { display: none; }
 
 .intro-stage {
   position: relative;
-  display: flex; align-items: center; gap: 14px;
-}
-
-/* 파란 점 — nav-dot과 동일한 감성 */
-.intro-dot {
-  width: 11px; height: 11px; border-radius: 50%;
-  background: #2563eb;
-  flex-shrink: 0;
-  opacity: 0;
-  transform: scale(0);
-}
-/* phase 1: 점 등장 */
-.intro-dot.appear {
-  animation: idot-pop .4s cubic-bezier(.34,1.56,.64,1) forwards;
-}
-/* phase 3: 이름 사라진 뒤 점만 pulse */
-.intro-dot.pulse {
-  animation: idot-pulse 1s ease-in-out infinite;
-}
-@keyframes idot-pop {
-  to { opacity:1; transform:scale(1); }
-}
-@keyframes idot-pulse {
-  0%,100% { transform:scale(1);    opacity:1; }
-  50%     { transform:scale(1.45); opacity:.6; }
+  display: flex; align-items: center; justify-content: center;
+  height: 60px;
 }
 
 /* 블로그 이름 */
 .intro-title {
   font-family: var(--sans);
-  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-size: clamp(1.4rem, 4vw, 2.1rem);
   font-weight: 800;
   color: #0f172a;
   letter-spacing: -.03em;
   white-space: nowrap;
+  position: absolute;
+  /* 시작: 보이지 않음 */
   opacity: 0;
-  transform: translateY(8px);
-  will-change: transform, opacity;
+  transform: translateY(10px);
+  transition: none;
 }
-/* phase 1: 이름 슬라이드업 등장 */
-.intro-title.appear {
-  animation: itl-in .45s cubic-bezier(.4,0,.2,1) .18s forwards;
+.intro-title.in {
+  animation: itl-in .5s cubic-bezier(.4,0,.2,1) forwards;
 }
-/* phase 2: 이름 페이드아웃 (충분히 보여준 뒤) */
-.intro-title.leave {
-  animation: itl-out .5s cubic-bezier(.4,0,.2,1) forwards;
+.intro-title.out {
+  animation: itl-out .55s cubic-bezier(.4,0,.2,1) forwards;
 }
-@keyframes itl-in {
-  to { opacity:1; transform:translateY(0); }
+@keyframes itl-in  { to { opacity:1; transform:translateY(0); } }
+@keyframes itl-out { to { opacity:0; transform:translateX(60px); } }
+
+/* ✦ 다이아몬드 마크 */
+.intro-mark {
+  position: absolute;
+  font-size: 2rem;
+  color: #2563eb;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.4) rotate(-20deg);
+  transition: none;
 }
-@keyframes itl-out {
-  to { opacity:0; transform:translateY(-6px); }
+.intro-mark.in {
+  animation: imark-in .55s cubic-bezier(.34,1.4,.64,1) forwards;
+}
+.intro-mark.out {
+  animation: imark-out .5s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes imark-in  {
+  to { opacity:1; transform:scale(1) rotate(0deg); }
+}
+@keyframes imark-out {
+  to { opacity:0; transform:scale(0.6) rotate(10deg); }
+}
+
+/* 전체 오버레이 fade-out */
+#intro-overlay.fade-out {
+  animation: iovl-out .9s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes iovl-out {
+  0%   { opacity:1; }
+  100% { opacity:0; }
 }
 
 /* 페이지 전환 fade */
@@ -1053,8 +1056,8 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <body>
 <div id="intro-overlay">
   <div class="intro-stage">
-    <div class="intro-dot" id="intro-dot"></div>
     <div class="intro-title" id="intro-name-text"></div>
+    <div class="intro-mark" id="intro-mark">✦</div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3474,64 +3477,53 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-// ── 입장 애니메이션 ───────────────────────────────────────────
+// ── 입장 애니메이션 — 데이터 로드와 완전히 독립 ─────────────
 (function(){
-  var dismissed     = false;
-  var readyReceived = false;
-  var pendingDismiss = false;
-
-  var dotEl     = document.getElementById('intro-dot');
   var titleEl   = document.getElementById('intro-name-text');
+  var markEl    = document.getElementById('intro-mark');
   var overlayEl = document.getElementById('intro-overlay');
 
-  // blog-ready 오면 이름 반영 (애니 중이어도 즉시)
+  // blog-ready: 이름만 업데이트 (in 애니 중이면 반영됨)
+  // 오버레이 퇴장은 타임라인이 알아서 함
   window.addEventListener('blog-ready', function(e){
-    readyReceived = true;
     var name = (e.detail && e.detail.name) || '';
-    if (titleEl && name) titleEl.textContent = name;
-    if (pendingDismiss) tryDismiss();
+    if (titleEl && name && titleEl.textContent !== name) {
+      titleEl.textContent = name;
+    }
   });
 
-  function tryDismiss() {
-    if (!readyReceived) { pendingDismiss = true; return; }
-    if (dismissed) return;
-    dismissed = true;
-    overlayEl.classList.add('out');
-    setTimeout(function(){ overlayEl.classList.add('gone'); }, 1150);
-  }
-
-  // 타임라인 시작
+  // 고정 타임라인
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
-    // t≈0: 점 pop
-    if (dotEl) dotEl.classList.add('appear');
 
-    // t=180ms: 이름 슬라이드업
-    setTimeout(function(){
-      if (titleEl) titleEl.classList.add('appear');
-    }, 180);
+    // t=0: 이름 slide-up in
+    if (titleEl) titleEl.classList.add('in');
 
-    // t=1600ms: 이름 fade-out
+    // t=1200ms: 이름 slide-right out
     setTimeout(function(){
       if (titleEl) {
-        titleEl.classList.remove('appear');
-        titleEl.classList.add('leave');
+        titleEl.classList.remove('in');
+        titleEl.classList.add('out');
       }
-    }, 1600);
+      // t=1200+150ms: ✦ spring-in
+      setTimeout(function(){
+        if (markEl) markEl.classList.add('in');
+      }, 150);
+    }, 1200);
 
-    // t=1900ms: 점 pulse
+    // t=2050ms: ✦ fade out
     setTimeout(function(){
-      if (dotEl) { dotEl.classList.remove('appear'); dotEl.classList.add('pulse'); }
-    }, 1900);
+      if (markEl) {
+        markEl.classList.remove('in');
+        markEl.classList.add('out');
+      }
+    }, 2050);
 
-    // t=2400ms: 퇴장 시도 (blog-ready 안 왔으면 대기)
+    // t=2300ms: 오버레이 fade-out
     setTimeout(function(){
-      tryDismiss();
-    }, 2400);
+      overlayEl.classList.add('fade-out');
+      setTimeout(function(){ overlayEl.classList.add('gone'); }, 920);
+    }, 2300);
 
-    // 안전장치: 6초 후 강제 퇴장
-    setTimeout(function(){
-      if (!dismissed) { readyReceived = true; tryDismiss(); }
-    }, 6000);
   }); });
 })();
 </script>
