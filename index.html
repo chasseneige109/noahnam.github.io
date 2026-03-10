@@ -973,12 +973,12 @@ button, a, label { touch-action: manipulation; }
 .intro-stage {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  gap: 12px;
   min-width: 200px; height: 56px;
 }
 
-/* 블로그 이름 — 처음부터 렌더되어 있고 JS로 opacity 조작 */
+/* 블로그 이름 */
 .intro-title {
+  position: absolute;
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
   font-weight: 800;
@@ -994,15 +994,16 @@ button, a, label { touch-action: manipulation; }
   opacity: 1;
   transform: translateY(0);
 }
-/* exit: 사라지지 않고 오른쪽으로만 이동 — opacity 그대로 */
+/* exit: opacity 유지, 오른쪽으로 크게 이동 */
 .intro-title.exit {
-  opacity: 1;
-  transform: translateX(14px);
-  transition: transform .55s cubic-bezier(.4,0,.2,1);
+  opacity: 1 !important;
+  transform: translateX(52px) !important;
+  transition: transform .6s cubic-bezier(.4,0,.2,1) !important;
 }
 
-/* ✦ 마크 */
+/* ✦ 마크 — absolute로 레이아웃 영향 없음 */
 .intro-mark {
+  position: absolute;
   font-size: 2.2rem;
   line-height: 1;
   color: #2563eb;
@@ -1010,13 +1011,10 @@ button, a, label { touch-action: manipulation; }
   transform: scale(.5) rotate(-15deg);
   transition: opacity .5s cubic-bezier(.34,1.4,.64,1),
               transform .5s cubic-bezier(.34,1.4,.64,1);
-  /* 처음엔 공간 안 차지하게 */
-  width: 0; overflow: visible;
 }
 .intro-mark.visible {
   opacity: 1;
   transform: scale(1) rotate(0deg);
-  width: auto;
 }
 
 /* 페이지 전환 fade */
@@ -1047,8 +1045,8 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <body>
 <div id="intro-overlay">
   <div class="intro-stage">
-    <div class="intro-mark" id="intro-mark">✦</div>
     <div class="intro-title" id="intro-name-text"></div>
+    <div class="intro-mark" id="intro-mark">✦</div>
   </div>
 </div>
 <div id="particles-js"></div>
