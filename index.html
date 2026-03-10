@@ -621,8 +621,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 
 /* 터치 전역 */
 *, *::before, *::after { -webkit-tap-highlight-color: transparent; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: pan-x pan-y; }
-body { -webkit-overflow-scrolling: touch; overscroll-behavior: none; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-overflow-scrolling: touch; overscroll-behavior-x: none; }
 button, a, label { touch-action: manipulation; }
 
 /* 바텀 네비 — PC 완전 hidden */
@@ -957,41 +957,60 @@ button, a, label { touch-action: manipulation; }
 
 
 /* ══════════════════════════════════════════════════
-   입장 애니메이션 (Snappy & Fast)
+   입장 애니메이션
    ══════════════════════════════════════════════════ */
 #intro-overlay {
   position: fixed; inset: 0; z-index: 99999;
   background: #fff;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   pointer-events: none;
-  transition: opacity .4s ease, filter .4s ease;
+  transition: opacity .9s cubic-bezier(.4,0,.2,1),
+              filter .9s cubic-bezier(.4,0,.2,1),
+              transform .9s cubic-bezier(.4,0,.2,1);
 }
-#intro-overlay.out { opacity: 0; filter: blur(8px); }
+#intro-overlay.out  { opacity: 0; filter: blur(6px); transform: scale(1.015); }
 #intro-overlay.gone { display: none; }
 
-.intro-wrapper { display: flex; align-items: center; justify-content: center; }
-
-.intro-name {
+/* 블로그 이름 — 큰 타이포 */
+.intro-title {
   font-family: var(--sans);
-  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
   font-weight: 800;
   color: #0f172a;
-  letter-spacing: -.03em;
+  letter-spacing: -.04em;
   opacity: 0;
-  transform: translateY(8px);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  clip-path: inset(0 100% 0 0);
+  /* animation은 JS에서 이름 세팅 후 class로 트리거 */
 }
-.intro-name.show { opacity: 1; transform: translateY(0); }
+.intro-title.go {
+  animation: intro-wipe .65s cubic-bezier(.77,0,.18,1) forwards;
+}
+@keyframes intro-wipe {
+  to { opacity:1; clip-path: inset(0 0% 0 0); }
+}
 
-.intro-logo {
-  font-size: clamp(2rem, 7vw, 3.2rem);
-  color: var(--blue);
-  width: 0; opacity: 0; overflow: hidden;
-  transform: scale(0.5) rotate(-45deg);
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  line-height: 1;
+/* 점 3개 로딩 인디케이터 */
+.intro-dots {
+  display: flex; gap: 6px; margin-top: 20px;
+  opacity: 0;
+  /* dots도 title과 같이 JS로 트리거 */
 }
-.intro-logo.go { width: 1.2em; opacity: 1; transform: scale(1) rotate(0); margin-right: 0.2em; }
+.intro-dots.go {
+  animation: intro-fade-in .3s ease .45s forwards;
+}
+.intro-dot-item {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #cbd5e1;
+  animation: intro-bounce 1s ease-in-out infinite;
+}
+.intro-dot-item:nth-child(2) { animation-delay: .15s; }
+.intro-dot-item:nth-child(3) { animation-delay: .3s; }
+@keyframes intro-bounce {
+  0%,100% { transform: translateY(0); background: #cbd5e1; }
+  50%      { transform: translateY(-5px); background: #3b82f6; }
+}
+@keyframes intro-fade-in { to { opacity:1; } }
 
 /* 페이지 전환 fade */
 .page.active { animation: page-fade-in .3s ease forwards; }
@@ -1020,9 +1039,11 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 </head>
 <body>
 <div id="intro-overlay">
-  <div class="intro-wrapper">
-    <div class="intro-logo" id="intro-logo">✦</div>
-    <div class="intro-name" id="intro-name-text">My Blog</div>
+  <div class="intro-title" id="intro-name-text">My Blog</div>
+  <div class="intro-dots">
+    <div class="intro-dot-item"></div>
+    <div class="intro-dot-item"></div>
+    <div class="intro-dot-item"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3442,7 +3463,7 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-// ── 입장 애니메이션 (Fast 버전) ───────────────────────────────────────────
+// ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var dismissed = false;
   var animStarted = false;
@@ -3451,18 +3472,16 @@ particlesJS("particles-js",{
     if (animStarted) return;
     animStarted = true;
     var titleEl = document.getElementById('intro-name-text');
-    var logoEl  = document.getElementById('intro-logo');
+    var dotsEl  = document.querySelector('.intro-dots');
+    // 이름 먼저 세팅
     if (titleEl && name) titleEl.textContent = name;
-
-    // 이름 즉시 등장
+    // 그 다음 프레임에서 애니 트리거 (레이아웃 플러시 보장)
     requestAnimationFrame(function(){
-      if (titleEl) titleEl.classList.add('show');
+      requestAnimationFrame(function(){
+        if (titleEl) titleEl.classList.add('go');
+        if (dotsEl)  dotsEl.classList.add('go');
+      });
     });
-
-    // 0.3초 뒤 로고가 이름을 밀어냄
-    setTimeout(function() {
-      if (logoEl) logoEl.classList.add('go');
-    }, 300);
   }
 
   function dismissIntro() {
@@ -3471,17 +3490,18 @@ particlesJS("particles-js",{
     var el = document.getElementById('intro-overlay');
     if (!el) return;
     el.classList.add('out');
-    setTimeout(function(){ el.classList.add('gone'); }, 400);
+    setTimeout(function(){ el.classList.add('gone'); }, 950);
   }
 
   window.addEventListener('blog-ready', function(e){
-    startAnim(e.detail && e.detail.name);
-    // 전체 과정을 0.9초 안에 끝내고 바로 본문 노출
-    setTimeout(dismissIntro, 900); 
+    var name = e.detail && e.detail.name;
+    startAnim(name);
+    // 애니가 시작된 후 최소 1초 노출
+    setTimeout(dismissIntro, 1000);
   });
 
-  // 안전장치 (로딩 지연 시 2초 후 강제 종료)
-  setTimeout(function(){ startAnim(''); dismissIntro(); }, 2000); 
+  // 안전장치: 4초 후 강제 퇴장 (네트워크 느릴 때)
+  setTimeout(function(){ startAnim(''); dismissIntro(); }, 4000);
 })();
 </script>
 
