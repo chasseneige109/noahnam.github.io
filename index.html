@@ -3455,75 +3455,75 @@ particlesJS("particles-js",{
   var titleEl   = document.getElementById('intro-name-text');
   var markEl    = document.getElementById('intro-mark');
   var overlayEl = document.getElementById('intro-overlay');
+  var done      = false; // 애니메이션 종료 전 텍스트 교체 방지
 
-  // ① 이름: localStorage 캐시에서 즉시 읽기 (Supabase 기다릴 필요 없음)
-  try {
-    var cached = localStorage.getItem('blog_profile');
-    if (cached) {
-      var p = JSON.parse(cached);
-      var n = p.blogName || p.name || '';
-      if (n && titleEl) titleEl.textContent = n;
-    }
-  } catch(e) {}
+  // ① 텍스트는 HTML 하드코딩(Noah's Ark)이 기본값
+  //    localStorage에 다른 이름이 있어도 애니메이션 중엔 무시
+  //    → 오버레이 사라진 뒤에만 업데이트
 
-  // ② blog-ready 오면 혹시 이름 바뀐 경우만 조용히 업데이트
+  // ② blog-ready: 오버레이 끝난 후에만 반영
   window.addEventListener('blog-ready', function(e){
+    if (!done) return; // 애니메이션 중이면 무시
     var name = (e.detail && e.detail.name) || '';
     if (name && titleEl && titleEl.textContent !== name)
       titleEl.textContent = name;
   });
 
-  // ③ 타임라인 — 모든 상태를 element.style로만 제어 (클래스 충돌 없음)
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+  // ③ 타임라인
+  var s1 = 'cubic-bezier(.4,0,.2,1)';
+  var s2 = 'cubic-bezier(.34,1.56,.64,1)';
 
-    var easing1 = 'cubic-bezier(.4,0,.2,1)';       // 부드럽게
-    var easing2 = 'cubic-bezier(.34,1.56,.64,1)';  // spring
+  // 초기 상태: CSS에서 opacity:0 이미 설정됨
+  // transition:none + 시작 위치 → reflow 강제 → transition 켜기
+  var markW = markEl ? markEl.offsetWidth : 36;
+  var half  = Math.round((markW + 14) / 2);
 
-    // ── 크기 측정: transition 없는 상태에서 offsetWidth 읽기
-    var markW = markEl  ? markEl.offsetWidth  : 36;
-    var half  = Math.round((markW + 14) / 2); // gap=14
+  // 시작 위치 세팅 (transition 없이)
+  if (markEl)  { markEl.style.transition  = 'none'; markEl.style.transform  = 'translateX(-'+half+'px) scale(.5) rotate(-20deg)'; }
+  if (titleEl) { titleEl.style.transition = 'none'; titleEl.style.opacity   = '0'; titleEl.style.transform = 'translateX(0)'; }
 
-    // ── 초기 위치 세팅 (transition 없이 즉시 적용)
+  // reflow 강제 — 브라우저가 시작 상태를 확정하게 함
+  if (markEl)  markEl.getBoundingClientRect();
+  if (titleEl) titleEl.getBoundingClientRect();
+
+  // phase 1: 블로그명 fade-in
+  if (titleEl) {
+    titleEl.style.transition = 'opacity .55s '+s1;
+    titleEl.style.opacity    = '1';
+  }
+
+  // phase 2 (700ms): ✦ spring-in + 블로그명 오른쪽으로 밀림
+  setTimeout(function(){
     if (markEl) {
-      markEl.style.transition = 'none';
-      markEl.style.opacity    = '0';
-      markEl.style.transform  = 'translateX(-' + half + 'px) scale(.5) rotate(-20deg)';
+      markEl.style.transition = 'opacity .6s '+s2+', transform .6s '+s2;
+      markEl.style.opacity    = '1';
+      markEl.style.transform  = 'translateX(0) scale(1) rotate(0deg)';
     }
     if (titleEl) {
-      titleEl.style.transition = 'none';
-      titleEl.style.opacity    = '0';
-      titleEl.style.transform  = 'translateX(0)';
+      titleEl.style.transition = 'transform .6s '+s2;
+      titleEl.style.transform  = 'translateX('+half+'px)';
     }
+  }, 700);
 
-    // t=0: 블로그명 fade-in (중앙 고정)
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){
-      if (titleEl) {
-        titleEl.style.transition = 'opacity .5s ' + easing1 + ', transform .5s ' + easing1;
-        titleEl.style.opacity    = '1';
-        titleEl.style.transform  = 'translateX(0)';
-      }
-
-      // t=700ms: ✦ spring-in + 블로그명 오른쪽으로 밀림 (동시 · 대칭)
-      setTimeout(function(){
-        if (markEl) {
-          markEl.style.transition = 'opacity .6s ' + easing2 + ', transform .6s ' + easing2;
-          markEl.style.opacity    = '1';
-          markEl.style.transform  = 'translateX(0) scale(1) rotate(0deg)';
+  // phase 3 (2000ms): 오버레이 fade-out
+  setTimeout(function(){
+    overlayEl.classList.add('hiding');
+    setTimeout(function(){
+      overlayEl.classList.add('gone');
+      done = true;
+      // 이제 localStorage/Supabase 이름으로 조용히 업데이트
+      try {
+        var cached = localStorage.getItem('blog_profile');
+        if (cached) {
+          var p = JSON.parse(cached);
+          var n = p.blogName || p.name || '';
+          // nav에만 반영 (intro는 이미 사라짐)
+          var navEl = document.getElementById('nav-blog-name');
+          if (n && navEl) navEl.textContent = n;
         }
-        if (titleEl) {
-          titleEl.style.transition = 'transform .6s ' + easing2;
-          titleEl.style.transform  = 'translateX(' + half + 'px)';
-        }
-      }, 700);
-
-      // t=2100ms: 오버레이 fade-out
-      setTimeout(function(){
-        overlayEl.classList.add('hiding');
-        setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
-      }, 2100);
-    }); });
-
-  }); });
+      } catch(e) {}
+    }, 1050);
+  }, 2000);
 })();
 </script>
 
