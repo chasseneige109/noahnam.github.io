@@ -971,14 +971,37 @@ button, a, label { touch-action: manipulation; }
 #intro-overlay.gone   { display: none; }
 
 .intro-stage {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  min-width: 200px; height: 56px;
+  /* 실제 flex 흐름 — 두 요소가 나란히 놓여 합산 너비가 항상 중앙 기준 */
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  height: 56px;
+}
+
+/* ✦ 마크 — 너비 0에서 늘어나며 블로그명을 오른쪽으로 밀어냄 */
+.intro-mark {
+  font-size: 2.2rem;
+  line-height: 1;
+  color: #2563eb;
+  opacity: 0;
+  /* 너비를 0으로 시작해 늘어나게 — overflow hidden으로 글자 안 보이게 */
+  width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transform: scale(.6) rotate(-20deg);
+  transition: opacity .55s cubic-bezier(.34,1.5,.64,1),
+              transform .55s cubic-bezier(.34,1.5,.64,1),
+              width .55s cubic-bezier(.34,1.5,.64,1);
+}
+.intro-mark.visible {
+  opacity: 1;
+  /* 2.2rem 글자 + 약간 여백 */
+  width: 2.6rem;
+  transform: scale(1) rotate(0deg);
 }
 
 /* 블로그 이름 */
 .intro-title {
-  position: absolute;
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
   font-weight: 800;
@@ -986,7 +1009,7 @@ button, a, label { touch-action: manipulation; }
   letter-spacing: -.03em;
   white-space: nowrap;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
   transition: opacity .5s cubic-bezier(.4,0,.2,1),
               transform .5s cubic-bezier(.4,0,.2,1);
 }
@@ -994,27 +1017,10 @@ button, a, label { touch-action: manipulation; }
   opacity: 1;
   transform: translateY(0);
 }
-/* exit: opacity 유지, 오른쪽으로 크게 이동 */
+/* exit 클래스 — 다이아몬드가 밀어낼 때 transform 불필요, 자연스러운 flex 이동 */
 .intro-title.exit {
   opacity: 1 !important;
-  transform: translateX(52px) !important;
-  transition: transform .6s cubic-bezier(.4,0,.2,1) !important;
-}
-
-/* ✦ 마크 — absolute로 레이아웃 영향 없음 */
-.intro-mark {
-  position: absolute;
-  font-size: 2.2rem;
-  line-height: 1;
-  color: #2563eb;
-  opacity: 0;
-  transform: scale(.5) rotate(-15deg);
-  transition: opacity .5s cubic-bezier(.34,1.4,.64,1),
-              transform .5s cubic-bezier(.34,1.4,.64,1);
-}
-.intro-mark.visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
+  transform: translateY(0) !important;
 }
 
 /* 페이지 전환 fade */
@@ -1045,8 +1051,8 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <body>
 <div id="intro-overlay">
   <div class="intro-stage">
-    <div class="intro-title" id="intro-name-text"></div>
     <div class="intro-mark" id="intro-mark">✦</div>
+    <div class="intro-title" id="intro-name-text"></div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -3496,10 +3502,10 @@ particlesJS("particles-js",{
     // t=0: 이름 fade-up in
     if (titleEl) titleEl.classList.add('visible');
 
-    // t=700ms: ✦ spring-in, 이름은 살짝 오른쪽으로 밀리며 나란히
+    // t=700ms: ✦ width 0→2.6rem 으로 spring-in — 블로그명이 자연스럽게 오른쪽으로 밀려남
+    // 두 요소가 inline-flex이므로 전체 조합이 항상 화면 정중앙에 위치
     setTimeout(function(){
       if (markEl) markEl.classList.add('visible');
-      if (titleEl) titleEl.classList.add('exit'); // opacity 유지, 살짝 이동만
     }, 700);
 
     // t=2100ms: 오버레이 fade-out — 이름+✦ 함께 사라짐
