@@ -971,37 +971,31 @@ button, a, label { touch-action: manipulation; }
 #intro-overlay.gone   { display: none; }
 
 .intro-stage {
-  /* 레이아웃은 처음부터 최종 크기로 고정 — 절대 변하지 않음 */
   display: inline-flex;
   align-items: center;
   gap: 14px;
   height: 56px;
 }
 
-/* ✦ 마크
-   - 자리는 처음부터 차지 (레이아웃 변화 없음)
-   - 왼쪽에서 날아오며 나타남
-   - translateX 시작값은 JS가 --mark-dx로 주입 */
+/* ✦ 마크 — 레이아웃 자리는 처음부터 고정, opacity/transform만 변함 */
 .intro-mark {
   font-size: 2.2rem;
   line-height: 1;
   color: #2563eb;
   flex-shrink: 0;
   opacity: 0;
-  transform: translateX(var(--mark-dx, 0px)) scale(.5) rotate(-20deg);
+  /* 시작: 왼쪽 오프셋(JS 주입) + 작게 + 회전 */
+  transform: translateX(var(--mark-x0, -40px)) scale(.5) rotate(-20deg);
   transition: opacity .6s cubic-bezier(.34,1.56,.64,1),
               transform .6s cubic-bezier(.34,1.56,.64,1);
   will-change: transform, opacity;
 }
-.intro-mark.visible {
+.intro-mark.go {
   opacity: 1;
   transform: translateX(0) scale(1) rotate(0deg);
 }
 
-/* 블로그 이름
-   - 자리는 처음부터 차지 (레이아웃 변화 없음)
-   - phase1: 아래서 fade-up
-   - phase2: 오른쪽으로 밀림 (translateX — JS가 --title-dx 주입) */
+/* 블로그 이름 — translateX 단일 축만 사용, Y는 절대 쓰지 않음 */
 .intro-title {
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
@@ -1010,19 +1004,21 @@ button, a, label { touch-action: manipulation; }
   letter-spacing: -.03em;
   white-space: nowrap;
   opacity: 0;
-  transform: translateY(10px);
+  /* 시작: 오른쪽 오프셋(JS 주입) */
+  transform: translateX(var(--title-x0, 40px));
   transition: opacity .5s cubic-bezier(.4,0,.2,1),
               transform .5s cubic-bezier(.4,0,.2,1);
   will-change: transform, opacity;
 }
-.intro-title.visible {
+/* phase1: fade-in + 제자리로 */
+.intro-title.come {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(var(--title-x1, 0px));
 }
-/* phase2: 오른쪽으로 밀림 — transition 재정의 */
-.intro-title.pushed {
-  transform: translateX(var(--title-dx, 0px)) !important;
-  transition: transform .6s cubic-bezier(.34,1.56,.64,1) !important;
+/* phase2: 오른쪽으로 밀림 */
+.intro-title.push {
+  transform: translateX(var(--title-x2, 0px));
+  transition: transform .6s cubic-bezier(.34,1.56,.64,1);
 }
 
 /* 페이지 전환 fade */
@@ -3500,26 +3496,33 @@ particlesJS("particles-js",{
   // ③ 타임라인
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
 
-    var stageEl = document.getElementById('intro-stage');
+    // ── 크기 측정 (레이아웃 이미 확정된 시점) ──────────────────
+    var markW = markEl  ? markEl.offsetWidth  : 36;
+    var gap   = 14;
+    // 중앙 유지: ✦는 왼쪽으로 half, 블로그명은 오른쪽으로 half 시작
+    // phase2에서 ✦는 0으로, 블로그명은 +half로 이동 → 중심 불변
+    var half  = Math.round((markW + gap) / 2);
 
-    // ── dx 계산: ✦와 블로그명이 대칭으로 움직여야 중앙이 유지됨
-    // 각각 자기 너비의 절반 + gap 절반만큼 이동 → 합산 중심 = 고정
-    var markW  = markEl  ? markEl.offsetWidth  : 0;
-    var titleW = titleEl ? titleEl.offsetWidth : 0;
-    var gap    = 14; // CSS gap과 동일
-    var half   = (markW + gap) / 2; // 두 요소가 서로 이만큼씩 벌어지면 중앙 유지
+    // 블로그명: 시작 위치 = 0 (중앙), phase2 = +half (오른쪽으로 밀림)
+    // ✦: 시작 위치 = -half (왼쪽), 도착 = 0
+    if (markEl)  markEl.style.setProperty('--mark-x0',  '-' + half + 'px');
+    if (titleEl) {
+      titleEl.style.setProperty('--title-x0', '0px');  // 시작: 중앙
+      titleEl.style.setProperty('--title-x1', '0px');  // come 후: 중앙 유지
+      titleEl.style.setProperty('--title-x2', '+' + half + 'px'); // push 후: 오른쪽
+    }
 
-    if (markEl)  markEl.style.setProperty('--mark-dx',  '-' + Math.round(half) + 'px');
-    if (titleEl) titleEl.style.setProperty('--title-dx', '+' + Math.round(half) + 'px');
+    // t=0: 블로그명 중앙에서 fade-in
+    if (titleEl) titleEl.classList.add('come');
 
-    // t=0: 블로그명 fade-up in (중앙에서)
-    if (titleEl) titleEl.classList.add('visible');
-
-    // t=700ms: ✦ 왼쪽에서 spring-in + 블로그명 오른쪽으로 밀림
-    // 두 이동이 대칭 → stage 중심 = 화면 중앙 유지
+    // t=700ms: ✦ spring-in + 블로그명 오른쪽으로 밀림 (동시, 대칭)
     setTimeout(function(){
-      if (markEl)  markEl.classList.add('visible');
-      if (titleEl) titleEl.classList.add('pushed');
+      if (markEl)  markEl.classList.add('go');
+      // push는 come 위에 transition만 교체 — !important 없이 자연스럽게
+      if (titleEl) {
+        titleEl.style.transition = 'transform .6s cubic-bezier(.34,1.56,.64,1)';
+        titleEl.style.transform  = 'translateX(' + half + 'px)';
+      }
     }, 700);
 
     // t=2100ms: 오버레이 fade-out
