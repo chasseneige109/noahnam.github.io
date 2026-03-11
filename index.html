@@ -971,14 +971,38 @@ button, a, label { touch-action: manipulation; }
 #intro-overlay.gone   { display: none; }
 
 .intro-stage {
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  min-width: 200px; height: 56px;
+  /* 레이아웃은 처음부터 최종 크기로 고정 — 절대 변하지 않음 */
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 56px;
 }
 
-/* 블로그 이름 */
+/* ✦ 마크
+   - 자리는 처음부터 차지 (레이아웃 변화 없음)
+   - 왼쪽에서 날아오며 나타남
+   - translateX 시작값은 JS가 --mark-dx로 주입 */
+.intro-mark {
+  font-size: 2.2rem;
+  line-height: 1;
+  color: #2563eb;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(var(--mark-dx, 0px)) scale(.5) rotate(-20deg);
+  transition: opacity .6s cubic-bezier(.34,1.56,.64,1),
+              transform .6s cubic-bezier(.34,1.56,.64,1);
+  will-change: transform, opacity;
+}
+.intro-mark.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1) rotate(0deg);
+}
+
+/* 블로그 이름
+   - 자리는 처음부터 차지 (레이아웃 변화 없음)
+   - phase1: 아래서 fade-up
+   - phase2: 오른쪽으로 밀림 (translateX — JS가 --title-dx 주입) */
 .intro-title {
-  position: absolute;
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
   font-weight: 800;
@@ -986,35 +1010,19 @@ button, a, label { touch-action: manipulation; }
   letter-spacing: -.03em;
   white-space: nowrap;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px);
   transition: opacity .5s cubic-bezier(.4,0,.2,1),
               transform .5s cubic-bezier(.4,0,.2,1);
+  will-change: transform, opacity;
 }
 .intro-title.visible {
   opacity: 1;
   transform: translateY(0);
 }
-/* exit: opacity 유지, 오른쪽으로 크게 이동 */
-.intro-title.exit {
-  opacity: 1 !important;
-  transform: translateX(52px) !important;
-  transition: transform .6s cubic-bezier(.4,0,.2,1) !important;
-}
-
-/* ✦ 마크 — absolute로 레이아웃 영향 없음 */
-.intro-mark {
-  position: absolute;
-  font-size: 2.2rem;
-  line-height: 1;
-  color: #2563eb;
-  opacity: 0;
-  transform: scale(.5) rotate(-15deg);
-  transition: opacity .5s cubic-bezier(.34,1.4,.64,1),
-              transform .5s cubic-bezier(.34,1.4,.64,1);
-}
-.intro-mark.visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
+/* phase2: 오른쪽으로 밀림 — transition 재정의 */
+.intro-title.pushed {
+  transform: translateX(var(--title-dx, 0px)) !important;
+  transition: transform .6s cubic-bezier(.34,1.56,.64,1) !important;
 }
 
 /* 페이지 전환 fade */
@@ -1044,9 +1052,9 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 </head>
 <body>
 <div id="intro-overlay">
-  <div class="intro-stage">
-    <div class="intro-title" id="intro-name-text">Noah's Ark</div>
+  <div class="intro-stage" id="intro-stage">
     <div class="intro-mark" id="intro-mark">✦</div>
+    <div class="intro-title" id="intro-name-text">Noah's Ark</div>
   </div>
 </div>
 <div id="particles-js"></div>
@@ -1055,7 +1063,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <nav class="topnav">
   <span class="nav-logo" onclick="showSection('landing')">
     <span class="nav-dot"></span>
-    <span id="nav-blog-name">Noah's Ark</span>
+    <span id="nav-blog-name">My Blog</span>
   </span>
   <div class="nav-tabs">
     <button class="nav-tab" id="tab-landing" onclick="showSection('landing')">Home</button>
@@ -1367,7 +1375,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <div class="modal-title">프로필 수정</div>
     <label class="form-label">이름</label><input class="form-input" id="inp-name" placeholder="이름">
     <label class="form-label">핸들 (@)</label><input class="form-input" id="inp-handle" placeholder="handle">
-    <label class="form-label">블로그 이름</label><input class="form-input" id="inp-blog-name" placeholder="Noah's Ark">
+    <label class="form-label">블로그 이름</label><input class="form-input" id="inp-blog-name" placeholder="My Blog">
     <label class="form-label">자기소개</label><textarea class="form-textarea" id="inp-bio" placeholder="자기소개..."></textarea>
     <label class="form-label">GitHub URL</label><input class="form-input" id="inp-github" placeholder="https://github.com/...">
     <label class="form-label">이메일</label><input class="form-input" id="inp-email" placeholder="email@example.com">
@@ -1651,7 +1659,7 @@ async function load() {
       const r = profileRes.data;
       profile = {
         name: r.name || '', handle: r.handle || (r.email ? r.email.split('@')[0] : ''),
-        bio: r.bio || '', blogName: r.blog_name || r.name || "Noah's Ark",
+        bio: r.bio || '', blogName: r.blog_name || r.name || 'My Blog',
         github: r.github || '', email: r.email || '', avatar: r.avatar_url || '',
         customLinks: r.custom_links || [],
         interests: r.interests || [],
@@ -1817,7 +1825,7 @@ let posts      = [];
 let papers     = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
-let profile    = { name:'',handle:'',bio:'',blogName:"Noah's Ark",github:'',email:'',avatar:'',customLinks:[],interests:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
+let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],interests:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
 
 let currentPostId   = null;
 let currentSection  = null;
@@ -2044,7 +2052,7 @@ function renderHome() {
   document.getElementById('home-name').textContent   = profile.name||'이름을 설정하세요';
   document.getElementById('home-handle').textContent = '@'+(profile.handle||'handle');
   document.getElementById('home-bio').innerHTML    = esc(profile.bio||'').replace(/\|/g,'<br>');
-  document.getElementById('nav-blog-name').textContent  = profile.blogName||"Noah's Ark";
+  document.getElementById('nav-blog-name').textContent  = profile.blogName||'My Blog';
 
   const av=document.getElementById('home-av');
   if(profile.avatar) av.innerHTML=`<img src="${esc(profile.avatar)}">`;
@@ -3120,7 +3128,7 @@ function openProfileEdit(){
 function saveProfile(){
   profile.name           =document.getElementById('inp-name').value.trim();
   profile.handle         =document.getElementById('inp-handle').value.trim().replace('@','');
-  profile.blogName       =document.getElementById('inp-blog-name').value.trim()||"Noah's Ark";
+  profile.blogName       =document.getElementById('inp-blog-name').value.trim()||'My Blog';
   profile.bio            =document.getElementById('inp-bio').value.trim();
   profile.github         =document.getElementById('inp-github').value.trim();
   profile.email          =document.getElementById('inp-email').value.trim();
@@ -3130,7 +3138,7 @@ function saveProfile(){
   profile.landingDesc    =document.getElementById('inp-landing-desc').value.trim();
   profile.landingDescEn  =document.getElementById('inp-landing-desc-en').value.trim();
   save();closeModal('modal-profile');
-  document.getElementById('nav-blog-name').textContent=profile.blogName||"Noah's Ark";
+  document.getElementById('nav-blog-name').textContent=profile.blogName||'My Blog';
   saveProfileToDB();
   renderHome();renderLanding();toast('저장되었습니다.');
 }
@@ -3355,13 +3363,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   showSaving('⏳ 데이터 불러오는 중...');
   await load();
   hideSaving('✅ 불러오기 완료', 800);
-  document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || "Noah's Ark";
+  document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || 'My Blog';
   showSection('landing');
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
   // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
   window.dispatchEvent(new CustomEvent('blog-ready', {
-    detail: { name: profile.blogName || profile.name || "Noah's Ark" }
+    detail: { name: profile.blogName || profile.name || 'My Blog' }
   }));
 });
 let cvDragSrcIdx = null;
@@ -3489,20 +3497,32 @@ particlesJS("particles-js",{
       titleEl.textContent = name;
   });
 
-  // ③ 타임라인 — transition 기반이라 reflow 번쩍임 없음
-  //   rAF 2번: DOM paint 완료 후 시작
+  // ③ 타임라인
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
 
-    // t=0: 이름 fade-up in
+    var stageEl = document.getElementById('intro-stage');
+
+    // ── dx 계산: ✦와 블로그명이 대칭으로 움직여야 중앙이 유지됨
+    // 각각 자기 너비의 절반 + gap 절반만큼 이동 → 합산 중심 = 고정
+    var markW  = markEl  ? markEl.offsetWidth  : 0;
+    var titleW = titleEl ? titleEl.offsetWidth : 0;
+    var gap    = 14; // CSS gap과 동일
+    var half   = (markW + gap) / 2; // 두 요소가 서로 이만큼씩 벌어지면 중앙 유지
+
+    if (markEl)  markEl.style.setProperty('--mark-dx',  '-' + Math.round(half) + 'px');
+    if (titleEl) titleEl.style.setProperty('--title-dx', '+' + Math.round(half) + 'px');
+
+    // t=0: 블로그명 fade-up in (중앙에서)
     if (titleEl) titleEl.classList.add('visible');
 
-    // t=700ms: ✦ spring-in, 이름은 살짝 오른쪽으로 밀리며 나란히
+    // t=700ms: ✦ 왼쪽에서 spring-in + 블로그명 오른쪽으로 밀림
+    // 두 이동이 대칭 → stage 중심 = 화면 중앙 유지
     setTimeout(function(){
-      if (markEl) markEl.classList.add('visible');
-      if (titleEl) titleEl.classList.add('exit'); // opacity 유지, 살짝 이동만
+      if (markEl)  markEl.classList.add('visible');
+      if (titleEl) titleEl.classList.add('pushed');
     }, 700);
 
-    // t=2100ms: 오버레이 fade-out — 이름+✦ 함께 사라짐
+    // t=2100ms: 오버레이 fade-out
     setTimeout(function(){
       overlayEl.classList.add('hiding');
       setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
