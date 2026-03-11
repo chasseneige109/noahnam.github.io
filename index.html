@@ -977,25 +977,18 @@ button, a, label { touch-action: manipulation; }
   height: 56px;
 }
 
-/* ✦ 마크 — 레이아웃 자리는 처음부터 고정, opacity/transform만 변함 */
+/* ✦ 마크 — 초기값만, 모든 상태는 JS가 style로 직접 제어 */
 .intro-mark {
   font-size: 2.2rem;
   line-height: 1;
   color: #2563eb;
   flex-shrink: 0;
   opacity: 0;
-  /* 시작: 왼쪽 오프셋(JS 주입) + 작게 + 회전 */
-  transform: translateX(var(--mark-x0, -40px)) scale(.5) rotate(-20deg);
-  transition: opacity .6s cubic-bezier(.34,1.56,.64,1),
-              transform .6s cubic-bezier(.34,1.56,.64,1);
+  transform: scale(.5) rotate(-20deg);
   will-change: transform, opacity;
 }
-.intro-mark.go {
-  opacity: 1;
-  transform: translateX(0) scale(1) rotate(0deg);
-}
 
-/* 블로그 이름 — translateX 단일 축만 사용, Y는 절대 쓰지 않음 */
+/* 블로그 이름 — 초기값만, 모든 상태는 JS가 style로 직접 제어 */
 .intro-title {
   font-family: var(--sans);
   font-size: clamp(1.35rem, 4vw, 2.1rem);
@@ -1004,21 +997,8 @@ button, a, label { touch-action: manipulation; }
   letter-spacing: -.03em;
   white-space: nowrap;
   opacity: 0;
-  /* 시작: 오른쪽 오프셋(JS 주입) */
-  transform: translateX(var(--title-x0, 40px));
-  transition: opacity .5s cubic-bezier(.4,0,.2,1),
-              transform .5s cubic-bezier(.4,0,.2,1);
+  transform: translateX(0);
   will-change: transform, opacity;
-}
-/* phase1: fade-in + 제자리로 */
-.intro-title.come {
-  opacity: 1;
-  transform: translateX(var(--title-x1, 0px));
-}
-/* phase2: 오른쪽으로 밀림 */
-.intro-title.push {
-  transform: translateX(var(--title-x2, 0px));
-  transition: transform .6s cubic-bezier(.34,1.56,.64,1);
 }
 
 /* 페이지 전환 fade */
@@ -3493,43 +3473,55 @@ particlesJS("particles-js",{
       titleEl.textContent = name;
   });
 
-  // ③ 타임라인
+  // ③ 타임라인 — 모든 상태를 element.style로만 제어 (클래스 충돌 없음)
   requestAnimationFrame(function(){ requestAnimationFrame(function(){
 
-    // ── 크기 측정 (레이아웃 이미 확정된 시점) ──────────────────
-    var markW = markEl  ? markEl.offsetWidth  : 36;
-    var gap   = 14;
-    // 중앙 유지: ✦는 왼쪽으로 half, 블로그명은 오른쪽으로 half 시작
-    // phase2에서 ✦는 0으로, 블로그명은 +half로 이동 → 중심 불변
-    var half  = Math.round((markW + gap) / 2);
+    var easing1 = 'cubic-bezier(.4,0,.2,1)';       // 부드럽게
+    var easing2 = 'cubic-bezier(.34,1.56,.64,1)';  // spring
 
-    // 블로그명: 시작 위치 = 0 (중앙), phase2 = +half (오른쪽으로 밀림)
-    // ✦: 시작 위치 = -half (왼쪽), 도착 = 0
-    if (markEl)  markEl.style.setProperty('--mark-x0',  '-' + half + 'px');
+    // ── 크기 측정: transition 없는 상태에서 offsetWidth 읽기
+    var markW = markEl  ? markEl.offsetWidth  : 36;
+    var half  = Math.round((markW + 14) / 2); // gap=14
+
+    // ── 초기 위치 세팅 (transition 없이 즉시 적용)
+    if (markEl) {
+      markEl.style.transition = 'none';
+      markEl.style.opacity    = '0';
+      markEl.style.transform  = 'translateX(-' + half + 'px) scale(.5) rotate(-20deg)';
+    }
     if (titleEl) {
-      titleEl.style.setProperty('--title-x0', '0px');  // 시작: 중앙
-      titleEl.style.setProperty('--title-x1', '0px');  // come 후: 중앙 유지
-      titleEl.style.setProperty('--title-x2', '+' + half + 'px'); // push 후: 오른쪽
+      titleEl.style.transition = 'none';
+      titleEl.style.opacity    = '0';
+      titleEl.style.transform  = 'translateX(0)';
     }
 
-    // t=0: 블로그명 중앙에서 fade-in
-    if (titleEl) titleEl.classList.add('come');
-
-    // t=700ms: ✦ spring-in + 블로그명 오른쪽으로 밀림 (동시, 대칭)
-    setTimeout(function(){
-      if (markEl)  markEl.classList.add('go');
-      // push는 come 위에 transition만 교체 — !important 없이 자연스럽게
+    // t=0: 블로그명 fade-in (중앙 고정)
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
       if (titleEl) {
-        titleEl.style.transition = 'transform .6s cubic-bezier(.34,1.56,.64,1)';
-        titleEl.style.transform  = 'translateX(' + half + 'px)';
+        titleEl.style.transition = 'opacity .5s ' + easing1 + ', transform .5s ' + easing1;
+        titleEl.style.opacity    = '1';
+        titleEl.style.transform  = 'translateX(0)';
       }
-    }, 700);
 
-    // t=2100ms: 오버레이 fade-out
-    setTimeout(function(){
-      overlayEl.classList.add('hiding');
-      setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
-    }, 2100);
+      // t=700ms: ✦ spring-in + 블로그명 오른쪽으로 밀림 (동시 · 대칭)
+      setTimeout(function(){
+        if (markEl) {
+          markEl.style.transition = 'opacity .6s ' + easing2 + ', transform .6s ' + easing2;
+          markEl.style.opacity    = '1';
+          markEl.style.transform  = 'translateX(0) scale(1) rotate(0deg)';
+        }
+        if (titleEl) {
+          titleEl.style.transition = 'transform .6s ' + easing2;
+          titleEl.style.transform  = 'translateX(' + half + 'px)';
+        }
+      }, 700);
+
+      // t=2100ms: 오버레이 fade-out
+      setTimeout(function(){
+        overlayEl.classList.add('hiding');
+        setTimeout(function(){ overlayEl.classList.add('gone'); }, 1050);
+      }, 2100);
+    }); });
 
   }); });
 })();
