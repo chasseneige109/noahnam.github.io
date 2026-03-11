@@ -1669,7 +1669,7 @@ async function load() {
 // ── DB SAVE: POSTS ────────────────────────────────────────────────
 async function savePost(post, section) {
   showSaving('저장 중...');
-  const row = {
+  const base = {
     id: post.id,
     title: post.title,
     content: post.body,
@@ -1677,15 +1677,19 @@ async function savePost(post, section) {
     tags: post.tags || [],
     created_at: new Date(post.createdAt).toISOString(),
     updated_at: new Date(post.updatedAt || post.createdAt).toISOString(),
-    authors: post.authors || null,
-    year: post.year || null,
-    venue: post.venue || null,
-    arxiv: post.arxiv || null,
+  };
+  // papers 전용 컬럼 — posts 테이블엔 없으므로 section에 따라 분기
+  const paperFields = section === 'papers' ? {
+    authors:  post.authors  || null,
+    year:     post.year     || null,
+    venue:    post.venue    || null,
+    arxiv:    post.arxiv    || null,
     code_link: post.codeLink || null,
     summary1: post.summary1 || null,
     summary2: post.summary2 || null,
     summary3: post.summary3 || null,
-  };
+  } : {};
+  const row = { ...base, ...paperFields };
   const table = section === 'posts' ? 'posts' : 'papers';
   const { error } = await supa.from(table).upsert(row);
   if (error) { hideSaving('❌ 저장 실패: ' + error.message, 0); return false; }
