@@ -198,6 +198,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .a-body pre{background:var(--s900);border-radius:12px;padding:20px 24px;overflow-x:auto;margin-bottom:1.6em}
 .a-body pre code{background:none;color:#cbd5e1;font-size:.85rem;padding:0}
 .a-body blockquote{border-left:3px solid #bfdbfe;padding-left:18px;margin:1.5em 0;color:var(--s600);font-style:italic}
+.a-body hr{border:none;border-top:1px solid var(--s200);margin:2em 0}
 .math-block{overflow-x:auto;padding:18px 22px;background:rgba(255,255,255,.8);border:1px solid var(--s200);border-left:3px solid #93c5fd;border-radius:0 12px 12px 0;margin:1.7em 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
 
 /* ── EDITOR ── */
@@ -3195,6 +3196,7 @@ function parseMd(md){
   h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
   h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  h=h.replace(/^---+$/gm,'<hr>');
   h=h.replace(/(^- .+\n?)+/gm,m=>{
     const items=m.trim().split('\n').map(l=>`<li>${l.replace(/^- /,'')}</li>`).join('');
     return `<ul>${items}</ul>`;
