@@ -3203,7 +3203,7 @@ function parseMd(md){
   });
   h=h.split(/\n\n+/).map(b=>{
     b=b.trim();if(!b) return '';
-    if(/^<(h[1-6]|ul|ol|pre|blockquote)/.test(b)) return b;
+    if(/^<(h[1-6]|ul|ol|pre|blockquote|hr)/.test(b)) return b;
     return `<p>${b.replace(/\n/g,'<br>')}</p>`;
   }).join('\n');
 mb.forEach((m,i)=>{h=h.replace(`%%MB${i}%%`,`<div class="math-block">$$${m}$$</div>`);});
