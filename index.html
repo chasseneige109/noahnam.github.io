@@ -2982,7 +2982,7 @@ function publishPost() {
   if(editingPostId!==null) {
     const i=list.findIndex(x=>x.id===editingPostId);
     const paperMeta = editingSection==='paper' ? readPaperFields() : null;
-    const updated={...list[i],title,body,tags:editorTags,cat:editorCat,updatedAt:Date.now(),...(paperMeta||{})};
+    const updated={...list[i],title,body,preview:body.substring(0,200),tags:editorTags,cat:editorCat,updatedAt:Date.now(),...(paperMeta||{})};
     if(i>=0) list[i]=updated;
     save();
     
