@@ -2847,7 +2847,8 @@ async function draftSaveNow() {
     draftDirty = false;
     setTimeout(() => { const dot=document.getElementById('draft-dot'); if(dot) dot.classList.remove('saved'); }, 2000);
   } catch(e) {
-    draftSetStatus('', '저장 실패 — 네트워크 확인');
+    console.error('draft save error:', e);
+    draftSetStatus('', '저장 실패: ' + (e.message || e));
   } finally {
     draftSaving = false;
   }
@@ -2922,7 +2923,8 @@ async function draftOpenPanel() {
       </div>`;
     }).join('');
   } catch(e) {
-    items.innerHTML = '<div class="draft-list-empty">불러오기 실패</div>';
+    console.error('draft list error:', e);
+    items.innerHTML = `<div class="draft-list-empty">불러오기 실패: ${e.message||e}</div>`;
   }
 }
 
@@ -2940,7 +2942,7 @@ async function draftLoadRow(id) {
     draftClosePanel();
     toast('임시저장을 불러왔습니다.');
     draftSetStatus('', '임시저장 복원됨');
-  } catch(e) { toast('불러오기 실패'); }
+  } catch(e) { console.error('draft load error:', e); toast('불러오기 실패: ' + (e.message || e)); }
 }
 
 async function draftDeleteRow(id, btn) {
