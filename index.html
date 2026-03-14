@@ -3219,10 +3219,7 @@ function parseMd(md){
   // 블록 태그 앞뒤 빈줄 확보
   h=h.replace(/(^<(?:h[1-6]|ul|ol|pre|blockquote|hr))/gm,'\n\n$1');
   h=h.replace(/((?:h[1-6]|ul|ol|pre|blockquote|hr)[^>]*>)$/gm,'$1\n\n');
-  // 
-
- → 문단 분리, 
- → <br>
+  // 빈줄은 문단 분리, 단일줄바꿈은 br
   const paras = h.split(/\n{2,}/);
   h = paras.map(b=>{
     b=b.trim(); if(!b) return '';
