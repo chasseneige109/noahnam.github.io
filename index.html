@@ -1680,7 +1680,7 @@ async function savePost(post, section) {
     updated_at: new Date(post.updatedAt || post.createdAt).toISOString(),
   };
   // papers 전용 컬럼 — posts 테이블엔 없으므로 section에 따라 분기
-  const paperFields = section === 'papers' ? {
+  const paperFields = (section === 'paper' || section === 'papers') ? {
     authors:  post.authors  || null,
     year:     post.year     || null,
     venue:    post.venue    || null,
@@ -2982,7 +2982,7 @@ function publishPost() {
   if(editingPostId!==null) {
     const i=list.findIndex(x=>x.id===editingPostId);
     const paperMeta = editingSection==='paper' ? readPaperFields() : null;
-    const updated={...list[i],title,body,preview:body.substring(0,200),tags:editorTags,cat:editorCat,updatedAt:Date.now(),...(paperMeta||{})};
+    const updated={...list[i],title,body,tags:editorTags,cat:editorCat,updatedAt:Date.now(),...(paperMeta||{})};
     if(i>=0) list[i]=updated;
     save();
     
