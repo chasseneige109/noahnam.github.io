@@ -3087,7 +3087,7 @@ function switchTab(tab,el){
   const body=document.getElementById('editor-body');
   const prev=document.getElementById('editor-preview');
   if(tab==='preview'){
-    prev.innerHTML=parseMd(body.value);prev.classList.add('active');body.classList.add('hidden');
+    prev.innerHTML=parseMd(body.value.replace(/\r\n/g,'\n').replace(/\r/g,'\n'));prev.classList.add('active');body.classList.add('hidden');
     if(window.renderMathInElement) setTimeout(()=>renderMathInElement(prev,{
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
     }),60);
@@ -3186,6 +3186,7 @@ function closeModal(id,event){
 // ── MARKDOWN ──────────────────────────────────────────────────────
 function parseMd(md){
   if(!md) return '';
+  md=md.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   let h=esc(md);
   const mb=[],mi=[];
   // 수식 보호
