@@ -3188,28 +3188,43 @@ function parseMd(md){
   if(!md) return '';
   let h=esc(md);
   const mb=[],mi=[];
+  // 수식 보호
   h=h.replace(/\$\$([\s\S]*?)\$\$/g,(_,m)=>{mb.push(m);return`%%MB${mb.length-1}%%`;});
   h=h.replace(/\$((?:[^$\\]|\\.)+?)\$/g,(_,m)=>{mi.push(m);return`%%MI${mi.length-1}%%`;});
+  // 코드블록 보호
+  const cb=[];
+  h=h.replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>{cb.push(c);return`%%CB${cb.length-1}%%`;});
+  // 인라인 코드 보호
+  const ci=[];
+  h=h.replace(/`([^`]+)`/g,(_,c)=>{ci.push(c);return`%%CI${ci.length-1}%%`;});
+  // --- 수평선: 독립 줄로만 (공백 허용, 앞뒤 빈줄 자동 확보)
+  h=h.replace(/^[ \t]*---+[ \t]*$/gm,'\n<hr>\n');
+  // 헤딩
   h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
   h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
   h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-  h=h.replace(/```[\w]*\n?([\s\S]*?)```/g,'<pre><code>$1</code></pre>');
-  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  // 인용
+  h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  // 리스트: "- " 뒤에 내용이 있는 줄만
+  h=h.replace(/((?:^- .+\n?)+)/gm,m=>{
+    const items=m.trim().split('\n')
+      .filter(l=>/^- /.test(l))
+      .map(l=>`<li>${l.slice(2)}</li>`).join('');
+    return `\n<ul>${items}</ul>\n`;
+  });
+  // 인라인 스타일
   h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
-  h=h.replace(/([^\n])\n(---+)/g,'$1\n\n$2');  // --- 앞 빈줄 확보
-  h=h.replace(/(---+)\n([^\n])/g,'$1\n\n$2');  // --- 뒤 빈줄 확보
-  h=h.replace(/^---+$/gm,'<hr>');
-  h=h.replace(/(^- .+\n?)+/gm,m=>{
-    const items=m.trim().split('\n').map(l=>`<li>${l.replace(/^- /,'')}</li>`).join('');
-    return `<ul>${items}</ul>`;
-  });
-  h=h.split(/\n\n+/).map(b=>{
+  // 문단 분리: 빈 줄 기준
+  h=h.split(/\n{2,}/).map(b=>{
     b=b.trim();if(!b) return '';
-    if(/^<(h[1-6]|ul|ol|pre|blockquote|hr)/.test(b)) return b;
+    if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|div)/.test(b)) return b;
+    // 단일 줄바꿈 → <br>
     return `<p>${b.replace(/\n/g,'<br>')}</p>`;
   }).join('\n');
+  // 코드블록/인라인 복원
+  cb.forEach((c,i)=>{h=h.replace(`%%CB${i}%%`,`<pre><code>${c}</code></pre>`);});
+  ci.forEach((c,i)=>{h=h.replace(`%%CI${i}%%`,`<code>${esc(c)}</code>`);});
 mb.forEach((m,i)=>{h=h.replace(`%%MB${i}%%`,`<div class="math-block">$$${m}$$</div>`);});
   mi.forEach((m,i)=>{h=h.replace(`%%MI${i}%%`,`$${m}$`);});
 
