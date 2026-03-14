@@ -2696,7 +2696,7 @@ async function openPost(id,section) {
     if(error||!data){ bodyEl.innerHTML='<div style="color:#ef4444">불러오기 실패</div>'; return; }
     p.body=data.content; // 캐시에 저장 — 다음 열 때 재사용
   }
-  bodyEl.innerHTML=parseMd(p.body);
+  bodyEl.innerHTML=parseMd((p.body||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n'));
   setTimeout(()=>{
     if(window.renderMathInElement) renderMathInElement(bodyEl,{
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
@@ -3087,7 +3087,7 @@ function switchTab(tab,el){
   const body=document.getElementById('editor-body');
   const prev=document.getElementById('editor-preview');
   if(tab==='preview'){
-    prev.innerHTML=parseMd(body.value.replace(/\r\n/g,'\n').replace(/\r/g,'\n'));prev.classList.add('active');body.classList.add('hidden');
+    prev.innerHTML=parseMd(body.value);prev.classList.add('active');body.classList.add('hidden');
     if(window.renderMathInElement) setTimeout(()=>renderMathInElement(prev,{
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
     }),60);
@@ -3216,12 +3216,18 @@ function parseMd(md){
   // 인라인 스타일
   h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  // 문단 분리: 빈 줄 기준
-  h=h.split(/\n{2,}/).map(b=>{
-    b=b.trim();if(!b) return '';
+  // 블록 태그 앞뒤 빈줄 확보
+  h=h.replace(/(^<(?:h[1-6]|ul|ol|pre|blockquote|hr))/gm,'\n\n$1');
+  h=h.replace(/((?:h[1-6]|ul|ol|pre|blockquote|hr)[^>]*>)$/gm,'$1\n\n');
+  // 
+
+ → 문단 분리, 
+ → <br>
+  const paras = h.split(/\n{2,}/);
+  h = paras.map(b=>{
+    b=b.trim(); if(!b) return '';
     if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|div)/.test(b)) return b;
-    // 단일 줄바꿈 → <br>
-    return `<p>${b.replace(/\n/g,'<br>')}</p>`;
+    return '<p>' + b.replace(/\n/g,'<br>') + '</p>';
   }).join('\n');
   // 코드블록/인라인 복원
   cb.forEach((c,i)=>{h=h.replace(`%%CB${i}%%`,`<pre><code>${c}</code></pre>`);});
