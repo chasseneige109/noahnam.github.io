@@ -721,7 +721,7 @@ button, a, label { touch-action: manipulation; }
   .mbn-inner {
     /* grid로 4칸 수학적 균등 분할 — 절대 잘리지 않음 */
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     height: 54px; width: 100%;
   }
 
@@ -1012,6 +1012,68 @@ button, a, label { touch-action: manipulation; }
 }
 
 
+/* ── MEDIA / HOBBY SECTION ── */
+.media-page-wrap{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+.media-page-header{margin-bottom:32px}
+.media-page-title{font-family:var(--serif);font-size:1.8rem;font-weight:700;color:var(--s900);letter-spacing:-.02em;margin-bottom:6px}
+.media-page-desc{font-size:.85rem;color:var(--s500);line-height:1.7}
+
+/* add item form */
+.media-add-form{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow);border-radius:var(--r3);padding:22px 26px;margin-bottom:28px;display:none}
+.media-add-form.open{display:block}
+.media-add-row{display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:end;flex-wrap:wrap}
+.media-add-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);margin-bottom:4px;display:block}
+.media-add-inp{width:100%;padding:8px 12px;border:1px solid var(--s200);border-radius:var(--r);font-size:.83rem;font-family:var(--sans);color:var(--s800);outline:none;transition:border-color .15s;background:#fff}
+.media-add-inp:focus{border-color:var(--blue)}
+.media-add-textarea{width:100%;padding:8px 12px;border:1px solid var(--s200);border-radius:var(--r);font-size:.83rem;font-family:var(--sans);color:var(--s800);outline:none;resize:none;line-height:1.5;background:#fff;transition:border-color .15s}
+.media-add-textarea:focus{border-color:var(--blue)}
+.media-type-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.media-type-btn{padding:5px 14px;border-radius:20px;font-size:.68rem;font-weight:700;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s500);transition:all .15s}
+.media-type-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* grid */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.media-card{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow);border-radius:var(--r3);overflow:hidden;transition:all .25s;position:relative}
+.media-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+.media-card-media{position:relative;width:100%;padding-top:56.25%;background:var(--s100);overflow:hidden}
+.media-card-media iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.media-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.media-card-thumb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,var(--blue-bg),#e0e7ff);cursor:pointer;transition:filter .2s}
+.media-card-thumb:hover{filter:brightness(.92)}
+.media-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(37,99,235,.85);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;pointer-events:none;transition:all .2s}
+.media-card-thumb:hover .media-play-btn{background:rgba(37,99,235,1);transform:translate(-50%,-50%) scale(1.08)}
+.media-card-body{padding:16px 18px}
+.media-card-tag{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:6px;display:inline-block;margin-bottom:7px}
+.media-card-title{font-size:.95rem;font-weight:700;color:var(--s900);letter-spacing:-.01em;line-height:1.35;margin-bottom:5px}
+.media-card-desc{font-size:.78rem;color:var(--s600);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.media-card-date{font-family:var(--mono);font-size:.6rem;color:var(--s400);margin-top:10px;padding-top:9px;border-top:1px solid var(--s100)}
+.media-card-admin{position:absolute;top:8px;right:8px;display:flex;gap:4px;opacity:0;transition:opacity .2s}
+.media-card:hover .media-card-admin{opacity:1}
+.media-admin-btn{padding:4px 9px;border-radius:8px;font-size:.62rem;font-weight:700;font-family:var(--sans);cursor:pointer;border:none;background:rgba(255,255,255,.9);color:var(--s600);backdrop-filter:blur(4px);transition:all .15s}
+.media-admin-btn:hover{background:#fff;color:var(--blue)}
+.media-admin-btn.danger:hover{color:#ef4444}
+.btn-add-media{display:flex;align-items:center;gap:8px;padding:12px 20px;background:rgba(255,255,255,.6);border:1px dashed var(--s300);border-radius:var(--r3);font-size:.75rem;font-weight:700;color:var(--s400);cursor:pointer;transition:all .2s;font-family:var(--sans);letter-spacing:.04em;margin-bottom:20px}
+.btn-add-media:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.media-empty{text-align:center;padding:60px 20px;color:var(--s400)}
+.media-empty-icon{font-size:2.5rem;margin-bottom:12px}
+.media-empty h3{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--s500);margin-bottom:5px}
+.media-empty p{font-size:.78rem;line-height:1.6}
+/* media filter chips */
+.media-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.media-filter-chip{padding:5px 14px;border-radius:20px;font-size:.68rem;font-weight:700;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s500);transition:all .15s}
+.media-filter-chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* video lightbox */
+#media-lightbox{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+#media-lightbox.open{display:flex}
+.media-lb-inner{position:relative;width:90vw;max-width:900px;aspect-ratio:16/9;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.media-lb-close{position:absolute;top:-38px;right:0;background:none;border:none;color:rgba(255,255,255,.8);font-size:1.5rem;cursor:pointer;line-height:1;transition:color .15s}
+.media-lb-close:hover{color:#fff}
+@media(max-width:768px){
+  .media-grid{grid-template-columns:1fr!important}
+  .media-add-row{grid-template-columns:1fr!important}
+  .media-page-wrap{padding:24px 14px 80px}
+}
+
 /* Papers 섹션 설명 */
 .paper-section-desc {
   font-size: .82rem; color: var(--s500); line-height: 1.7;
@@ -1049,6 +1111,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <button class="nav-tab" id="tab-home"  onclick="showSection('home')">Me</button>
     <button class="nav-tab" id="tab-posts" onclick="showSection('posts')">Posts</button>
     <button class="nav-tab" id="tab-paper" onclick="showSection('paper')">Paper Review</button>
+    <button class="nav-tab" id="tab-media" onclick="showSection('media')">🎹 Media</button>
   </div>
   <div class="nav-spacer"></div>
   <div class="admin-controls" id="admin-controls">
@@ -1069,6 +1132,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <button class="mbn-btn"   id="mbn-home"    onclick="showSection('home')"><span class="mbn-ic">👤</span><span class="mbn-lb">Me</span></button>
     <button class="mbn-btn"   id="mbn-posts"   onclick="showSection('posts')"><span class="mbn-ic">✍️</span><span class="mbn-lb">Posts</span></button>
     <button class="mbn-btn"   id="mbn-paper"   onclick="showSection('paper')"><span class="mbn-ic">📄</span><span class="mbn-lb">Papers</span></button>
+    <button class="mbn-btn"   id="mbn-media"   onclick="showSection('media')"><span class="mbn-ic">🎹</span><span class="mbn-lb">Media</span></button>
   </div>
 </div>
 <button class="mbn-fab" id="mbn-fab" onclick="openWrite()">✏</button>
@@ -1119,6 +1183,12 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div class="lc-icon">📄</div>
         <div class="lc-title">Paper Review</div>
         <div class="lc-desc i18n" data-ko="읽은 논문들을 정리하고 핵심 내용을 요약한 리뷰를 올립니다." data-en="Summaries and reviews of papers I've read."></div>
+        <div class="lc-arrow i18n" data-ko="둘러보기 →" data-en="Browse →"></div>
+      </div>
+      <div class="gc gc-hover landing-card" onclick="showSection('media')">
+        <div class="lc-icon">🎹</div>
+        <div class="lc-title">Media</div>
+        <div class="lc-desc i18n" data-ko="피아노 연주 영상, 취미 활동, 일상의 순간들을 담습니다." data-en="Piano performances, hobbies, and everyday moments."></div>
         <div class="lc-arrow i18n" data-ko="둘러보기 →" data-en="Browse →"></div>
       </div>
     </div>
@@ -1198,6 +1268,66 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div id="paper-list"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="page-media" class="page">
+  <div class="media-page-wrap">
+    <div class="media-page-header">
+      <h1 class="media-page-title">🎹 Media &amp; Hobbies</h1>
+      <p class="media-page-desc">피아노 연주, 취미 활동, 그리고 일상의 순간들을 공유하는 공간입니다.</p>
+    </div>
+
+    <!-- 관리자 추가 폼 -->
+    <div class="media-add-form admin-only" id="media-add-form">
+      <div style="font-size:.72rem;font-weight:800;color:var(--s700);letter-spacing:.04em;margin-bottom:14px">새 미디어 추가</div>
+      <div class="media-type-btns">
+        <button class="media-type-btn active" data-type="youtube" onclick="selectMediaType('youtube',this)">▶ YouTube</button>
+        <button class="media-type-btn" data-type="instagram" onclick="selectMediaType('instagram',this)">📷 Instagram</button>
+        <button class="media-type-btn" data-type="image" onclick="selectMediaType('image',this)">🖼 이미지 링크</button>
+        <button class="media-type-btn" data-type="link" onclick="selectMediaType('link',this)">🔗 링크</button>
+      </div>
+      <input type="hidden" id="media-inp-type" value="youtube">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label class="media-add-label">제목</label>
+          <input class="media-add-inp" id="media-inp-title" placeholder="예: Chopin Nocturne Op.9 No.2">
+        </div>
+        <div>
+          <label class="media-add-label">태그 (피아노 / 일상 / 여행 등)</label>
+          <input class="media-add-inp" id="media-inp-tag" placeholder="예: 피아노">
+        </div>
+      </div>
+      <div style="margin-bottom:10px">
+        <label class="media-add-label" id="media-url-label">YouTube URL 또는 영상 ID</label>
+        <input class="media-add-inp" id="media-inp-url" placeholder="https://youtu.be/xxxx 또는 영상 ID">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="media-add-label">설명 (선택)</label>
+        <textarea class="media-add-textarea" id="media-inp-desc" rows="2" placeholder="간단한 설명..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="saveMediaItem()" style="padding:8px 20px;border-radius:20px;font-size:.72rem;font-weight:700;font-family:var(--sans);cursor:pointer;background:var(--blue);color:#fff;border:none">추가</button>
+        <button class="btn-secondary" onclick="closeMediaForm()" style="padding:8px 14px;border-radius:20px;font-size:.72rem;font-weight:700;font-family:var(--sans);cursor:pointer;background:none;color:var(--s500);border:1px solid var(--s200)">취소</button>
+      </div>
+    </div>
+
+    <!-- 관리자 추가 버튼 -->
+    <button class="btn-add-media admin-only" onclick="openMediaForm()">+ 미디어 / 영상 추가</button>
+
+    <!-- 필터 칩 -->
+    <div class="media-filter-bar" id="media-filter-bar"></div>
+
+    <!-- 그리드 -->
+    <div class="media-grid" id="media-grid"></div>
+  </div>
+</div>
+
+<!-- 동영상 라이트박스 -->
+<div id="media-lightbox" onclick="closeMediaLightbox(event)">
+  <div class="media-lb-inner" id="media-lb-inner">
+    <button class="media-lb-close" onclick="closeMediaLightboxBtn()">✕</button>
+    <div id="media-lb-content" style="width:100%;height:100%"></div>
   </div>
 </div>
 
@@ -1598,12 +1728,13 @@ function hideSaving(msg, delay) {
 // ── DB LOAD ───────────────────────────────────────────────────────
 async function load() {
   try {
-    const [postsRes, papersRes, catsRes, cvRes, profileRes] = await Promise.all([
+    const [postsRes, papersRes, catsRes, cvRes, profileRes, mediaRes] = await Promise.all([
       supa.from('posts').select('id,title,category,tags,created_at,updated_at,content').order('id', { ascending: false }),
       supa.from('papers').select('id,title,category,tags,created_at,updated_at,content,authors,year,venue,arxiv,code_link,summary1,summary2,summary3').order('id', { ascending: false }),
       supa.from('categories').select('*'),
       supa.from('cv_sections').select('*').order('sort_order'),
       supa.from('profile').select('*').eq('id', 1).single(),
+      supa.from('media').select('*').order('created_at', { ascending: false }),
     ]);
 
     if (postsRes.data) posts = postsRes.data.map(r => ({
@@ -1649,7 +1780,11 @@ async function load() {
         landingDescEn: r.landing_desc_en || 'A space to organize what I study, papers I read, and thoughts along the way.'
       };
     }
-  } catch(e) {
+
+    if (mediaRes.data) mediaItems = mediaRes.data.map(r => ({
+      id: r.id, type: r.type||'youtube', title: r.title||'', url: r.url||'',
+      tag: r.tag||'기타', desc: r.desc||'', createdAt: new Date(r.created_at).getTime()
+    }));
     console.error('Load error:', e);
     // fallback to localStorage
     try {
@@ -1663,6 +1798,8 @@ async function load() {
       if(c)  categories = JSON.parse(c);
       if(cv) cvSections = JSON.parse(cv);
       if(pr) profile    = {...profile,...JSON.parse(pr)};
+      const med = localStorage.getItem('blog_media');
+      if(med) mediaItems = JSON.parse(med);
     } catch(e2){}
   }
 }
@@ -1806,6 +1943,7 @@ async function uploadPdfToSupabase(file) {
 // ── STATE ─────────────────────────────────────────────────────────
 let posts      = [];
 let papers     = [];
+let mediaItems = [];
 let categories = { posts:[], paper:[] };
 let cvSections = [];
 let profile    = { name:'',handle:'',bio:'',blogName:'My Blog',github:'',email:'',avatar:'',customLinks:[],interests:[],adminPw:null,landingTitle:'생각을 기록하고,|지식을 나눕니다',landingTitleEn:'Thoughts, recorded.|Knowledge, shared.',landingDesc:'공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',landingDescEn:'A space to organize what I study, papers I read, and thoughts along the way.' };
@@ -1840,6 +1978,7 @@ function save() {
     localStorage.setItem('blog_cats',    JSON.stringify(categories));
     localStorage.setItem('blog_cv',      JSON.stringify(cvSections));
     localStorage.setItem('blog_profile', JSON.stringify(profile));
+    localStorage.setItem('blog_media',   JSON.stringify(mediaItems));
   } catch(e){}
 }
 
@@ -1938,6 +2077,7 @@ function renderCurrentPage() {
   if(currentPageName==='home')  renderHome();
   if(currentPageName==='posts') renderPostsPage();
   if(currentPageName==='paper') renderPaperPage();
+  if(currentPageName==='media') renderMediaPage();
 }
 
 
@@ -2021,6 +2161,174 @@ function renderLanding() {
       <div class="rc-date">${fmtDate(p.createdAt)}</div>
     </div>`;
   }).join('');
+}
+
+// ── MEDIA PAGE ────────────────────────────────────────────────────
+let mediaFilterTag = 'all';
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  url = url.trim();
+  // bare ID (11 chars, no slash/dot)
+  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function getInstagramPostId(url) {
+  if (!url) return null;
+  const m = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+function renderMediaPage() {
+  const grid = document.getElementById('media-grid');
+  const filterBar = document.getElementById('media-filter-bar');
+  if (!grid) return;
+
+  // Build filter chips
+  const allTags = ['all', ...new Set(mediaItems.map(m => m.tag || '기타').filter(Boolean))];
+  filterBar.innerHTML = allTags.map(t =>
+    `<button class="media-filter-chip ${mediaFilterTag===t?'active':''}" onclick="setMediaFilter('${esc(t)}')">${t==='all'?'전체':esc(t)}</button>`
+  ).join('');
+
+  const filtered = mediaFilterTag === 'all' ? mediaItems : mediaItems.filter(m => (m.tag||'기타') === mediaFilterTag);
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="media-empty" style="grid-column:1/-1">
+      <div class="media-empty-icon">🎹</div>
+      <h3>${mediaFilterTag==='all'?'아직 올린 미디어가 없습니다':'해당 태그의 미디어가 없습니다'}</h3>
+      <p>${isAdmin?'위의 버튼으로 첫 번째 영상이나 사진을 추가해보세요!':'곧 업데이트될 예정입니다 :)'}</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((item, idx) => {
+    const realIdx = mediaItems.indexOf(item);
+    const tag = item.tag || '기타';
+    const adminBtns = isAdmin ? `<div class="media-card-admin">
+      <button class="media-admin-btn danger" onclick="deleteMediaItem(${realIdx},event)">✕</button>
+    </div>` : '';
+
+    let mediaHtml = '';
+    if (item.type === 'youtube') {
+      const vid = getYouTubeId(item.url);
+      if (vid) {
+        mediaHtml = `<div class="media-card-media">
+          <div class="media-card-thumb" onclick="openMediaLightbox('youtube','${vid}')">
+            <img class="media-card-img" src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" alt="" onerror="this.style.display='none'">
+            <div class="media-play-btn">▶</div>
+          </div>
+        </div>`;
+      }
+    } else if (item.type === 'instagram') {
+      const pid = getInstagramPostId(item.url);
+      mediaHtml = `<div class="media-card-media" style="background:linear-gradient(135deg,#f9a8d4,#a78bfa)">
+        <div class="media-card-thumb" onclick="window.open('${esc(item.url)}','_blank')">
+          <span style="font-size:2rem">📷</span>
+          <div class="media-play-btn" style="font-size:.7rem;width:60px;height:28px;border-radius:20px;font-weight:700">보기</div>
+        </div>
+      </div>`;
+    } else if (item.type === 'image') {
+      mediaHtml = `<div class="media-card-media">
+        <img class="media-card-img" src="${esc(item.url)}" alt="${esc(item.title)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      </div>`;
+    } else {
+      // link
+      mediaHtml = `<div class="media-card-media" style="background:linear-gradient(135deg,var(--blue-bg),#e0e7ff);cursor:pointer" onclick="window.open('${esc(item.url)}','_blank')">
+        <div class="media-card-thumb">
+          <span>🔗</span>
+          <div class="media-play-btn" style="font-size:.7rem;width:60px;height:28px;border-radius:20px;font-weight:700">열기</div>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="media-card">
+      ${adminBtns}
+      ${mediaHtml}
+      <div class="media-card-body">
+        <div class="media-card-tag">${esc(tag)}</div>
+        <div class="media-card-title">${esc(item.title)}</div>
+        ${item.desc ? `<div class="media-card-desc">${esc(item.desc)}</div>` : ''}
+        <div class="media-card-date">${fmtDate(item.createdAt)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setMediaFilter(tag) {
+  mediaFilterTag = tag;
+  renderMediaPage();
+}
+
+function openMediaForm() {
+  document.getElementById('media-add-form').classList.add('open');
+  document.getElementById('media-inp-title').value='';
+  document.getElementById('media-inp-url').value='';
+  document.getElementById('media-inp-tag').value='';
+  document.getElementById('media-inp-desc').value='';
+}
+
+function closeMediaForm() {
+  document.getElementById('media-add-form').classList.remove('open');
+}
+
+function selectMediaType(type, btn) {
+  document.querySelectorAll('.media-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('media-inp-type').value = type;
+  const labels = {youtube:'YouTube URL 또는 영상 ID',instagram:'Instagram 게시물 URL',image:'이미지 URL',link:'링크 URL'};
+  document.getElementById('media-url-label').textContent = labels[type]||'URL';
+}
+
+async function saveMediaItem() {
+  const title = document.getElementById('media-inp-title').value.trim();
+  const url   = document.getElementById('media-inp-url').value.trim();
+  const tag   = document.getElementById('media-inp-tag').value.trim();
+  const desc  = document.getElementById('media-inp-desc').value.trim();
+  const type  = document.getElementById('media-inp-type').value;
+  if (!title) { toast('제목을 입력하세요.'); return; }
+  if (!url)   { toast('URL을 입력하세요.'); return; }
+  const item = { id: Date.now(), type, title, url, tag: tag||'기타', desc, createdAt: Date.now() };
+  mediaItems.unshift(item);
+  save();
+  // Supabase sync
+  try { await supa.from('media').insert([{id:item.id,type:item.type,title:item.title,url:item.url,tag:item.tag,desc:item.desc,created_at:new Date(item.createdAt).toISOString()}]); } catch(e){}
+  closeMediaForm();
+  renderMediaPage();
+  toast('✅ 추가됐습니다!');
+}
+
+async function deleteMediaItem(idx, e) {
+  e && e.stopPropagation();
+  if (!confirm('삭제할까요?')) return;
+  const item = mediaItems[idx];
+  mediaItems.splice(idx, 1);
+  save();
+  try { await supa.from('media').delete().eq('id', item.id); } catch(e){}
+  renderMediaPage();
+  toast('🗑 삭제됐습니다.');
+}
+
+let lbType = null;
+function openMediaLightbox(type, id) {
+  lbType = type;
+  const lb = document.getElementById('media-lightbox');
+  const content = document.getElementById('media-lb-content');
+  if (type === 'youtube') {
+    content.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1" allow="autoplay;encrypted-media" allowfullscreen style="width:100%;height:100%;border:none"></iframe>`;
+  }
+  lb.classList.add('open');
+}
+
+function closeMediaLightbox(e) {
+  if (e && e.target !== document.getElementById('media-lightbox')) return;
+  _closeMediaLb();
+}
+function closeMediaLightboxBtn() { _closeMediaLb(); }
+function _closeMediaLb() {
+  document.getElementById('media-lightbox').classList.remove('open');
+  document.getElementById('media-lb-content').innerHTML = '';
 }
 
 function goBack() {
@@ -3438,8 +3746,7 @@ particlesJS("particles-js",{
     if(fab){
       if(!ed&&window.isAdmin&&(name==='posts'||name==='paper')) fab.classList.add('show');
       else fab.classList.remove('show');
-    }
-  }
+    }  }
 
   function restoreNav(){
     if(!mob()) return;
