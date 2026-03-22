@@ -1177,7 +1177,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <div class="gc gc-hover landing-card" onclick="showSection('media')">
         <div class="lc-icon">🎹</div>
         <div class="lc-title">Media</div>
-        <div class="lc-desc i18n" data-ko="취미, 경험 등 일상의 순간들을 담습니다." data-en="hobbies, and everyday moments."></div>
+        <div class="lc-desc i18n" data-ko="피아노 연주 영상, 취미 활동, 일상의 순간들을 담습니다." data-en="Piano performances, hobbies, and everyday moments."></div>
         <div class="lc-arrow i18n" data-ko="둘러보기 →" data-en="Browse →"></div>
       </div>
     </div>
@@ -1263,7 +1263,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <div id="page-media" class="page">
   <div class="media-page-wrap">
     <h1 class="media-page-title">🎹 Media &amp; Hobbies</h1>
-    <p class="media-page-desc">취미 등 일상의 순간들을 공유하는 공간입니다.</p>
+    <p class="media-page-desc">피아노 연주, 취미 활동, 그리고 일상의 순간들을 공유하는 공간입니다.</p>
 
     <div class="media-add-form admin-only" id="media-add-form">
       <div style="font-size:.72rem;font-weight:800;color:var(--s700);letter-spacing:.04em;margin-bottom:14px">새 미디어 추가</div>
@@ -1276,7 +1276,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <input type="hidden" id="media-inp-type" value="youtube">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
         <div><label class="media-add-label">제목</label><input class="media-add-inp" id="media-inp-title" placeholder="예: Chopin Nocturne Op.9 No.2"></div>
-        <div><label class="media-add-label">태그 (취미 / 일상 / 여행 등)</label><input class="media-add-inp" id="media-inp-tag" placeholder="예: 피아노"></div>
+        <div><label class="media-add-label">태그 (피아노 / 일상 / 여행 등)</label><input class="media-add-inp" id="media-inp-tag" placeholder="예: 피아노"></div>
       </div>
       <div style="margin-bottom:10px">
         <label class="media-add-label" id="media-url-label">YouTube URL 또는 영상 ID</label>
@@ -1298,8 +1298,28 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
   </div>
 </div>
 
-<div id="media-lightbox" onclick="closeMediaLightbox(event)">
-  <div class="media-lb-inner" id="media-lb-inner">
+<!-- 미디어 수정 모달 -->
+<div id="modal-media-edit" class="modal-overlay" style="display:none" onclick="closeModal('modal-media-edit',event)">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-drag-handle"></div>
+    <div class="modal-title">✎ 미디어 수정</div>
+    <input type="hidden" id="media-edit-idx">
+    <label class="form-label">제목</label>
+    <input class="form-input" id="media-edit-title" placeholder="제목">
+    <label class="form-label">태그</label>
+    <input class="form-input" id="media-edit-tag" placeholder="피아노 / 일상 / 여행 등">
+    <label class="form-label">URL</label>
+    <input class="form-input" id="media-edit-url" placeholder="YouTube URL, 이미지 URL 등">
+    <label class="form-label">설명 (선택)</label>
+    <textarea class="form-textarea" id="media-edit-desc" placeholder="간단한 설명..." style="min-height:60px"></textarea>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-media-edit')">취소</button>
+      <button class="btn-primary" onclick="saveMediaEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="media-lightbox" onclick="closeMediaLightbox(event)">  <div class="media-lb-inner" id="media-lb-inner">
     <button class="media-lb-close" onclick="closeMediaLightboxBtn()">✕</button>
     <div id="media-lb-content" style="width:100%;height:100%"></div>
   </div>
@@ -2173,6 +2193,7 @@ function renderMediaPage() {
     const realIdx = mediaItems.indexOf(item);
     const tag = item.tag || '기타';
     const adminBtns = isAdmin ? `<div class="media-card-admin">
+      <button class="media-admin-btn" onclick="openMediaEdit(${realIdx},event)">✎</button>
       <button class="media-admin-btn danger" onclick="deleteMediaItem(${realIdx},event)">✕</button>
     </div>` : '';
     let mediaHtml = '';
@@ -2249,6 +2270,43 @@ async function deleteMediaItem(idx, e) {
   try { await supa.from('media').delete().eq('id', item.id); } catch(e){}
   renderMediaPage();
   toast('🗑 삭제됐습니다.');
+}
+
+function openMediaEdit(idx, e) {
+  e && e.stopPropagation();
+  const item = mediaItems[idx];
+  if (!item) return;
+  document.getElementById('media-edit-idx').value = idx;
+  document.getElementById('media-edit-title').value = item.title || '';
+  document.getElementById('media-edit-tag').value = item.tag || '';
+  document.getElementById('media-edit-url').value = item.url || '';
+  document.getElementById('media-edit-desc').value = item.desc || '';
+  document.getElementById('modal-media-edit').style.display = 'flex';
+}
+
+async function saveMediaEdit() {
+  const idx   = parseInt(document.getElementById('media-edit-idx').value);
+  const title = document.getElementById('media-edit-title').value.trim();
+  const tag   = document.getElementById('media-edit-tag').value.trim();
+  const url   = document.getElementById('media-edit-url').value.trim();
+  const desc  = document.getElementById('media-edit-desc').value.trim();
+  if (!title) { toast('제목을 입력하세요.'); return; }
+  if (!url)   { toast('URL을 입력하세요.'); return; }
+  const item = mediaItems[idx];
+  if (!item) return;
+  item.title = title;
+  item.tag   = tag || '기타';
+  item.url   = url;
+  item.desc  = desc;
+  save();
+  try {
+    await supa.from('media').update({
+      title, tag: item.tag, url, description: desc
+    }).eq('id', item.id);
+  } catch(e){}
+  closeModal('modal-media-edit');
+  renderMediaPage();
+  toast('✅ 수정됐습니다!');
 }
 
 function openMediaLightbox(type, id) {
