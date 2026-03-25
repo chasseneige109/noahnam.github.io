@@ -36,8 +36,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .nav-logo{font-family:var(--sans);font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;cursor:pointer;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-l);animation:pulse-b 2s infinite}
 @keyframes pulse-b{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,.7)}70%{transform:scale(1);box-shadow:0 0 0 8px rgba(59,130,246,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,0)}}
-.nav-tabs{display:flex;gap:6px;margin-left:44px}
-.nav-tab{padding:6px 20px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--sans)}
+.nav-tabs{display:flex;gap:2px;margin-left:32px}
+.nav-tab{padding:6px 14px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--sans)}
 .nav-tab:hover{color:var(--blue);background:var(--blue-bg)}
 .nav-tab.active{background:var(--blue);color:#fff}
 .nav-spacer{flex:1}
@@ -57,7 +57,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── LAYOUT ── */
-.wrap{max-width:1280px;margin:0 auto;padding:0 36px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
 .two-col{display:grid;grid-template-columns:280px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
 .three-col-sidebar{display:grid;grid-template-columns:220px 1fr;gap:36px;padding:40px 0 80px;align-items:start}
 
@@ -615,6 +615,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .cv-entry[style*="min-height"] { display:flex;flex-direction:column; }
 .cv-entry[style*="min-height"] .cv-entry-desc { flex:1; }
 
+/* ── LANG TOGGLE ── */
 /* ── POST LIST GRID ── */
 .posts-grid-wrap { display: flex; flex-direction: column; gap: 10px; }
 .posts-grid-wrap.cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
@@ -629,7 +630,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 @media(max-width:600px){
   .posts-grid-wrap.cols-2,.posts-grid-wrap.cols-3,.posts-grid-wrap.cols-4{grid-template-columns:1fr!important;}
 }
-
 /* ── POST GRID CONTROL ── */
 .post-col-control{display:none;align-items:center;gap:6px;margin-left:auto}
 .admin-mode .post-col-control{display:flex}
@@ -638,7 +638,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .col-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 
 
-.lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
 .lang-btn.active{background:#fff;color:var(--s900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 
@@ -1803,6 +1802,11 @@ async function load() {
         landingDesc: r.landing_desc || '공부하면서 배운 것들, 읽은 논문들, 그리고 생각들을 정리하는 공간입니다.',
         landingDescEn: r.landing_desc_en || 'A space to organize what I study, papers I read, and thoughts along the way.'
       };
+      // grid 열 수 설정 복원
+      if (r.grid_cols) {
+        postGridCols.posts = r.grid_cols.posts || 1;
+        postGridCols.paper = r.grid_cols.paper || 1;
+      }
     }
 
     // media 테이블이 없어도 나머지가 깨지지 않도록 별도 처리
@@ -1915,6 +1919,7 @@ async function saveProfileToDB() {
     landing_title_en: profile.landingTitleEn || null,
     landing_desc: profile.landingDesc || null,
     landing_desc_en: profile.landingDescEn || null,
+    grid_cols: postGridCols,
   };
   const { error } = await supa.from('profile').upsert(row);
   if (error) { hideSaving('❌ 저장 실패', 0); return; }
@@ -1990,7 +1995,7 @@ let deleteExtra     = null;
 let sortDesc        = { posts:true, paper:true };
 let filterCat       = { posts:null, paper:null };
 let filterTag       = { posts:null, paper:null };
-let postGridCols    = { posts: parseInt(localStorage.getItem('blog_grid_posts')||'1'), paper: parseInt(localStorage.getItem('blog_grid_paper')||'1') };
+let postGridCols    = { posts:1, paper:1 };
 let isAdmin         = false;
 
 // CV editing state
@@ -2838,15 +2843,15 @@ function renderPaperPage() {
     :`<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
 }
 
-function setPostCols(section, cols) {
+async function setPostCols(section, cols) {
   postGridCols[section] = cols;
-  try { localStorage.setItem('blog_grid_'+section, cols); } catch(e){}
-  section==='posts'?renderPostsPage():renderPaperPage();
+  // Supabase profile에 저장 — 모든 방문자에게 동일하게 적용
+  await supa.from('profile').upsert({ id:1, grid_cols: postGridCols });
+  section==='posts' ? renderPostsPage() : renderPaperPage();
 }
 
 function renderColBtns(section) {
-  const filterId = section+'-col-control';
-  const el = document.getElementById(filterId);
+  const el = document.getElementById(section+'-col-control');
   if (!el) return;
   const cur = postGridCols[section];
   el.innerHTML = [1,2,3,4].map(n => {
@@ -3038,17 +3043,15 @@ async function openPost(id,section) {
   const p=list.find(x=>x.id===id);
   if(!p) return;
   currentPostId=id; currentSection=section;
-  // URL hash 업데이트
   history.pushState(null,'','#'+section+'/'+id);
   document.getElementById('article-tags').innerHTML=
     (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')+(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join('');
   document.getElementById('article-title').textContent=p.title;
   document.getElementById('article-date').textContent=fmtDate(p.createdAt);
-  // 공유 링크 버튼
-  const shareUrl = location.origin + location.pathname + '#' + section + '/' + id;
-  const shareBtn = document.getElementById('article-share-btn');
-  if(shareBtn) {
-    shareBtn.onclick = function(){
+  const shareBtn=document.getElementById('article-share-btn');
+  if(shareBtn){
+    const shareUrl=location.origin+location.pathname+'#'+section+'/'+id;
+    shareBtn.onclick=function(){
       navigator.clipboard.writeText(shareUrl).then(()=>toast('🔗 링크가 복사됐습니다!')).catch(()=>toast(shareUrl));
     };
   }
@@ -3059,13 +3062,12 @@ async function openPost(id,section) {
   window.scrollTo(0,0);
 
   const bodyEl=document.getElementById('article-body');
-  // 본문이 캐시에 없으면 fetch
   if(!p.body) {
     bodyEl.innerHTML='<div style="color:var(--s400);font-size:.85rem;padding:20px 0">불러오는 중...</div>';
     const table=section==='posts'?'posts':'papers';
     const {data,error}=await supa.from(table).select('content').eq('id',id).single();
     if(error||!data){ bodyEl.innerHTML='<div style="color:#ef4444">불러오기 실패</div>'; return; }
-    p.body=data.content; // 캐시에 저장 — 다음 열 때 재사용
+    p.body=data.content;
   }
   bodyEl.innerHTML=parseMd((p.body||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n'));
   setTimeout(()=>{
@@ -3737,19 +3739,41 @@ function excerpt(b){if(!b) return '';return b.replace(/#{1,6} /g,'').replace(/\*
 function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
+// ── HASH ROUTING (딥링크) ─────────────────────────────────────────
+function handleHash() {
+  const hash = location.hash.slice(1);
+  if (!hash) return false;
+  const parts = hash.split('/');
+  if (parts.length === 2) {
+    const sec = parts[0];
+    const id  = parseInt(parts[1]);
+    if ((sec === 'posts' || sec === 'paper') && !isNaN(id)) {
+      openPost(id, sec);
+      return true;
+    }
+  }
+  if (['landing','home','posts','paper','media'].includes(hash)) {
+    showSection(hash);
+    return true;
+  }
+  return false;
+}
+
+window.addEventListener('popstate', function() {
+  if (!handleHash()) showSection(currentSection || 'landing');
+});
+
 // ── INIT ──────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   showSaving('⏳ 데이터 불러오는 중...');
   await load();
   hideSaving('✅ 불러오기 완료', 800);
   document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || 'My Blog';
-  // hash 라우팅: URL에 hash가 있으면 해당 글/섹션 바로 열기
   if (!handleHash()) {
     showSection('landing');
   }
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
-  // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
   window.dispatchEvent(new CustomEvent('blog-ready', {
     detail: { name: profile.blogName || profile.name || 'My Blog' }
   }));
@@ -3856,37 +3880,7 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-// ── HASH ROUTING (딥링크) ─────────────────────────────────────────
-function handleHash() {
-  const hash = location.hash.slice(1); // e.g. "posts/1234" or "paper/5678"
-  if (!hash) return false;
-  const parts = hash.split('/');
-  if (parts.length === 2) {
-    const sec = parts[0];
-    const id  = parseInt(parts[1]);
-    if ((sec === 'posts' || sec === 'paper') && !isNaN(id)) {
-      openPost(id, sec);
-      return true;
-    }
-    // section only (e.g. #posts)
-    if (['landing','home','posts','paper','media'].includes(sec)) {
-      showSection(sec);
-      return true;
-    }
-  }
-  if (['landing','home','posts','paper','media'].includes(hash)) {
-    showSection(hash);
-    return true;
-  }
-  return false;
-}
-
-window.addEventListener('popstate', function() {
-  if (!handleHash()) {
-    showSection(currentSection || 'landing');
-  }
-});
-
+// ── 입장 애니메이션 ───────────────────────────────────────────
 (function(){
   var titleEl   = document.getElementById('intro-name-text');
   var markEl    = document.getElementById('intro-mark');
