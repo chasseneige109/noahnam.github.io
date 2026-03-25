@@ -36,8 +36,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .nav-logo{font-family:var(--sans);font-size:1rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;cursor:pointer;display:flex;align-items:center;gap:10px;flex-shrink:0}
 .nav-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-l);animation:pulse-b 2s infinite}
 @keyframes pulse-b{0%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,.7)}70%{transform:scale(1);box-shadow:0 0 0 8px rgba(59,130,246,0)}100%{transform:scale(.95);box-shadow:0 0 0 0 rgba(59,130,246,0)}}
-.nav-tabs{display:flex;gap:2px;margin-left:32px}
-.nav-tab{padding:6px 14px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--sans)}
+.nav-tabs{display:flex;gap:6px;margin-left:44px}
+.nav-tab{padding:6px 20px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s500);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--sans)}
 .nav-tab:hover{color:var(--blue);background:var(--blue-bg)}
 .nav-tab.active{background:var(--blue);color:#fff}
 .nav-spacer{flex:1}
@@ -57,7 +57,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── LAYOUT ── */
-.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 36px}
 .two-col{display:grid;grid-template-columns:280px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
 .three-col-sidebar{display:grid;grid-template-columns:220px 1fr;gap:36px;padding:40px 0 80px;align-items:start}
 
@@ -615,7 +615,29 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .cv-entry[style*="min-height"] { display:flex;flex-direction:column; }
 .cv-entry[style*="min-height"] .cv-entry-desc { flex:1; }
 
-/* ── LANG TOGGLE ── */
+/* ── POST LIST GRID ── */
+.posts-grid-wrap { display: flex; flex-direction: column; gap: 10px; }
+.posts-grid-wrap.cols-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.posts-grid-wrap.cols-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.posts-grid-wrap.cols-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.posts-grid-wrap.cols-2 .post-card,
+.posts-grid-wrap.cols-3 .post-card,
+.posts-grid-wrap.cols-4 .post-card { margin-bottom: 0; }
+@media(max-width:900px){
+  .posts-grid-wrap.cols-3,.posts-grid-wrap.cols-4{grid-template-columns:repeat(2,1fr)!important;}
+}
+@media(max-width:600px){
+  .posts-grid-wrap.cols-2,.posts-grid-wrap.cols-3,.posts-grid-wrap.cols-4{grid-template-columns:1fr!important;}
+}
+
+/* ── POST GRID CONTROL ── */
+.post-col-control{display:none;align-items:center;gap:6px;margin-left:auto}
+.admin-mode .post-col-control{display:flex}
+.col-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--s200);background:#fff;color:var(--s500);font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:var(--mono)}
+.col-btn:hover{border-color:var(--blue);color:var(--blue)}
+.col-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+
 .lang-toggle{display:flex;background:var(--s100);border-radius:20px;padding:3px;gap:2px;margin-right:8px}
 .lang-btn{padding:4px 10px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.06em;border:none;background:none;color:var(--s400);cursor:pointer;font-family:var(--sans);transition:all .2s}
 .lang-btn.active{background:#fff;color:var(--s900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
@@ -1238,6 +1260,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div id="posts-mob-filter" class="mob-filter-bar"></div>
         <div class="filter-bar">
           <span class="filter-label" id="posts-filter-label">Posts</span>
+          <div class="post-col-control" id="posts-col-control"></div>
           <button class="sort-btn" onclick="toggleSort('posts')">최신순 ↕</button>
         </div>
         <div id="posts-list"></div>
@@ -1257,6 +1280,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
            data-en="Notes and summaries of papers I've read.">읽고 정리한 논문들을 기록하는 장소입니다.</p>
         <div class="filter-bar">
           <span class="filter-label" id="paper-filter-label">Paper Review</span>
+          <div class="post-col-control" id="paper-col-control"></div>
           <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
         </div>
         <div id="paper-list"></div>
@@ -1334,9 +1358,12 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
   <div class="article-wrap">
     <div class="article-topbar">
       <button class="btn-back" onclick="goBack()">← 목록으로</button>
-      <div style="display:flex;gap:8px" id="article-admin-btns">
-        <button class="btn-sm admin-only" onclick="editCurrentArticle()">✎ 수정</button>
-        <button class="btn-sm danger admin-only" onclick="deleteCurrentArticle()">✕ 삭제</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="article-share-btn" class="btn-sm" title="링크 복사" style="display:flex;align-items:center;gap:4px">🔗 공유</button>
+        <div id="article-admin-btns" style="display:flex;gap:8px">
+          <button class="btn-sm admin-only" onclick="editCurrentArticle()">✎ 수정</button>
+          <button class="btn-sm danger admin-only" onclick="deleteCurrentArticle()">✕ 삭제</button>
+        </div>
       </div>
     </div>
     <div class="a-tags" id="article-tags"></div>
@@ -1963,6 +1990,7 @@ let deleteExtra     = null;
 let sortDesc        = { posts:true, paper:true };
 let filterCat       = { posts:null, paper:null };
 let filterTag       = { posts:null, paper:null };
+let postGridCols    = { posts: parseInt(localStorage.getItem('blog_grid_posts')||'1'), paper: parseInt(localStorage.getItem('blog_grid_paper')||'1') };
 let isAdmin         = false;
 
 // CV editing state
@@ -2333,6 +2361,7 @@ function _closeMediaLb() {
 }
 
 function goBack() {
+  history.pushState(null,'',location.pathname);
   if(currentSection) showSection(currentSection);
   else showSection('landing');
   setLang(currentLang);
@@ -2784,8 +2813,11 @@ function renderPostsPage() {
   list.sort((a,b)=>sortDesc.posts?b.id-a.id:a.id-b.id);
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Posts (${list.length})`;
   document.getElementById('posts-filter-label').textContent=label;
+  renderColBtns('posts');
+  const cols=postGridCols.posts;
+  const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
   document.getElementById('posts-list').innerHTML=list.length
-    ?list.map(p=>postCardHTML(p,'posts')).join('')
+    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'posts')).join('')+`</div>`
     :`<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
 }
 function renderPaperPage() {
@@ -2798,9 +2830,29 @@ function renderPaperPage() {
   list.sort((a,b)=>sortDesc.paper?b.id-a.id:a.id-b.id);
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Paper Review (${list.length})`;
   document.getElementById('paper-filter-label').textContent=label;
+  renderColBtns('paper');
+  const cols=postGridCols.paper;
+  const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
   document.getElementById('paper-list').innerHTML=list.length
-    ?list.map(p=>postCardHTML(p,'paper')).join('')
+    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'paper')).join('')+`</div>`
     :`<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
+}
+
+function setPostCols(section, cols) {
+  postGridCols[section] = cols;
+  try { localStorage.setItem('blog_grid_'+section, cols); } catch(e){}
+  section==='posts'?renderPostsPage():renderPaperPage();
+}
+
+function renderColBtns(section) {
+  const filterId = section+'-col-control';
+  const el = document.getElementById(filterId);
+  if (!el) return;
+  const cur = postGridCols[section];
+  el.innerHTML = [1,2,3,4].map(n => {
+    const icons = ['▬','⊟','⊞','⊟⊟'];
+    return `<button class="col-btn ${cur===n?'active':''}" onclick="setPostCols('${section}',${n})" title="${n}열">${icons[n-1]}</button>`;
+  }).join('');
 }
 
 function postCardHTML(p,section) {
@@ -2986,10 +3038,20 @@ async function openPost(id,section) {
   const p=list.find(x=>x.id===id);
   if(!p) return;
   currentPostId=id; currentSection=section;
+  // URL hash 업데이트
+  history.pushState(null,'','#'+section+'/'+id);
   document.getElementById('article-tags').innerHTML=
     (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')+(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join('');
   document.getElementById('article-title').textContent=p.title;
   document.getElementById('article-date').textContent=fmtDate(p.createdAt);
+  // 공유 링크 버튼
+  const shareUrl = location.origin + location.pathname + '#' + section + '/' + id;
+  const shareBtn = document.getElementById('article-share-btn');
+  if(shareBtn) {
+    shareBtn.onclick = function(){
+      navigator.clipboard.writeText(shareUrl).then(()=>toast('🔗 링크가 복사됐습니다!')).catch(()=>toast(shareUrl));
+    };
+  }
   renderPaperMeta(p, section);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
@@ -3681,7 +3743,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await load();
   hideSaving('✅ 불러오기 완료', 800);
   document.getElementById('nav-blog-name').textContent = profile.blogName || profile.name || 'My Blog';
-  showSection('landing');
+  // hash 라우팅: URL에 hash가 있으면 해당 글/섹션 바로 열기
+  if (!handleHash()) {
+    showSection('landing');
+  }
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
   // 인트로 — 데이터 로드 완료 시 이름 동기화 후 퇴장
@@ -3791,7 +3856,37 @@ particlesJS("particles-js",{
 </script>
 
 <script>
-// ── 입장 애니메이션 ───────────────────────────────────────────
+// ── HASH ROUTING (딥링크) ─────────────────────────────────────────
+function handleHash() {
+  const hash = location.hash.slice(1); // e.g. "posts/1234" or "paper/5678"
+  if (!hash) return false;
+  const parts = hash.split('/');
+  if (parts.length === 2) {
+    const sec = parts[0];
+    const id  = parseInt(parts[1]);
+    if ((sec === 'posts' || sec === 'paper') && !isNaN(id)) {
+      openPost(id, sec);
+      return true;
+    }
+    // section only (e.g. #posts)
+    if (['landing','home','posts','paper','media'].includes(sec)) {
+      showSection(sec);
+      return true;
+    }
+  }
+  if (['landing','home','posts','paper','media'].includes(hash)) {
+    showSection(hash);
+    return true;
+  }
+  return false;
+}
+
+window.addEventListener('popstate', function() {
+  if (!handleHash()) {
+    showSection(currentSection || 'landing');
+  }
+});
+
 (function(){
   var titleEl   = document.getElementById('intro-name-text');
   var markEl    = document.getElementById('intro-mark');
