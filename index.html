@@ -276,6 +276,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--s300);border-radius:3px}
+
+/* ── VISITOR COUNTER ── */
+.visitor-counter-wrap{display:flex;align-items:center;gap:8px;padding:5px 12px;background:rgba(255,255,255,.7);border:1px solid var(--s200);border-radius:20px;font-size:.68rem;font-weight:600;color:var(--s500);backdrop-filter:blur(8px)}
+.visitor-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;flex-shrink:0;animation:pulse-g 2s infinite}
+@keyframes pulse-g{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.visitor-count{font-family:var(--mono);font-weight:700;color:var(--s700)}
+
+/* ── VISITOR LOG MODAL ── */
+.vlog-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.vlog-table th{text-align:left;padding:7px 10px;border-bottom:2px solid var(--s200);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s400)}
+.vlog-table td{padding:7px 10px;border-bottom:1px solid var(--s100);color:var(--s700)}
+.vlog-table tr:last-child td{border-bottom:none}
+.vlog-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:8px;font-size:.58rem;font-weight:700}
+.vlog-badge.new{background:#dcfce7;color:#16a34a}
+.vlog-badge.today{background:#eff6ff;color:#2563eb}
+.vlog-empty{text-align:center;padding:30px;color:var(--s400);font-size:.78rem}
 /* ── RESPONSIVE ── */
 @media(max-width:860px){
   .two-col,.three-col-sidebar{grid-template-columns:1fr}
@@ -1138,6 +1154,12 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <button id="lang-ko" class="lang-btn active" onclick="setLang('ko')">KO</button>
     <button id="lang-en" class="lang-btn" onclick="setLang('en')">EN</button>
   </div>
+  <!-- 방문자 카운터 -->
+  <div class="visitor-counter-wrap" id="visitor-counter-wrap" style="display:none" title="총 방문자 수 (본인 기기 제외)">
+    <span class="visitor-dot"></span>
+    <span id="visitor-count-el" class="visitor-count">-</span>
+    <span>명</span>
+  </div>
   <button class="btn-unlock" id="btn-unlock" onclick="openPwModal()">🔒</button>
 </nav>
 <!-- 모바일 바텀 네비 -->
@@ -1720,6 +1742,37 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('modal-delete')">취소</button>
       <button class="btn-primary" style="background:#ef4444" onclick="confirmDelete()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 방문자 로그 모달 (관리자 전용) -->
+<div id="modal-visitor-log" class="modal-overlay" style="display:none" onclick="closeModal('modal-visitor-log',event)">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-drag-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin-bottom:0">👥 방문자 기록</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:.68rem;color:var(--s400);font-family:var(--mono)" id="vlog-total-label"></span>
+        <button onclick="clearVisitorLog()" style="padding:4px 10px;border-radius:8px;font-size:.62rem;font-weight:700;background:none;color:#ef4444;border:1px solid #fecaca;cursor:pointer">초기화</button>
+      </div>
+    </div>
+    <p style="font-size:.72rem;color:var(--s500);margin-bottom:12px;line-height:1.6">본인 기기(노트북·태블릿·휴대폰)를 제외한 외부 방문자 기록입니다.</p>
+    <div style="max-height:380px;overflow-y:auto;border-radius:var(--r);border:1px solid var(--s200)">
+      <table class="vlog-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>방문 시각</th>
+            <th>기기</th>
+            <th>국가</th>
+          </tr>
+        </thead>
+        <tbody id="vlog-tbody"></tbody>
+      </table>
+    </div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn-secondary" onclick="closeModal('modal-visitor-log')">닫기</button>
     </div>
   </div>
 </div>
@@ -3733,7 +3786,166 @@ function openPdf(type, src) {
   }
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────
+// ── VISITOR COUNTER ───────────────────────────────────────────────
+// 본인 기기 식별 키 (로컬스토리지에 저장)
+const OWNER_KEY = 'blog_is_owner_device';
+
+// 이 기기가 소유자 기기인지 확인
+function isOwnerDevice() {
+  return localStorage.getItem(OWNER_KEY) === 'true';
+}
+
+// 관리자 로그인 성공 시 소유자 기기로 표시
+function markAsOwnerDevice() {
+  localStorage.setItem(OWNER_KEY, 'true');
+}
+
+// 방문자 UA 분석 (기기 종류)
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  if (/Mobi|Android|iPhone/i.test(ua)) return '📱 모바일';
+  if (/iPad|Tablet/i.test(ua)) return '📟 태블릿';
+  return '💻 PC';
+}
+
+// 방문 기록 추가 (소유자 기기가 아닐 때만)
+async function recordVisit() {
+  if (isOwnerDevice()) {
+    // 소유자 기기: 카운터만 표시 (기록 안 함)
+    loadVisitorCount();
+    return;
+  }
+
+  try {
+    const now = new Date().toISOString();
+    const device = getDeviceType();
+
+    // 국가 정보 시도 (실패해도 계속)
+    let country = '알 수 없음';
+    try {
+      const res = await Promise.race([
+        fetch('https://ipapi.co/json/'),
+        new Promise((_, rej) => setTimeout(rej, 2000))
+      ]);
+      if (res.ok) {
+        const data = await res.json();
+        country = data.country_name || '알 수 없음';
+      }
+    } catch(e) {}
+
+    // Supabase visitors 테이블에 기록
+    await supa.from('visitors').insert([{
+      visited_at: now,
+      device: device,
+      country: country
+    }]);
+  } catch(e) {
+    console.warn('Visitor record failed:', e);
+  }
+
+  loadVisitorCount();
+}
+
+// 방문자 수 로드 및 표시
+async function loadVisitorCount() {
+  try {
+    const { count, error } = await supa
+      .from('visitors')
+      .select('id', { count: 'exact', head: true });
+
+    if (error) throw error;
+
+    const el = document.getElementById('visitor-count-el');
+    const wrap = document.getElementById('visitor-counter-wrap');
+    if (el) el.textContent = (count || 0).toLocaleString();
+    if (wrap) wrap.style.display = 'flex';
+  } catch(e) {
+    console.warn('Visitor count load failed:', e);
+  }
+}
+
+// 관리자용: 방문자 로그 열기
+async function openVisitorLog() {
+  document.getElementById('modal-visitor-log').style.display = 'flex';
+  const tbody = document.getElementById('vlog-tbody');
+  const totalLabel = document.getElementById('vlog-total-label');
+  tbody.innerHTML = '<tr><td colspan="4" class="vlog-empty">불러오는 중...</td></tr>';
+
+  try {
+    const { data, count, error } = await supa
+      .from('visitors')
+      .select('*', { count: 'exact' })
+      .order('visited_at', { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+
+    if (totalLabel) totalLabel.textContent = `총 ${(count || 0).toLocaleString()}명`;
+
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="vlog-empty">방문 기록이 없습니다.</td></tr>';
+      return;
+    }
+
+    const now = new Date();
+    tbody.innerHTML = data.map((row, i) => {
+      const d = new Date(row.visited_at);
+      const isToday = d.toDateString() === now.toDateString();
+      const diffMin = Math.floor((now - d) / 60000);
+      const isNew = diffMin < 60;
+
+      const ts = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} `
+               + `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+
+      const badge = isNew
+        ? '<span class="vlog-badge new">NEW</span>'
+        : isToday
+          ? '<span class="vlog-badge today">오늘</span>'
+          : '';
+
+      return `<tr>
+        <td style="color:var(--s400);font-family:var(--mono)">${data.length - i}</td>
+        <td style="font-family:var(--mono)">${ts} ${badge}</td>
+        <td>${row.device || '-'}</td>
+        <td>${row.country || '-'}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="4" class="vlog-empty">불러오기 실패: ${e.message}</td></tr>`;
+  }
+}
+
+// 방문자 로그 초기화 (관리자 전용)
+async function clearVisitorLog() {
+  if (!confirm('방문자 기록을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+  try {
+    const { error } = await supa.from('visitors').delete().gt('id', 0);
+    if (error) throw error;
+    toast('방문자 기록이 초기화됐습니다.');
+    openVisitorLog();
+    loadVisitorCount();
+  } catch(e) {
+    toast('초기화 실패: ' + e.message);
+  }
+}
+
+// 관리자 로그인 시 소유자 기기로 마킹 + 로그 버튼 표시
+const _enterAdminOrig = window.enterAdmin;
+window.enterAdmin = function() {
+  _enterAdminOrig.call(this);
+  markAsOwnerDevice();
+  // 관리자 컨트롤에 방문자 로그 버튼 추가
+  const adminControls = document.getElementById('admin-controls');
+  if (adminControls && !document.getElementById('btn-visitor-log')) {
+    const btn = document.createElement('button');
+    btn.id = 'btn-visitor-log';
+    btn.className = 'btn-admin-toggle';
+    btn.textContent = '👥 방문자';
+    btn.onclick = openVisitorLog;
+    adminControls.insertBefore(btn, adminControls.firstChild);
+  }
+};
+
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function excerpt(b){if(!b) return '';return b.replace(/#{1,6} /g,'').replace(/\*\*/g,'').replace(/\*/g,'').replace(/`/g,'').replace(/\$\$[\s\S]*?\$\$/g,'[수식]').replace(/\$[^$]+\$/g,'[수식]').substring(0,110).trim()+'...';}
 function fmtDate(ts){const d=new Date(ts);return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
@@ -3772,6 +3984,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!handleHash()) {
     showSection('landing');
   }
+  // 방문자 기록 (소유자 기기 여부 자동 판별)
+  recordVisit();
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
   window.dispatchEvent(new CustomEvent('blog-ready', {
