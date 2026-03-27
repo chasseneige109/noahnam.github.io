@@ -3846,8 +3846,9 @@ async function recordVisit() {
   loadVisitorCount();
 }
 
-// 방문자 수 로드 및 표시
+// 방문자 수 로드 및 표시 (관리자 모드일 때만)
 async function loadVisitorCount() {
+  if (!isAdmin) return;
   try {
     const { count, error } = await supa
       .from('visitors')
@@ -4074,6 +4075,8 @@ particlesJS("particles-js",{
     _lock.call(this);
     var fab=document.getElementById('mbn-fab');
     if(fab) fab.classList.remove('show');
+    var wrap=document.getElementById('visitor-counter-wrap');
+    if(wrap) wrap.style.display='none';
   };
 
   var _op=window.openPost;
