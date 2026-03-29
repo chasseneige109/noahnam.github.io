@@ -1113,91 +1113,7 @@ button, a, label { touch-action: manipulation; }
   .media-page-wrap{padding:24px 14px 80px}
 }
 
-/* ── DARK MODE TOGGLE BTN ── */
-.btn-darkmode{padding:6px 9px;border-radius:20px;font-size:.82rem;border:1px solid var(--s200);background:none;cursor:pointer;transition:all .2s;line-height:1;flex-shrink:0}
-.btn-darkmode:hover{border-color:var(--blue);background:var(--blue-bg)}
-
-/* ── DARK MODE ── */
-[data-theme="dark"]{
-  --blue:#3b82f6;--blue-l:#60a5fa;--blue-bg:rgba(37,99,235,.15);
-  --s900:#f1f5f9;--s800:#e2e8f0;--s700:#cbd5e1;--s600:#94a3b8;
-  --s500:#64748b;--s400:#475569;--s300:#334155;--s200:#1e293b;--s100:#162032;
-  --bg:#0f172a;
-  --shadow:0 2px 8px rgba(0,0,0,.3);--shadow-lg:0 12px 40px rgba(0,0,0,.4);
-}
-[data-theme="dark"] body{background:var(--bg);color:var(--s800)}
-[data-theme="dark"] .topnav{background:rgba(15,23,42,.9);border-bottom-color:var(--s200)}
-[data-theme="dark"] .gc,
-[data-theme="dark"] .cv-entry,
-[data-theme="dark"] .profile-card,
-[data-theme="dark"] .links-card,
-[data-theme="dark"] .cat-card,
-[data-theme="dark"] .tag-card,
-[data-theme="dark"] .folder-card,
-[data-theme="dark"] .landing-card,
-[data-theme="dark"] .recent-card,
-[data-theme="dark"] .post-card,
-[data-theme="dark"] .landing-author-card,
-[data-theme="dark"] .media-card,
-[data-theme="dark"] .media-add-form{background:rgba(30,41,59,.85);border-color:rgba(255,255,255,.07)}
-[data-theme="dark"] .modal{background:#1e293b;color:var(--s800)}
-[data-theme="dark"] .form-input,
-[data-theme="dark"] .form-textarea,
-[data-theme="dark"] .cat-new-inp,
-[data-theme="dark"] .media-add-inp,
-[data-theme="dark"] .media-add-textarea,
-[data-theme="dark"] .paper-field-inp,
-[data-theme="dark"] .paper-summary-inp,
-[data-theme="dark"] .editor-title-inp,
-[data-theme="dark"] .editor-body-ta{background:#0f172a;border-color:var(--s200);color:var(--s800)}
-[data-theme="dark"] .btn-sm,
-[data-theme="dark"] .cat-sel-btn,
-[data-theme="dark"] .span-btn,
-[data-theme="dark"] .height-btn,
-[data-theme="dark"] .colstart-btn,
-[data-theme="dark"] .col-btn{background:#1e293b;border-color:var(--s200);color:var(--s600)}
-[data-theme="dark"] .lang-btn.active{background:#1e293b;color:var(--s900);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-[data-theme="dark"] .layout-btn{background:var(--s100)}
-[data-theme="dark"] .layout-btn.active{background:#1e293b;color:var(--s700);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-[data-theme="dark"] .math-block{background:rgba(30,41,59,.8);border-color:var(--s200)}
-[data-theme="dark"] .paper-summary-box{background:#1e293b;border-color:var(--s200)}
-[data-theme="dark"] .visitor-counter-wrap{background:rgba(30,41,59,.7);border-color:var(--s200)}
-[data-theme="dark"] .mbn-wrap{background:rgba(15,23,42,.97);border-top-color:var(--s200)}
-[data-theme="dark"] .mbn-btn{color:var(--s600)}
-[data-theme="dark"] .mbn-btn.on{color:var(--blue)}
-[data-theme="dark"] #intro-overlay{background:#0f172a}
-[data-theme="dark"] .intro-title{color:#f1f5f9}
-[data-theme="dark"] .draft-list-panel{background:#1e293b;border-color:#334155}
-[data-theme="dark"] .draft-list-title{color:#94a3b8}
-[data-theme="dark"] .draft-item{background:#0f172a;border-color:#334155}
-[data-theme="dark"] .draft-item:hover{background:#162032}
-[data-theme="dark"] .draft-item-meta{color:#64748b}
-[data-theme="dark"] .draft-bar{background:var(--s100);border-color:var(--s200)}
-[data-theme="dark"] .a-body code{background:var(--s200);color:#60a5fa}
-[data-theme="dark"] .a-body pre{background:#020617}
-[data-theme="dark"] .entry-style-opt .esp-preview{background:#1e293b;border-color:var(--s200)}
-[data-theme="dark"] .upload-area{border-color:var(--s300)}
-[data-theme="dark"] .cv-entry.style-text,
-[data-theme="dark"] .cv-entry.style-minimal,
-[data-theme="dark"] .cv-entry.style-line{background:transparent!important;border-color:var(--s200)!important}
-[data-theme="dark"] .btn-add-section,
-[data-theme="dark"] .btn-add-entry{background:rgba(30,41,59,.6);border-color:var(--s300)}
-[data-theme="dark"] .admin-badge{background:#1c1a0a;border-color:#78350f;color:#fbbf24}
-[data-theme="dark"] .paper-meta-box{background:rgba(37,99,235,.12);border-color:rgba(59,130,246,.25)}
-[data-theme="dark"] .pc-paper-venue{background:var(--s200);color:var(--s600)}
-[data-theme="dark"] .tag-chip{background:var(--s200);color:var(--s600)}
-[data-theme="dark"] .cat-count,.folder-count,.folder-all-count{background:var(--s200);color:var(--s500)}
-[data-theme="dark"] .a-body blockquote{color:var(--s600)}
-[data-theme="dark"] .media-card-media{background:var(--s200)}
-[data-theme="dark"] .media-admin-btn{background:rgba(30,41,59,.9);color:var(--s600)}
 </style>
-<script>
-// 다크모드 초기화 (flash 방지)
-(function(){
-  var t=localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
-  if(t==='dark')document.documentElement.setAttribute('data-theme','dark');
-})();
-</script>
 <script>
 // 핀치줌, 더블탭줌 완전 차단
 document.addEventListener('gesturestart',  function(e){e.preventDefault();},{passive:false});
@@ -1244,7 +1160,6 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     <span id="visitor-count-el" class="visitor-count">-</span>
     <span>명</span>
   </div>
-  <button class="btn-darkmode" id="btn-darkmode" onclick="toggleDarkMode()" title="다크모드 전환">🌙</button>
   <button class="btn-unlock" id="btn-unlock" onclick="openPwModal()">🔒</button>
 </nav>
 <!-- 모바일 바텀 네비 -->
@@ -1866,21 +1781,6 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <div class="toast" id="toast"></div>
 
 <script>
-// ── DARK MODE ──────────────────────────────────────────────────────
-function toggleDarkMode() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  const btn = document.getElementById('btn-darkmode');
-  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
-}
-// 버튼 아이콘 초기화
-document.addEventListener('DOMContentLoaded', function() {
-  const btn = document.getElementById('btn-darkmode');
-  if (btn && document.documentElement.getAttribute('data-theme') === 'dark') btn.textContent = '☀️';
-});
-
 // ── SUPABASE ──────────────────────────────────────────────────────
 const SUPA_URL = 'https://wsppvddkqvjikstheqka.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcHB2ZGRrcXZqaWtzdGhlcWthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDUwNTMsImV4cCI6MjA4ODQ4MTA1M30.PPidd4mQebBeoAEEqS6NPJdEaT3qr7Db7RsYlO0MWRE';
