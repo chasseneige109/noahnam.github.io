@@ -1785,25 +1785,15 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     </div>
 
     <div id="media-pdf" style="display:none">
-      <div class="upload-zone" id="pdf-upload-zone"
-        ondragover="event.preventDefault();this.classList.add('drag')"
-        ondragleave="this.classList.remove('drag')"
-        ondrop="handlePdfDrop(event)">
-        <input type="file" accept=".pdf,application/pdf" onchange="handlePdfFile(event)">
-        <span class="upload-zone-icon">📄</span>
-        <div class="upload-zone-text"><strong>클릭하거나 PDF를 드래그</strong></div>
-        <div class="upload-zone-sub">Supabase Storage에 자동 업로드</div>
-      </div>
-      <div class="upload-progress-wrap" id="pdf-upload-progress">
-        <div class="upload-progress-bar-outer"><div class="upload-progress-bar-inner" id="pdf-progress-bar"></div></div>
-        <div class="upload-progress-label" id="pdf-upload-status">업로드 중...</div>
-      </div>
+      <p style="font-size:.75rem;color:var(--s500);line-height:1.7;margin-bottom:10px;padding:10px 12px;background:var(--blue-bg);border-radius:var(--r);border-left:3px solid var(--blue)">
+        📎 arXiv · Google Drive · 학회 사이트 등 링크를 그대로 붙여넣으세요.<br>
+        <span style="font-size:.68rem;color:var(--s400)">예) arxiv.org/abs/2301.xxxxx &nbsp;·&nbsp; drive.google.com/file/d/...</span>
+      </p>
+      <label class="form-label">PDF URL</label>
+      <input class="form-input" id="media-pdf-url" placeholder="https://arxiv.org/abs/... 또는 Google Drive 링크" oninput="onPdfUrlInput(this.value)">
+      <div id="pdf-link-preview" style="display:none;margin:6px 0;padding:8px 12px;background:var(--s100);border-radius:var(--r);font-size:.75rem;color:var(--s600);word-break:break-all"></div>
       <label class="form-label" style="margin-top:8px">표시 이름</label>
       <input class="form-input" id="media-pdf-label" placeholder="논문 제목 등...">
-      <details style="margin-top:4px">
-        <summary style="font-size:.68rem;color:var(--s400);cursor:pointer">URL로 직접 입력 (Google Drive 등)</summary>
-        <input class="form-input" style="margin-top:6px" id="media-pdf-url" placeholder="https://drive.google.com/file/d/...">
-      </details>
       <span id="media-pdf-name" style="font-size:.7rem;color:var(--blue);margin-top:4px;display:block"></span>
     </div>
 
@@ -3969,6 +3959,18 @@ function extractYoutubeId(url) {
   return m ? m[1] : null;
 }
 
+function onPdfUrlInput(url) {
+  const preview = document.getElementById('pdf-link-preview');
+  url = url.trim();
+  if (!url) { preview.style.display = 'none'; return; }
+  let hint = url;
+  if (/arxiv\.org\/abs\//.test(url)) hint = '📄 arXiv 논문 — PDF로 자동 변환됩니다';
+  else if (/drive\.google\.com/.test(url)) hint = '📁 Google Drive 링크 — 뷰어로 자동 변환됩니다';
+  else if (url.endsWith('.pdf')) hint = '📄 직접 PDF 링크';
+  preview.textContent = hint;
+  preview.style.display = 'block';
+}
+
 async function handleMediaFile(e) {
   const files = Array.from(e.target.files);
   if (!files.length) return;
@@ -3983,12 +3985,7 @@ async function handleImgDrop(e) {
   await uploadImageFiles(files);
 }
 
-function handlePdfDrop(e) {
-  e.preventDefault();
-  document.getElementById('pdf-upload-zone').classList.remove('drag');
-  const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
-  if (file) handlePdfFile({target:{files:[file]}});
-}
+function handlePdfDrop(e) { /* PDF는 링크 방식으로 변경됨 */ }
 
 async function uploadImageFiles(files) {
   const grid = document.getElementById('img-thumb-grid');
@@ -4027,26 +4024,7 @@ function removeUploadedImg(idx) {
   });
 }
 
-async function handlePdfFile(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const progress = document.getElementById('pdf-upload-progress');
-  const bar = document.getElementById('pdf-progress-bar');
-  const label = document.getElementById('pdf-upload-status');
-  progress.style.display = 'block';
-  bar.style.width = '40%';
-  label.textContent = '업로드 중...';
-  if (!document.getElementById('media-pdf-label').value) {
-    document.getElementById('media-pdf-label').value = file.name.replace('.pdf','');
-  }
-  const filename = `${Date.now()}_${file.name}`;
-  const { data, error } = await supa.storage.from('blog-images').upload(filename, file, {contentType:'application/pdf',upsert:false});
-  if (error) { toast('❌ PDF 업로드 실패: ' + error.message); progress.style.display='none'; return; }
-  const { data: urlData } = supa.storage.from('blog-images').getPublicUrl(filename);
-  document.getElementById('media-pdf-url').value = urlData.publicUrl;
-  document.getElementById('media-pdf-name').textContent = '✓ ' + file.name;
-  bar.style.width = '100%';
-  label.textContent = '✓ 완료';
-  setTimeout(() => { progress.style.display = 'none'; }, 1200);
+async function handlePdfFile(e) { /* PDF는 링크 방식으로 변경됨 */
 }
 
 function confirmInsertMedia() {
@@ -4071,8 +4049,10 @@ function confirmInsertMedia() {
     let src = document.getElementById('media-pdf-url').value.trim();
     const label = document.getElementById('media-pdf-label').value.trim() || 'PDF 파일';
     if (!src) { toast('PDF URL을 입력하세요.'); return; }
+    // arXiv abs → pdf URL로 변환
+    src = src.replace(/arxiv\.org\/abs\/([^\s?]+)/, 'arxiv.org/pdf/$1');
     // Google Drive 공유 링크 → embed URL로 변환
-    const gdMatch = src.match(/\/file\/d\/([^/]+)/);
+    const gdMatch = src.match(/\/file\/d\/([^/?]+)/);
     if (gdMatch) src = `https://drive.google.com/file/d/${gdMatch[1]}/preview`;
     tag = `\n%%PDF%%${src}%%${label}%%\n`;
   }
