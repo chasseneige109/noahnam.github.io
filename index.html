@@ -60,6 +60,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .wrap{max-width:1440px;margin:0 auto;padding:0 24px}
 .two-col{display:grid;grid-template-columns:300px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
 .three-col-sidebar{display:grid;grid-template-columns:260px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
+/* Home / Me: 원래 좁은 레이아웃 유지 */
+#page-home .wrap,#page-me .wrap{max-width:1100px}
+#page-home .two-col{grid-template-columns:280px 1fr;gap:44px}
 
 /* ── GLASS CARD ── */
 .gc{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow)}
@@ -207,8 +210,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .math-block{overflow-x:auto;padding:18px 22px;background:rgba(255,255,255,.8);border:1px solid var(--s200);border-left:3px solid #93c5fd;border-radius:0 12px 12px 0;margin:1.7em 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
 
 /* ── EDITOR ── */
-.editor-wrap{max-width:840px;margin:0 auto;padding:0 24px 80px}
+.editor-wrap{max-width:1200px;margin:0 auto;padding:0 24px 80px}
 .editor-topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px;border-bottom:1px solid var(--s200);margin-bottom:26px}
+/* split-pane live preview */
+.editor-split{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--s200);border-radius:var(--r2);overflow:hidden;min-height:520px;margin-bottom:10px}
+.editor-split-left{border-right:1px solid var(--s200);display:flex;flex-direction:column}
+.editor-split-right{overflow-y:auto;padding:20px 24px;background:rgba(255,255,255,.6);display:flex;flex-direction:column}
+.editor-split-label{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);padding:6px 12px;background:var(--s100);border-bottom:1px solid var(--s200);flex-shrink:0}
+.editor-split-right .editor-split-label{margin:-20px -24px 16px;padding:6px 24px}
+.editor-split-right .a-body:empty::after{content:'미리보기가 여기에 실시간으로 표시됩니다...';color:var(--s300);font-family:var(--sans);font-size:.85rem;font-style:italic}
+@media(max-width:860px){.editor-split{grid-template-columns:1fr}.editor-split-left{border-right:none;border-bottom:1px solid var(--s200)}.editor-split-right{min-height:200px}}
 .editor-mode{font-family:var(--mono);font-size:.62rem;color:var(--s400)}
 .btn-pub{padding:8px 20px;background:var(--blue);color:#fff;border:none;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all .2s}
 .btn-pub:hover{background:#1d4ed8;transform:translateY(-1px)}
@@ -242,7 +253,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-tabs-row{display:flex;border-bottom:1px solid var(--s200)}
 .editor-tab{padding:7px 15px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);color:var(--s400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none}
 .editor-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.editor-body-ta{width:100%;min-height:500px;font-family:var(--mono);font-size:.88rem;color:var(--s900);border:none;outline:none;background:transparent;line-height:2;resize:vertical;padding:18px 0}
+.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--mono);font-size:.88rem;color:var(--s900);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 20px;tab-size:2}
 .editor-body-ta::placeholder{color:var(--s300)}
 .e-preview{display:none;padding:18px 0;min-height:200px}
 .e-preview.active{display:block}
@@ -466,6 +477,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-add-sub{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;font-size:.6rem;font-weight:700;color:var(--s400);background:none;border:1px solid var(--s300);cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
 .admin-mode .folder-row:hover .folder-add-sub{display:flex}
 .folder-add-sub:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+/* 폴더 rename/delete 버튼 */
+.folder-mgmt{display:none;align-items:center;gap:2px;flex-shrink:0}
+.admin-mode .folder-row:hover .folder-mgmt{display:flex}
+.folder-mgmt-btn{width:18px;height:18px;border-radius:4px;border:1px solid var(--s200);background:#fff;color:var(--s400);font-size:.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;line-height:1}
+.folder-mgmt-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
+.folder-mgmt-btn.danger:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2}
 
 .folder-posts{padding-left:22px;overflow:hidden;transition:max-height .25s ease}
 .folder-post-item{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s}
@@ -1481,10 +1498,6 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <span id="editor-tag-list"></span>
       <input class="tag-inp" id="editor-tag-inp" placeholder="태그 입력 후 Enter..." onkeydown="handleTagInput(event)">
     </div>
-    <div class="editor-tabs-row">
-      <button class="editor-tab active" onclick="switchTab('write',this)">작성</button>
-      <button class="editor-tab" onclick="switchTab('preview',this)">미리보기</button>
-    </div>
     <div class="editor-toolbar">
       <button class="tb-btn" onclick="ins('## ','')">H2</button>
       <button class="tb-btn" onclick="ins('### ','')">H3</button>
@@ -1504,9 +1517,17 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <button class="tb-btn" onclick="insertMedia('pdf')">📄 PDF</button>
       <button class="tb-btn" onclick="insertMedia('link')">🔗 링크</button>
     </div>
-    <textarea class="editor-body-ta" id="editor-body" placeholder="마크다운으로 작성하세요...&#10;&#10;$E=mc^2$ 또는 $$\int f(x)dx$$"></textarea>
-    <div class="e-preview a-body" id="editor-preview"></div>
-    <div class="editor-hint">마크다운 지원 · 수식: $...$ (인라인) / $$...$$ (블록) · Enter로 태그 추가</div>
+    <div class="editor-split">
+      <div class="editor-split-left">
+        <div class="editor-split-label">✏ 작성</div>
+        <textarea class="editor-body-ta" id="editor-body" placeholder="마크다운으로 작성하세요...&#10;&#10;$E=mc^2$ 또는 $$\int f(x)dx$$" oninput="updateLivePreview()"></textarea>
+      </div>
+      <div class="editor-split-right">
+        <div class="editor-split-label">👁 미리보기</div>
+        <div class="a-body" id="editor-preview"></div>
+      </div>
+    </div>
+    <div class="editor-hint">마크다운 · 수식: $...$ (인라인) / $$...$$ (블록) · 왼쪽 작성 → 오른쪽 실시간 미리보기</div>
   </div>
 </div>
 
@@ -2859,6 +2880,10 @@ function renderFolderNode(node, list, section, fc, level) {
       <span class="folder-name">${esc(node.name)}</span>
       <span class="folder-count">${cnt}</span>
       <button class="folder-add-sub" title="하위 폴더 추가" onclick="event.stopPropagation();addSubFolder('${section}','${escapedPath.replace(/'/g,"\\'")}')">+</button>
+      <div class="folder-mgmt" onclick="event.stopPropagation()">
+        <button class="folder-mgmt-btn" title="이름 변경" onclick="renameFolderCat('${section}','${path.replace(/'/g,"\\'")}')">✎</button>
+        <button class="folder-mgmt-btn danger" title="폴더 삭제" onclick="deleteFolderCat('${section}','${path.replace(/'/g,"\\'")}')">✕</button>
+      </div>
     </div>`;
 
   // Children subtree
@@ -3228,11 +3253,11 @@ function openWrite(sectionHint) {
   else editingSection='posts';
   document.getElementById('editor-title').value='';
   document.getElementById('editor-body').value='';
+  document.getElementById('editor-preview').innerHTML='';
   document.getElementById('editor-mode-label').textContent='새 글 작성';
   clearPaperFields();
   selectSection(editingSection,document.getElementById('sec-btn-'+editingSection));
   renderEditorCats(); renderEditorTags();
-  switchTab('write',document.querySelector('.editor-tab'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-write').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -3261,11 +3286,11 @@ async function openEdit(id,section) {
   selectSection(section,document.getElementById('sec-btn-'+section));
   renderEditorCats(); renderEditorTags();
   if(section==='paper') fillPaperFields(p);
-  switchTab('write',document.querySelector('.editor-tab'));
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   document.getElementById('page-write').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   window.scrollTo(0,0);
+  updateLivePreview();
   // draft: 수정 중엔 restore 배너 안 띄움, watcher만
   draftDirty=false;
   draftStartWatcher();
@@ -3574,9 +3599,67 @@ async function deleteCat(cat){
   categories[editingSection]=(categories[editingSection]||[]).filter(c=>c!==cat);
   if(editorCat===cat) editorCat='';
   save(); renderEditorCats();
-  // DB에서도 삭제
   await supa.from('categories').delete().eq('id', editingSection+'_'+cat);
   toast('카테고리 삭제됨');
+}
+
+// ── FOLDER RENAME / DELETE (사이드바용) ───────────────────────────
+async function renameFolderCat(section, oldPath) {
+  const newName = prompt(`"${oldPath}" 폴더 이름 변경:`, oldPath.split('/').pop());
+  if (!newName || !newName.trim()) return;
+  const parts = oldPath.split('/');
+  parts[parts.length - 1] = newName.trim();
+  const newPath = parts.join('/');
+  if (newPath === oldPath) return;
+  const cats = categories[section] || [];
+  // 이 폴더와 하위 폴더 경로 모두 교체
+  categories[section] = cats.map(c => {
+    if (c === oldPath) return newPath;
+    if (c.startsWith(oldPath + '/')) return newPath + c.slice(oldPath.length);
+    return c;
+  });
+  // 해당 섹션 글들의 cat도 업데이트
+  const list = section === 'posts' ? posts : papers;
+  list.forEach(p => {
+    if (p.cat === oldPath) p.cat = newPath;
+    else if (p.cat && p.cat.startsWith(oldPath + '/')) p.cat = newPath + p.cat.slice(oldPath.length);
+  });
+  save(); await saveCategories();
+  // 글 DB 업데이트
+  const changed = list.filter(p => p.cat === newPath || (p.cat && p.cat.startsWith(newPath + '/')));
+  for (const p of changed) {
+    await supa.from(section === 'posts' ? 'posts' : 'papers').update({ cat: p.cat }).eq('id', p.id);
+  }
+  section === 'posts' ? renderPostsPage() : renderPaperPage();
+  toast('폴더 이름 변경됨');
+}
+
+async function deleteFolderCat(section, path) {
+  if (!confirm(`"${path}" 폴더를 삭제할까요?\n글은 삭제되지 않으며, 해당 글들은 미분류 상태가 됩니다.`)) return;
+  const cats = categories[section] || [];
+  // 이 폴더와 하위 폴더 카테고리 모두 제거
+  const removed = cats.filter(c => c === path || c.startsWith(path + '/'));
+  categories[section] = cats.filter(c => c !== path && !c.startsWith(path + '/'));
+  // 해당 섹션 글들의 cat 초기화 (글은 유지, cat만 제거)
+  const list = section === 'posts' ? posts : papers;
+  const affected = [];
+  list.forEach(p => {
+    if (p.cat === path || (p.cat && p.cat.startsWith(path + '/'))) {
+      p.cat = '';
+      affected.push(p);
+    }
+  });
+  save(); await saveCategories();
+  // 글 DB에서 cat 초기화
+  for (const p of affected) {
+    await supa.from(section === 'posts' ? 'posts' : 'papers').update({ cat: '' }).eq('id', p.id);
+  }
+  // 삭제된 카테고리 DB에서도 제거
+  for (const c of removed) {
+    await supa.from('categories').delete().eq('id', section + '_' + c);
+  }
+  section === 'posts' ? renderPostsPage() : renderPaperPage();
+  toast(`폴더 삭제됨 (글 ${affected.length}개는 미분류로 이동)`);
 }
 function renderEditorTags(){
   document.getElementById('editor-tag-list').innerHTML=editorTags.map(t=>
@@ -3601,16 +3684,20 @@ function ins(before,after){
 }
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
 function switchTab(tab,el){
-  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
-  if(el) el.classList.add('active');
-  const body=document.getElementById('editor-body');
-  const prev=document.getElementById('editor-preview');
-  if(tab==='preview'){
-    prev.innerHTML=parseMd(body.value);prev.classList.add('active');body.classList.add('hidden');
-    if(window.renderMathInElement) setTimeout(()=>renderMathInElement(prev,{
+  // 레거시 호환 — 이제 split-pane 방식이라 탭 전환 없음
+}
+let _livePreviewTimer=null;
+function updateLivePreview(){
+  clearTimeout(_livePreviewTimer);
+  _livePreviewTimer=setTimeout(()=>{
+    const body=document.getElementById('editor-body');
+    const prev=document.getElementById('editor-preview');
+    if(!body||!prev) return;
+    prev.innerHTML=parseMd(body.value);
+    if(window.renderMathInElement) renderMathInElement(prev,{
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
-    }),60);
-  } else { prev.classList.remove('active');body.classList.remove('hidden');body.focus(); }
+    });
+  },150);
 }
 
 // ── PROFILE ───────────────────────────────────────────────────────
