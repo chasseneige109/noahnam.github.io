@@ -57,9 +57,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── LAYOUT ── */
-.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
-.two-col{display:grid;grid-template-columns:280px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
-.three-col-sidebar{display:grid;grid-template-columns:220px 1fr;gap:36px;padding:40px 0 80px;align-items:start}
+.wrap{max-width:1440px;margin:0 auto;padding:0 24px}
+.two-col{display:grid;grid-template-columns:300px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
+.three-col-sidebar{display:grid;grid-template-columns:260px 1fr;gap:44px;padding:40px 0 80px;align-items:start}
 
 /* ── GLASS CARD ── */
 .gc{background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow)}
@@ -155,13 +155,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .post-card{padding:24px 26px;border-radius:var(--r3);margin-bottom:10px;cursor:pointer;transition:all .25s}
 .post-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
 .pc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.pc-cat{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s400);background:var(--s100);padding:2px 8px;border-radius:6px}
+.pc-cat{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);background:var(--blue-bg);padding:2px 9px;border-radius:20px;border:1px solid #bfdbfe}
 .pc-tag{font-family:var(--mono);font-size:.6rem;color:var(--blue);background:var(--blue-bg);padding:2px 8px;border-radius:10px}
-.pc-title{font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--s900);line-height:1.4;letter-spacing:-.01em;margin-bottom:6px;transition:color .2s}
+.pc-title{font-family:var(--serif);font-size:1.2rem;font-weight:800;color:var(--s900);line-height:1.4;letter-spacing:-.01em;margin-bottom:6px;transition:color .2s}
 .post-card:hover .pc-title{color:var(--blue)}
-.pc-excerpt{font-size:.81rem;color:var(--s700);line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post-card.has-cat{border-left:3px solid var(--blue-l) !important}
+.pc-excerpt{font-size:.81rem;color:var(--s700);line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .pc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid var(--s100)}
-.pc-date{font-family:var(--mono);font-size:.62rem;color:var(--s400)}
+.pc-date{font-family:var(--mono);font-size:.65rem;color:var(--s500);font-weight:500}
 .pc-actions{display:flex;gap:6px;opacity:0;transition:opacity .2s}
 .post-card:hover .pc-actions{opacity:1}
 .btn-sm{padding:4px 10px;border-radius:var(--r);font-size:.62rem;font-weight:700;letter-spacing:.03em;font-family:var(--sans);cursor:pointer;border:1px solid var(--s200);background:#fff;color:var(--s500);transition:all .15s}
@@ -441,16 +442,30 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-all-count{font-family:var(--mono);font-size:.6rem;color:var(--s400);background:var(--s100);padding:1px 6px;border-radius:8px}
 
 .folder-item{margin-bottom:2px}
-.folder-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s;user-select:none}
+.folder-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s,color .15s;user-select:none;position:relative}
 .folder-row:hover{background:var(--s100)}
 .folder-row.active{background:var(--blue-bg)}
 .folder-row.active .folder-name{color:var(--blue);font-weight:700}
-.folder-toggle{font-size:.55rem;color:var(--s300);transition:transform .2s;flex-shrink:0;width:10px}
+.folder-toggle{font-size:.55rem;color:var(--s400);transition:transform .2s;flex-shrink:0;width:10px}
 .folder-toggle.open{transform:rotate(90deg)}
 .folder-icon{font-size:.82rem;flex-shrink:0}
-.folder-name{font-size:.8rem;font-weight:600;color:var(--s700);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.folder-name{font-size:.82rem;font-weight:700;color:var(--s800);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .15s}
+.folder-row:hover .folder-name{color:var(--blue)}
 .folder-count{font-family:var(--mono);font-size:.6rem;color:var(--s400);background:var(--s100);padding:1px 6px;border-radius:8px;flex-shrink:0}
 .folder-row.active .folder-count{background:rgba(59,130,246,.12);color:var(--blue)}
+
+/* nested folder children */
+.folder-children{overflow:hidden;transition:max-height .25s ease}
+.folder-children-inner{position:relative;padding-left:16px}
+.folder-children-inner::before{content:'';position:absolute;left:14px;top:0;bottom:8px;width:1px;background:var(--s200)}
+.folder-level-1 .folder-name{font-size:.8rem;font-weight:600}
+.folder-level-2 .folder-name{font-size:.78rem;font-weight:600}
+.folder-level-3 .folder-name{font-size:.76rem;font-weight:500}
+
+/* add-subfolder button (admin only) */
+.folder-add-sub{display:none;align-items:center;justify-content:center;width:16px;height:16px;border-radius:4px;font-size:.6rem;font-weight:700;color:var(--s400);background:none;border:1px solid var(--s300);cursor:pointer;flex-shrink:0;transition:all .15s;line-height:1}
+.admin-mode .folder-row:hover .folder-add-sub{display:flex}
+.folder-add-sub:hover{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
 
 .folder-posts{padding-left:22px;overflow:hidden;transition:max-height .25s ease}
 .folder-post-item{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r);cursor:pointer;transition:background .15s}
@@ -2797,6 +2812,80 @@ function buildMobFilter(section) {
   el.innerHTML = html;
 }
 
+/* ── NESTED FOLDER TREE BUILDER ── */
+function buildFolderTree(cats) {
+  // Returns array of root nodes: { name, path, children[] }
+  const nodeMap = {};
+  // First pass: create all nodes
+  cats.forEach(path => {
+    nodeMap[path] = { name: path.split('/').pop(), path, children: [] };
+  });
+  const roots = [];
+  cats.forEach(path => {
+    const parts = path.split('/');
+    if (parts.length === 1) {
+      roots.push(nodeMap[path]);
+    } else {
+      const parentPath = parts.slice(0, -1).join('/');
+      if (nodeMap[parentPath]) {
+        nodeMap[parentPath].children.push(nodeMap[path]);
+      } else {
+        // Orphan node with missing parent — add to roots
+        roots.push(nodeMap[path]);
+      }
+    }
+  });
+  return roots;
+}
+
+function renderFolderNode(node, list, section, fc, level) {
+  const path = node.path;
+  // Count posts that belong to this node or any descendant
+  const catPosts = list.filter(p => p.cat && (p.cat === path || p.cat.startsWith(path + '/')));
+  const directPosts = list.filter(p => p.cat === path);
+  const cnt = catPosts.length;
+  const isOpen = folderOpen[section][path] || false;
+  const isActive = fc === path;
+  const hasChildren = node.children.length > 0;
+  const levelCls = `folder-level-${Math.min(level, 3)}`;
+  const escapedPath = esc(path);
+
+  let html = `<div class="folder-item ${levelCls}">
+    <div class="folder-row ${isActive?'active':''}" title="${escapedPath}" onclick="toggleFolder('${section}','${escapedPath.replace(/'/g,"\\'")}')">
+      ${hasChildren
+        ? `<span class="folder-toggle ${isOpen?'open':''}">▶</span>`
+        : `<span style="width:10px;flex-shrink:0"></span>`}
+      <span class="folder-icon">${isOpen?'📂':'📁'}</span>
+      <span class="folder-name">${esc(node.name)}</span>
+      <span class="folder-count">${cnt}</span>
+      <button class="folder-add-sub" title="하위 폴더 추가" onclick="event.stopPropagation();addSubFolder('${section}','${escapedPath.replace(/'/g,"\\'")}')">+</button>
+    </div>`;
+
+  // Children subtree
+  if (hasChildren) {
+    html += `<div class="folder-children" id="fc-${section}-${escapedPath.replace(/[^a-z0-9]/gi,'_')}" style="max-height:${isOpen?'9999px':'0'}">
+      <div class="folder-children-inner">`;
+    node.children.forEach(child => {
+      html += renderFolderNode(child, list, section, fc, level + 1);
+    });
+    html += `</div></div>`;
+  }
+
+  // Direct posts under this folder (shown when open and no deeper children selected)
+  if (isOpen && directPosts.length) {
+    html += `<div class="folder-posts" style="max-height:9999px">
+      ${directPosts.sort((a,b)=>b.createdAt-a.createdAt).map(p=>`
+      <div class="folder-post-item" onclick="openPost(${p.id},'${section}')">
+        <span class="folder-post-dot"></span>
+        <span class="folder-post-title">${esc(p.title)}</span>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
 function buildFilterSidebar(containerId, section) {
   const el=document.getElementById(containerId);
   const list=section==='posts'?posts:papers;
@@ -2805,7 +2894,7 @@ function buildFilterSidebar(containerId, section) {
   const fc=filterCat[section], ft=filterTag[section];
   let html='';
 
-  // Folder-style category tree
+  // Folder-style category tree with unlimited nesting
   html+=`<div class="gc folder-card">
     <div class="sec-label" style="margin-bottom:8px">Categories</div>
     <div class="folder-all ${!fc?'active':''}" onclick="setCatFilter('${section}',null)">
@@ -2815,26 +2904,9 @@ function buildFilterSidebar(containerId, section) {
     </div>`;
 
   if(cats.length) {
-    cats.forEach(c => {
-      const catPosts = list.filter(p=>p.cat===c);
-      const cnt = catPosts.length;
-      const isOpen = folderOpen[section][c] || false;
-      const isActive = fc===c;
-      html+=`<div class="folder-item">
-        <div class="folder-row ${isActive?'active':''}" onclick="toggleFolder('${section}','${esc(c)}')">
-          <span class="folder-toggle ${isOpen?'open':''}">▶</span>
-          <span class="folder-icon">${isOpen?'📂':'📁'}</span>
-          <span class="folder-name">${esc(c)}</span>
-          <span class="folder-count">${cnt}</span>
-        </div>
-        <div class="folder-posts" id="fp-${section}-${esc(c)}" style="max-height:${isOpen?'600px':'0'}">
-          ${catPosts.sort((a,b)=>b.createdAt-a.createdAt).map(p=>`
-          <div class="folder-post-item" onclick="openPost(${p.id},'${section}')">
-            <span class="folder-post-dot"></span>
-            <span class="folder-post-title">${esc(p.title)}</span>
-          </div>`).join('')}
-        </div>
-      </div>`;
+    const tree = buildFolderTree(cats);
+    tree.forEach(node => {
+      html += renderFolderNode(node, list, section, fc, 1);
     });
   } else {
     html+=`<div style="font-size:.75rem;color:var(--s400);padding:8px">카테고리 없음</div>`;
@@ -2854,11 +2926,25 @@ function buildFilterSidebar(containerId, section) {
   el.innerHTML=html;
 }
 
-function toggleFolder(section, cat) {
-  const isOpen = folderOpen[section][cat];
-  folderOpen[section][cat] = !isOpen;
-  // also set category filter
-  setCatFilter(section, !isOpen ? cat : null);
+function toggleFolder(section, path) {
+  const isOpen = folderOpen[section][path];
+  folderOpen[section][path] = !isOpen;
+  // set category filter to this path (or clear if closing)
+  setCatFilter(section, !isOpen ? path : null);
+}
+
+function addSubFolder(section, parentPath) {
+  if (!isAdmin) return;
+  const name = prompt(`"${parentPath}" 아래 새 폴더 이름:`);
+  if (!name || !name.trim()) return;
+  const newPath = parentPath + '/' + name.trim();
+  if (!categories[section]) categories[section] = [];
+  if (!categories[section].includes(newPath)) {
+    categories[section].push(newPath);
+    save(); saveCategories();
+    section === 'posts' ? renderPostsPage() : renderPaperPage();
+    toast('폴더 추가됨');
+  }
 }
 
 // ── POSTS/PAPER PAGES ─────────────────────────────────────────────
@@ -2867,7 +2953,7 @@ function renderPostsPage() {
   buildMobFilter('posts');
   let list=[...posts];
   const fc=filterCat.posts,ft=filterTag.posts;
-  if(fc) list=list.filter(p=>p.cat===fc);
+  if(fc) list=list.filter(p=>p.cat&&(p.cat===fc||p.cat.startsWith(fc+'/')));
   if(ft) list=list.filter(p=>(p.tags||[]).includes(ft));
   list.sort((a,b)=>sortDesc.posts?b.id-a.id:a.id-b.id);
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Posts (${list.length})`;
@@ -2884,7 +2970,7 @@ function renderPaperPage() {
   buildMobFilter('paper');
   let list=[...papers];
   const fc=filterCat.paper,ft=filterTag.paper;
-  if(fc) list=list.filter(p=>p.cat===fc);
+  if(fc) list=list.filter(p=>p.cat&&(p.cat===fc||p.cat.startsWith(fc+'/')));
   if(ft) list=list.filter(p=>(p.tags||[]).includes(ft));
   list.sort((a,b)=>sortDesc.paper?b.id-a.id:a.id-b.id);
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Paper Review (${list.length})`;
@@ -2924,7 +3010,7 @@ function postCardHTML(p,section) {
     if(p.venue) m+=`<span class="pc-paper-venue">${esc(p.venue)}</span>`;
     return m ? `<div class="pc-paper-meta">${m}</div>` : '';
   })() : '';
-  return `<div class="gc gc-hover post-card" onclick="openPost(${p.id},'${section}')">
+  return `<div class="gc gc-hover post-card${p.cat?' has-cat':''}" onclick="openPost(${p.id},'${section}')">
     <div class="pc-top">${cat}${tags}</div>
     <div class="pc-title">${esc(p.title)}</div>
     ${paperMeta}
@@ -3462,12 +3548,18 @@ function selectSection(sec,btn) {
 }
 function renderEditorCats() {
   const cats=categories[editingSection]||[];
-  document.getElementById('editor-cat-btns').innerHTML=cats.map(c=>
-    `<span class="cat-sel-wrap">
-      <button class="cat-sel-btn ${editorCat===c?'sel':''}" onclick="selectCat('${esc(c)}')">${esc(c)}</button>
+  // Sort and render as indented tree for easy selection
+  const sorted = [...cats].sort();
+  document.getElementById('editor-cat-btns').innerHTML=sorted.map(c=>{
+    const depth = c.split('/').length - 1;
+    const label = c.split('/').pop();
+    const indent = depth > 0 ? `style="margin-left:${depth*14}px"` : '';
+    const prefix = depth > 0 ? '<span style="color:var(--s300);font-size:.6rem;margin-right:3px">└</span>' : '';
+    return `<span class="cat-sel-wrap" ${indent}>
+      ${prefix}<button class="cat-sel-btn ${editorCat===c?'sel':''}" onclick="selectCat('${esc(c)}')" title="${esc(c)}">${esc(label)}</button>
       <button class="cat-del-btn" onclick="deleteCat('${esc(c)}')" title="삭제">×</button>
-    </span>`
-  ).join('');
+    </span>`;
+  }).join('');
 }
 function selectCat(cat){editorCat=editorCat===cat?'':cat;renderEditorCats();}
 function addNewCat(){
