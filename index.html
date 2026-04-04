@@ -227,12 +227,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-wrap{max-width:1490px;margin:0 auto;padding:0 24px 80px}
 .editor-topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px;border-bottom:1px solid var(--s200);margin-bottom:26px}
 /* split-pane live preview */
-.editor-split{display:grid;grid-template-columns:720px 720px;gap:0;border:1px solid var(--s200);border-radius:var(--r2);overflow:hidden;min-height:520px;margin-bottom:10px}
+.editor-split{display:grid;grid-template-columns:720px 720px;gap:0;border:1px solid var(--s200);border-radius:var(--r2);overflow:hidden;height:calc(100vh - 330px);min-height:520px;margin-bottom:10px}
 .editor-split-left{border-right:1px solid var(--s200);display:flex;flex-direction:column}
 .editor-split-right{overflow-y:scroll;padding:0;background:rgba(255,255,255,.6);display:flex;flex-direction:column;scrollbar-gutter:stable}
 .editor-split-label{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);padding:6px 12px;background:var(--s100);border-bottom:1px solid var(--s200);flex-shrink:0}
 .editor-split-right .editor-split-label{margin:0 0 0 0;padding:6px 20px}
-.editor-split-right .a-body{padding:18px 24px;flex:1}
+.editor-split-right .a-body{padding:18px 24px 200px;flex:1}
 .editor-split-right .a-body:empty::after{content:'미리보기가 여기에 실시간으로 표시됩니다...';color:var(--s300);font-family:var(--sans);font-size:.85rem;font-style:italic}
 /* p 태그 margin 완전 제거 — <br><br> 방식으로 간격 통일 */
 .editor-split-right .a-body p{margin:0!important;padding:0!important}
@@ -282,7 +282,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-tabs-row{display:flex;border-bottom:1px solid var(--s200)}
 .editor-tab{padding:7px 15px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);color:var(--s400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none}
 .editor-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--serif);font-size:1.04rem;color:var(--s800);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 24px;white-space:pre-wrap;word-break:break-word;overflow-y:scroll;scrollbar-gutter:stable}
+.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--serif);font-size:1.04rem;color:var(--s800);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 24px 200px;white-space:pre-wrap;word-break:break-word;overflow-y:scroll;scrollbar-gutter:stable}
 .editor-body-ta::placeholder{color:var(--s300)}
 .e-preview{display:none;padding:18px 0;min-height:200px}
 .e-preview.active{display:block}
