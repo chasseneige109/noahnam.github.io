@@ -207,6 +207,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .a-body pre code{background:none;color:#cbd5e1;font-size:.85rem;padding:0}
 .a-body blockquote{border-left:3px solid #bfdbfe;padding-left:18px;margin:1.5em 0;color:var(--s600);font-style:italic}
 .a-body hr{border:none;border-top:1px solid var(--s200);margin:2em 0}
+/* ep-h* heading design in published posts (override base 1.04rem) */
+.a-body .ep-h{white-space:normal!important}
+.a-body .ep-h1{font-size:1.7rem;font-weight:800;font-family:var(--sans);color:var(--s900);letter-spacing:-.03em;line-height:1.2;position:relative;padding-left:16px}
+.a-body .ep-h1::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:6px;border-radius:3px;background:var(--blue)}
+.a-body .ep-h2{font-size:1.3rem;font-weight:700;font-family:var(--sans);color:var(--s900);letter-spacing:-.02em;line-height:1.3;position:relative;padding-left:14px}
+.a-body .ep-h2::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:5px;border-radius:2px;background:var(--blue)}
+.a-body .ep-h3{font-size:1.08rem;font-weight:700;font-family:var(--sans);color:var(--s800);line-height:1.4;position:relative;padding-left:12px}
+.a-body .ep-h3::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:4px;border-radius:2px;background:#60a5fa}
+.a-body .ep-h4{font-size:.8rem;font-weight:700;font-family:var(--sans);color:var(--s500);letter-spacing:.09em;text-transform:uppercase;line-height:1.6;position:relative;padding-left:12px}
+.a-body .ep-h4::before{content:'';position:absolute;left:0;top:3px;bottom:3px;width:3px;border-radius:1.5px;background:#bfdbfe}
+/* ep-bq, ep-pre overrides in published post */
+.a-body .ep-bq{border-left:3px solid #bfdbfe;padding-left:18px;color:var(--s600);font-style:italic}
+.a-body .ep-pre{display:block;background:var(--s900);border-radius:12px;padding:20px 24px;overflow-x:auto;margin:4px 0}
+.a-body .ep-pre code{background:none;color:#cbd5e1;font-size:.85rem;padding:0;font-family:var(--mono);line-height:1.7}
 .math-block{overflow-x:auto;padding:18px 22px;background:rgba(255,255,255,.8);border:1px solid var(--s200);border-left:3px solid #93c5fd;border-radius:0 12px 12px 0;margin:1.7em 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
 
 /* ── EDITOR ── */
@@ -3779,32 +3793,21 @@ function parseMdEditor(md){
     if(/^[ \t]*(-{3,}|\*{3,}|_{3,})[ \t]*$/.test(raw)){parts.push('<span class="ep-line ep-hr">\u200B</span>');continue;}
     // Heading
     const hm=raw.match(/^(#{1,6}) +(.*)/);
-    if(hm){parts.push(`<span class="ep-line ep-h ep-h${hm[1].length}">${ir2(hm[2])}</span>`);continue;}
+    if(hm){parts.push(`<span class="ep-line ep-h ep-h${hm[1].length}">${pmi(hm[2])}</span>`);continue;}
     // Blockquote
-    if(/^>[ ]?/.test(raw)){parts.push(`<span class="ep-line ep-bq">${ir2(raw.replace(/^>[ ]?/,''))}</span>`);continue;}
+    if(/^>[ ]?/.test(raw)){parts.push(`<span class="ep-line ep-bq">${pmi(raw.replace(/^>[ ]?/,''))}</span>`);continue;}
     // Unordered list
     const ulm=raw.match(/^([ \t]*)[-*+] +(.*)/);
-    if(ulm){const d=Math.floor(ulm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">\u2022 ${ir2(ulm[2])}</span>`);continue;}
+    if(ulm){const d=Math.floor(ulm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">\u2022 ${pmi(ulm[2])}</span>`);continue;}
     // Ordered list
     const olm=raw.match(/^([ \t]*)(\d+)\. +(.*)/);
-    if(olm){const d=Math.floor(olm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li ep-ol" data-d="${d}">${olm[2]}. ${ir2(olm[3])}</span>`);continue;}
+    if(olm){const d=Math.floor(olm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">${olm[2]}. ${pmi(olm[3])}</span>`);continue;}
     // Normal line
-    parts.push(`<span class="ep-line ep-text">${ir2(raw)}</span>`);
+    parts.push(`<span class="ep-line ep-text">${pmi(raw)}</span>`);
   }
   // flush unclosed code block
   if(inCode) codeBuf.forEach(l=>parts.push(`<span class="ep-line ep-code-inner">${esc(l)}</span>`));
   return parts.join('');
-}
-function ir2(t){
-  t=esc(t);
-  t=t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
-  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  t=t.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g,'<em>$1</em>');
-  t=t.replace(/~~(.+?)~~/g,'<s>$1</s>');
-  t=t.replace(/`([^`]+)`/g,'<code class="ep-code">$1</code>');
-  t=t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" class="ep-img">');
-  t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" class="ep-a">$1</a>');
-  return t;
 }
 
 let _livePreviewTimer=null;
@@ -3911,66 +3914,76 @@ function closeModal(id,event){
 }
 
 // ── MARKDOWN ──────────────────────────────────────────────────────
+// Shared inline renderer — used by both parseMd (published) and parseMdEditor (preview)
+function pmi(t){
+  const mb=[],mi=[];
+  // protect math before escaping
+  t=t.replace(/\$\$([\s\S]*?)\$\$/g,(_,m)=>{mb.push(m);return`\x02MB${mb.length-1}\x02`;});
+  t=t.replace(/\$((?:[^$\\]|\\.)+?)\$/g,(_,m)=>{mi.push(m);return`\x02MI${mi.length-1}\x02`;});
+  t=esc(t);
+  t=t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/(?<!\*)\*([^*\n]+?)\*(?!\*)/g,'<em>$1</em>');
+  t=t.replace(/~~(.+?)~~/g,'<s>$1</s>');
+  t=t.replace(/`([^`]+)`/g,'<code class="ep-code">$1</code>');
+  t=t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:var(--r);vertical-align:middle">');
+  t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a class="media-link-inline" href="$2" target="_blank">$1</a>');
+  mb.forEach((m,i)=>{t=t.replace(`\x02MB${i}\x02`,`$$${m}$$`);});
+  mi.forEach((m,i)=>{t=t.replace(`\x02MI${i}\x02`,`$${m}$`);});
+  return t;
+}
+
+// Line-by-line renderer — 1 input line = 1 display block, no injected spacing
 function parseMd(md){
   if(!md) return '';
   md=md.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-  let h=esc(md);
-  const mb=[],mi=[];
-  // 수식 보호
-  h=h.replace(/\$\$([\s\S]*?)\$\$/g,(_,m)=>{mb.push(m);return`%%MB${mb.length-1}%%`;});
-  h=h.replace(/\$((?:[^$\\]|\\.)+?)\$/g,(_,m)=>{mi.push(m);return`%%MI${mi.length-1}%%`;});
-  // 코드블록 보호
-  const cb=[];
-  h=h.replace(/```[\w]*\n?([\s\S]*?)```/g,(_,c)=>{cb.push(c);return`%%CB${cb.length-1}%%`;});
-  // 인라인 코드 보호
-  const ci=[];
-  h=h.replace(/`([^`]+)`/g,(_,c)=>{ci.push(c);return`%%CI${ci.length-1}%%`;});
-  // --- 수평선: 독립 줄로만 (공백 허용, 앞뒤 빈줄 자동 확보)
-  h=h.replace(/^[ \t]*---+[ \t]*$/gm,'\n<hr>\n');
-  // 헤딩
-  h=h.replace(/^#### (.+)$/gm,'<h4>$1</h4>');
-  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
-  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
-  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-  // 인용
-  h=h.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
-  // 리스트: "- " 뒤에 내용이 있는 줄만
-  h=h.replace(/((?:^- .+\n?)+)/gm,m=>{
-    const items=m.trim().split('\n')
-      .filter(l=>/^- /.test(l))
-      .map(l=>`<li>${l.slice(2)}</li>`).join('');
-    return `\n<ul>${items}</ul>\n`;
-  });
-  // 인라인 스타일
-  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  // 블록 태그 앞뒤 빈줄 확보
-  h=h.replace(/(^<(?:h[1-6]|ul|ol|pre|blockquote|hr))/gm,'\n\n$1');
-  h=h.replace(/((?:h[1-6]|ul|ol|pre|blockquote|hr)[^>]*>)$/gm,'$1\n\n');
-  // 단락 분리: <p> 태그 없이 <br><br>만 사용 → textarea와 완전히 동일한 간격
-  const paras = h.split(/\n{2,}/);
-  h = paras.map(b=>{
-    b=b.trim(); if(!b) return '';
-    if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|div)/.test(b)) return b;
-    return b.replace(/\n/g,'<br>');
-  }).join('<br><br>');
-  // 코드블록/인라인 복원
-  cb.forEach((c,i)=>{h=h.replace(`%%CB${i}%%`,`<pre><code>${c}</code></pre>`);});
-  ci.forEach((c,i)=>{h=h.replace(`%%CI${i}%%`,`<code>${esc(c)}</code>`);});
-mb.forEach((m,i)=>{h=h.replace(`%%MB${i}%%`,`<div class="math-block">$$${m}$$</div>`);});
-  mi.forEach((m,i)=>{h=h.replace(`%%MI${i}%%`,`$${m}$`);});
-
-  // media tags
-  h = h.replace(/%%IMG%%([^%]+)%%([^%]*)%%/g, (_, src, caption) =>
-    `<div class="media-img-wrap"><img src="${src}" loading="lazy">${caption ? `<div class="media-caption">${caption}</div>` : ''}</div>`);
-  h = h.replace(/%%VID%%([^%]+)%%([^%]*)%%/g, (_, src, caption) =>
-    `<div class="media-video-wrap"><iframe src="${src}" allowfullscreen></iframe></div>${caption ? `<div class="media-caption">${caption}</div>` : ''}`);
-h = h.replace(/%%PDF%%([^%]+)%%([^%]*)%%/g, (_, src, label) =>
-    `<div class="media-pdf-wrap"><a class="media-pdf-link" href="#" onclick="openPdf('${src.length > 100 ? 'blob' : src}', ${JSON.stringify(src)});return false;"><span class="media-pdf-icon">📄</span>${label}<span style="font-size:.65rem;color:var(--s400);margin-left:8px">새 탭에서 열기 ↗</span></a></div>`);
-  h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
-    (_, text, url) => `<a class="media-link-inline" href="${url}" target="_blank">${text}</a>`);
-
-  return h;
+  const lines=md.split('\n');
+  const parts=[];
+  let inCode=false, codeLines=[];
+  for(let i=0;i<lines.length;i++){
+    const raw=lines[i];
+    // Code fence
+    if(/^```/.test(raw)){
+      if(!inCode){inCode=true;codeLines=[];}
+      else{
+        inCode=false;
+        parts.push(`<pre class="ep-pre"><code>${esc(codeLines.join('\n'))}</code></pre>`);
+        codeLines=[];
+      }
+      continue;
+    }
+    if(inCode){codeLines.push(raw);continue;}
+    // Empty line
+    if(!raw.trim()){parts.push('<span class="ep-line ep-blank">\u200B</span>');continue;}
+    // HR
+    if(/^[ \t]*(-{3,}|\*{3,}|_{3,})[ \t]*$/.test(raw)){parts.push('<span class="ep-line ep-hr">\u200B</span>');continue;}
+    // Media tags (inserted on own line by editor)
+    let mm;
+    if((mm=raw.match(/^%%IMG%%([^%]+)%%([^%]*)%%/))){
+      parts.push(`<div class="media-img-wrap"><img src="${mm[1]}" loading="lazy">${mm[2]?`<div class="media-caption">${mm[2]}</div>`:''}</div>`);continue;
+    }
+    if((mm=raw.match(/^%%VID%%([^%]+)%%([^%]*)%%/))){
+      parts.push(`<div class="media-video-wrap"><iframe src="${mm[1]}" allowfullscreen></iframe>${mm[2]?`<div class="media-caption">${mm[2]}</div>`:''}</div>`);continue;
+    }
+    if((mm=raw.match(/^%%PDF%%([^%]+)%%([^%]*)%%/))){
+      parts.push(`<div class="media-pdf-wrap"><a class="media-pdf-link" href="#" onclick="openPdf('${mm[1].length>100?'blob':mm[1]}',${JSON.stringify(mm[1])});return false;"><span class="media-pdf-icon">📄</span>${mm[2]}<span style="font-size:.65rem;color:var(--s400);margin-left:8px">새 탭에서 열기 ↗</span></a></div>`);continue;
+    }
+    // Heading
+    const hm=raw.match(/^(#{1,6}) +(.*)/);
+    if(hm){parts.push(`<span class="ep-line ep-h ep-h${hm[1].length}">${pmi(hm[2])}</span>`);continue;}
+    // Blockquote
+    if(/^> ?/.test(raw)){parts.push(`<span class="ep-line ep-bq">${pmi(raw.replace(/^> ?/,''))}</span>`);continue;}
+    // Unordered list
+    const ulm=raw.match(/^([ \t]*)[-*+] +(.*)/);
+    if(ulm){const d=Math.floor(ulm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">\u2022 ${pmi(ulm[2])}</span>`);continue;}
+    // Ordered list
+    const olm=raw.match(/^([ \t]*)(\d+)\. +(.*)/);
+    if(olm){const d=Math.floor(olm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">${olm[2]}. ${pmi(olm[3])}</span>`);continue;}
+    // Normal line
+    parts.push(`<span class="ep-line ep-text">${pmi(raw)}</span>`);
+  }
+  if(inCode) parts.push(`<pre class="ep-pre"><code>${esc(codeLines.join('\n'))}</code></pre>`);
+  return parts.join('');
 }
 // ── MEDIA ─────────────────────────────────────────────────────────
 let currentMediaType = null;
