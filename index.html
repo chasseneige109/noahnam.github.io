@@ -215,12 +215,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 /* split-pane live preview */
 .editor-split{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--s200);border-radius:var(--r2);overflow:hidden;min-height:520px;margin-bottom:10px}
 .editor-split-left{border-right:1px solid var(--s200);display:flex;flex-direction:column}
-.editor-split-right{overflow-y:auto;padding:20px 24px;background:rgba(255,255,255,.6);display:flex;flex-direction:column}
+.editor-split-right{overflow-y:scroll;padding:0;background:rgba(255,255,255,.6);display:flex;flex-direction:column;scrollbar-gutter:stable}
 .editor-split-label{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);padding:6px 12px;background:var(--s100);border-bottom:1px solid var(--s200);flex-shrink:0}
-.editor-split-right .editor-split-label{margin:-20px -24px 16px;padding:6px 24px}
+.editor-split-right .editor-split-label{margin:0 0 0 0;padding:6px 20px}
+.editor-split-right .a-body{padding:18px 20px;flex:1}
 .editor-split-right .a-body:empty::after{content:'미리보기가 여기에 실시간으로 표시됩니다...';color:var(--s300);font-family:var(--sans);font-size:.85rem;font-style:italic}
-/* 에디터 미리보기: 단락 margin 제거 → textarea 줄바꿈과 동일한 간격 */
-.editor-split-right .a-body p{margin-top:0;margin-bottom:0}
+/* p 태그 margin 완전 제거 — <br><br> 방식으로 간격 통일 */
+.editor-split-right .a-body p{margin:0!important;padding:0!important}
 .editor-split-right .a-body h1,.editor-split-right .a-body h2,
 .editor-split-right .a-body h3,.editor-split-right .a-body h4{margin-top:1.2em;margin-bottom:0.2em}
 @media(max-width:860px){.editor-split{grid-template-columns:1fr}.editor-split-left{border-right:none;border-bottom:1px solid var(--s200)}.editor-split-right{min-height:200px}}
@@ -257,7 +258,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-tabs-row{display:flex;border-bottom:1px solid var(--s200)}
 .editor-tab{padding:7px 15px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);color:var(--s400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none}
 .editor-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--serif);font-size:1.04rem;color:var(--s800);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 20px;white-space:pre-wrap;word-break:break-word}
+.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--serif);font-size:1.04rem;color:var(--s800);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 20px;white-space:pre-wrap;word-break:break-word;overflow-y:scroll;scrollbar-gutter:stable}
 .editor-body-ta::placeholder{color:var(--s300)}
 .e-preview{display:none;padding:18px 0;min-height:200px}
 .e-preview.active{display:block}
@@ -3879,13 +3880,13 @@ function parseMd(md){
   // 블록 태그 앞뒤 빈줄 확보
   h=h.replace(/(^<(?:h[1-6]|ul|ol|pre|blockquote|hr))/gm,'\n\n$1');
   h=h.replace(/((?:h[1-6]|ul|ol|pre|blockquote|hr)[^>]*>)$/gm,'$1\n\n');
-  // 빈줄은 문단 분리(단락간 <br> 하나 = textarea 2회 Enter와 동일한 간격)
+  // 단락 분리: <p> 태그 없이 <br><br>만 사용 → textarea와 완전히 동일한 간격
   const paras = h.split(/\n{2,}/);
   h = paras.map(b=>{
     b=b.trim(); if(!b) return '';
     if(/^<(h[1-6]|ul|ol|pre|blockquote|hr|div)/.test(b)) return b;
-    return '<p>' + b.replace(/\n/g,'<br>') + '</p>';
-  }).join('<br>');
+    return b.replace(/\n/g,'<br>');
+  }).join('<br><br>');
   // 코드블록/인라인 복원
   cb.forEach((c,i)=>{h=h.replace(`%%CB${i}%%`,`<pre><code>${c}</code></pre>`);});
   ci.forEach((c,i)=>{h=h.replace(`%%CI${i}%%`,`<code>${esc(c)}</code>`);});
