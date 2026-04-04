@@ -3928,7 +3928,7 @@ function pmi(t){
   t=t.replace(/`([^`]+)`/g,'<code class="ep-code">$1</code>');
   t=t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:var(--r);vertical-align:middle">');
   t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a class="media-link-inline" href="$2" target="_blank">$1</a>');
-  mb.forEach((m,i)=>{t=t.replace(`\x02MB${i}\x02`,`$$${m}$$`);});
+  mb.forEach((m,i)=>{t=t.replace(`\x02MB${i}\x02`,`<div class="math-block">$$${m}$$</div>`);});
   mi.forEach((m,i)=>{t=t.replace(`\x02MI${i}\x02`,`$${m}$`);});
   return t;
 }
