@@ -3770,7 +3770,7 @@ function parseMdEditor(md){
   if(!md) return '';
   const lines=md.split('\n');
   const parts=[];
-  let inCode=false, codeBuf=[];
+  let inCode=false, codeBuf=[], inMath=false, mathBuf=[];
   for(let i=0;i<lines.length;i++){
     const raw=lines[i];
     // Code fence
@@ -3787,6 +3787,17 @@ function parseMdEditor(md){
       continue;
     }
     if(inCode){codeBuf.push(raw);continue;}
+    // Math fence $$
+    if(raw.trim()==='$$'){
+      if(!inMath){inMath=true;mathBuf=[];}
+      else{
+        inMath=false;
+        parts.push(`<div class="math-block">$$${mathBuf.join('\n')}$$</div>`);
+        mathBuf=[];
+      }
+      continue;
+    }
+    if(inMath){mathBuf.push(raw);continue;}
     // Empty line
     if(!raw.trim()){parts.push('<span class="ep-line ep-blank">\u200B</span>');continue;}
     // HR
@@ -3939,7 +3950,7 @@ function parseMd(md){
   md=md.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
   const lines=md.split('\n');
   const parts=[];
-  let inCode=false, codeLines=[];
+  let inCode=false, codeLines=[], inMath=false, mathLines=[];
   for(let i=0;i<lines.length;i++){
     const raw=lines[i];
     // Code fence
@@ -3953,6 +3964,17 @@ function parseMd(md){
       continue;
     }
     if(inCode){codeLines.push(raw);continue;}
+    // Math fence $$
+    if(raw.trim()==='$$'){
+      if(!inMath){inMath=true;mathLines=[];}
+      else{
+        inMath=false;
+        parts.push(`<div class="math-block">$$${mathLines.join('\n')}$$</div>`);
+        mathLines=[];
+      }
+      continue;
+    }
+    if(inMath){mathLines.push(raw);continue;}
     // Empty line
     if(!raw.trim()){parts.push('<span class="ep-line ep-blank">\u200B</span>');continue;}
     // HR
