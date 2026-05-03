@@ -3553,7 +3553,7 @@ const LPE = (() => {
     cur.dataset.raw=cur.textContent;
     if(/^```/.test(cur.dataset.raw)||(cur.dataset.raw||'').trim()==='$$') renderAllExceptCur();
     syncHidden();
-    if(typeof draftDirty!=='undefined') draftDirty=true;
+    if(typeof draftMarkDirty==='function') draftMarkDirty();
   }
 
   // ── Selection helpers ────────────────────────────────────────────
@@ -3616,7 +3616,7 @@ const LPE = (() => {
         const nr2=raw2.slice(0,off2)+e.key+raw2.slice(off2);
         cur.dataset.raw=nr2;cur.textContent=nr2;
         requestAnimationFrame(()=>setOff(cur,off2+1));
-        syncHidden();if(typeof draftDirty!=='undefined')draftDirty=true;
+        syncHidden();if(typeof draftMarkDirty==='function') draftMarkDirty();
       }
     }
   }
@@ -3739,7 +3739,7 @@ const LPE = (() => {
     cur.dataset.raw=nr;cur.textContent=nr;
     requestAnimationFrame(()=>setOff(cur,s+before.length+sel_text.length));
     syncHidden();
-    if(typeof draftDirty!=='undefined') draftDirty=true;
+    if(typeof draftMarkDirty==='function') draftMarkDirty();
   }
 
   function init(wrapEl,hiddenEl){
