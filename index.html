@@ -4037,6 +4037,10 @@ function openPdf(type, src) {
 // 본인 기기 식별 키 (로컬스토리지에 저장)
 const OWNER_KEY = 'blog_is_owner_device';
 
+// recordVisit() 완료를 기다리는 Promise — updateVisitArticle의 race condition 해결
+let _visitIdResolve;
+const _visitIdPromise = new Promise(r => { _visitIdResolve = r; });
+
 // 이 기기가 소유자 기기인지 확인
 function isOwnerDevice() {
   return localStorage.getItem(OWNER_KEY) === 'true';
@@ -4103,6 +4107,7 @@ function parseUA() {
 // 방문 기록 추가 (소유자 기기가 아닐 때만)
 async function recordVisit() {
   if (isOwnerDevice()) {
+    _visitIdResolve(null);
     loadVisitorCount();
     return;
   }
@@ -4148,9 +4153,13 @@ async function recordVisit() {
 
     if (!error && inserted?.id) {
       sessionStorage.setItem('_visit_id', inserted.id);
+      _visitIdResolve(inserted.id);
+    } else {
+      _visitIdResolve(null);
     }
   } catch(e) {
     console.warn('Visitor record failed:', e);
+    _visitIdResolve(null);
   }
 
   loadVisitorCount();
@@ -4159,7 +4168,11 @@ async function recordVisit() {
 // 글 읽기 추적 — openPost 시 호출
 async function updateVisitArticle(title) {
   if (isOwnerDevice()) return;
-  const visitId = sessionStorage.getItem('_visit_id');
+  // recordVisit()가 아직 완료되지 않았을 수 있으므로 Promise로 대기 (최대 10초)
+  const visitId = await Promise.race([
+    _visitIdPromise,
+    new Promise(r => setTimeout(() => r(null), 10000))
+  ]);
   if (!visitId) return;
   try {
     await supa.from('visitors').update({ article: title }).eq('id', visitId);
