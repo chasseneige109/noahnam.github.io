@@ -227,20 +227,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .editor-wrap{max-width:860px;margin:0 auto;padding:0 24px 80px}
 .editor-topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px;border-bottom:1px solid var(--s200);margin-bottom:26px}
 /* p 태그 margin 완전 제거 — <br><br> 방식으로 간격 통일 */
-.e-preview.active p{margin:0!important;padding:0!important}
-.e-preview.active:empty::after{content:'미리보기가 여기에 표시됩니다...';color:var(--s300);font-family:var(--sans);font-size:.85rem;font-style:italic}
-/* parseMdEditor — line-by-line preview blocks */
-.ep-line{display:block;font-family:var(--serif);font-size:1.04rem;line-height:1.9;color:var(--s800);white-space:pre-wrap;word-break:break-word}
-.ep-blank{visibility:hidden;pointer-events:none}
-.ep-hr{position:relative}
-.ep-hr::after{content:'';position:absolute;left:0;right:0;top:50%;height:2px;background:var(--s300);transform:translateY(-50%)}
-.ep-h{font-weight:700;color:var(--blue)}
-.ep-bq{border-left:3px solid var(--s300);padding-left:.8em;color:var(--s500);font-style:italic}
-.ep-li{padding-left:1.4em}.ep-li[data-d="1"]{padding-left:2.8em}.ep-li[data-d="2"]{padding-left:4.2em}
-.ep-code-fence,.ep-code-inner{font-family:var(--mono)!important;font-size:.93rem;background:var(--s100);padding:0 4px;border-radius:2px}
-.ep-code{font-family:var(--mono);font-size:.95em;background:var(--s100);padding:1px 4px;border-radius:3px}
-.ep-img{max-width:100%;border-radius:var(--r);display:block}
-.ep-a{color:var(--blue);text-decoration:underline}
 .editor-mode{font-family:var(--mono);font-size:.62rem;color:var(--s400)}
 .btn-pub{padding:8px 20px;background:var(--blue);color:#fff;border:none;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);cursor:pointer;transition:all .2s}
 .btn-pub:hover{background:#1d4ed8;transform:translateY(-1px)}
@@ -271,14 +257,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .tb-btn{padding:4px 9px;background:none;border:none;border-radius:6px;font-size:.7rem;font-family:var(--mono);color:var(--s500);cursor:pointer;transition:all .12s;font-weight:500}
 .tb-btn:hover{background:var(--blue-bg);color:var(--blue)}
 .tb-sep{width:1px;background:var(--s200);margin:3px 5px}
-.editor-tabs-row{display:flex;border-bottom:1px solid var(--s200)}
-.editor-tab{padding:7px 15px;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-family:var(--sans);color:var(--s400);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-left:none;border-right:none;border-top:none}
-.editor-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.editor-body-ta{width:100%;flex:1;min-height:460px;font-family:var(--serif);font-size:1.04rem;color:var(--s800);border:none;outline:none;background:transparent;line-height:1.9;resize:none;padding:18px 24px 200px;white-space:pre-wrap;word-break:break-word;overflow-y:scroll;scrollbar-gutter:stable}
-.editor-body-ta::placeholder{color:var(--s300)}
-.e-preview{display:none;padding:18px 0 200px;min-height:460px}
-.e-preview.active{display:block}
-.editor-body-ta.hidden{display:none}
+.lp-editor{outline:none;padding:18px 0 200px;min-height:460px;cursor:text;caret-color:var(--blue);border-top:1px solid var(--s200)}
+.lp-line{display:block;min-height:1.9em;word-break:break-word;border-radius:3px;padding:0 3px;outline:none}
+.lp-line.lp-active{background:rgba(59,130,246,.06)!important;font-family:var(--mono)!important;font-size:.92rem!important;white-space:pre-wrap!important;color:var(--s700)!important;padding:1px 6px!important;line-height:1.8!important;border-radius:4px!important}
+.lp-line.lp-code-zone{background:var(--s900);border-radius:0;padding:0 24px}
+.lp-line.lp-code-zone span{color:#cbd5e1;font-family:var(--mono);font-size:.88rem}
+.lp-line.lp-code-zone.lp-code-fence span{color:#60a5fa}
 .editor-hint{font-size:.62rem;font-family:var(--mono);color:var(--s400);padding:9px 0;border-top:1px solid var(--s200);line-height:1.9}
 
 /* ── MODALS ── */
@@ -1435,13 +1419,9 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <button class="tb-btn" onclick="insertMedia('pdf')">📄 PDF</button>
       <button class="tb-btn" onclick="insertMedia('link')">🔗 링크</button>
     </div>
-    <div class="editor-tabs-row">
-      <button class="editor-tab active" id="editor-tab-write" onclick="switchTab('write',this)">✏ 작성</button>
-      <button class="editor-tab" id="editor-tab-preview" onclick="switchTab('preview',this)">👁 미리보기</button>
-    </div>
-    <textarea class="editor-body-ta" id="editor-body" placeholder="마크다운으로 작성하세요...&#10;&#10;$E=mc^2$ 또는 $$\int f(x)dx$$" oninput="updateLivePreview()"></textarea>
-    <div class="e-preview a-body" id="editor-preview"></div>
-    <div class="editor-hint">마크다운 · 수식: $...$ (인라인) / $$...$$ (블록) · ✏ 작성 탭에서 입력, 👁 미리보기 탭에서 확인</div>
+    <div class="lp-editor" id="lp-editor" contenteditable="true" spellcheck="false"></div>
+    <textarea id="editor-body" style="display:none" aria-hidden="true" tabindex="-1"></textarea>
+    <div class="editor-hint">마크다운 지원 · $...$ 인라인 수식 · $$...$$ 블록 수식</div>
   </div>
 </div>
 
@@ -3017,13 +2997,8 @@ function openWrite(sectionHint) {
   if(currentPageName==='paper') editingSection='paper';
   else editingSection='posts';
   document.getElementById('editor-title').value='';
-  document.getElementById('editor-body').value='';
-  document.getElementById('editor-preview').innerHTML='';
+  LPE.setValue('');
   document.getElementById('editor-mode-label').textContent='새 글 작성';
-  document.getElementById('editor-body').classList.remove('hidden');
-  document.getElementById('editor-preview').classList.remove('active');
-  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('editor-tab-write').classList.add('active');
   clearPaperFields();
   selectSection(editingSection,document.getElementById('sec-btn-'+editingSection));
   renderEditorCats(); renderEditorTags();
@@ -3046,24 +3021,19 @@ async function openEdit(id,section) {
   document.getElementById('editor-mode-label').textContent='글 수정 중';
   // 본문 캐시 없으면 fetch
   if(!p.body) {
-    document.getElementById('editor-body').value='불러오는 중...';
+    LPE.setValue('불러오는 중...');
     const table=section==='posts'?'posts':'papers';
     const {data}=await supa.from(table).select('content').eq('id',id).single();
     if(data){ p.body=data.content; }
   }
-  document.getElementById('editor-body').value=p.body||'';
+  LPE.setValue(p.body||'');
   selectSection(section,document.getElementById('sec-btn-'+section));
   renderEditorCats(); renderEditorTags();
   if(section==='paper') fillPaperFields(p);
-  document.getElementById('editor-body').classList.remove('hidden');
-  document.getElementById('editor-preview').classList.remove('active');
-  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('editor-tab-write').classList.add('active');
   document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
   document.getElementById('page-write').classList.add('active');
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   window.scrollTo(0,0);
-  updateLivePreview();
   // draft: 수정 중엔 restore 배너 안 띄움, watcher만
   draftDirty=false;
   draftStartWatcher();
@@ -3092,7 +3062,7 @@ function draftGetFields() {
     section:   editingSection || 'posts',
     editingId: editingPostId,
     title:     document.getElementById('editor-title')?.value || '',
-    body:      document.getElementById('editor-body')?.value  || '',
+    body:      LPE.getValue() || '',
     cat:       editorCat || '',
     tags:      [...(editorTags||[])],
     authors:   document.getElementById('pf-authors')?.value   || '',
@@ -3113,9 +3083,8 @@ function draftSetFields(d) {
     selectSection(d.section, document.getElementById('sec-btn-' + d.section));
   }
   const titleEl = document.getElementById('editor-title');
-  const bodyEl  = document.getElementById('editor-body');
   if (titleEl) { titleEl.value = d.title || ''; autoResize(titleEl); }
-  if (bodyEl)  { bodyEl.value  = d.body  || ''; }
+  LPE.setValue(d.body || '');
   editorCat  = d.cat  || '';
   editorTags = d.tags || [];
   renderEditorCats(); renderEditorTags();
@@ -3177,7 +3146,7 @@ function draftMarkDirty() {
 }
 
 function draftStartWatcher() {
-  ['editor-title','editor-body','pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3'].forEach(id => {
+  ['editor-title','pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', draftMarkDirty);
   });
@@ -3192,7 +3161,7 @@ function draftStopWatcher() {
 function draftClear() {
   if (!confirm('작성 중인 내용을 모두 지우시겠습니까?')) return;
   document.getElementById('editor-title').value = '';
-  document.getElementById('editor-body').value  = '';
+  LPE.setValue('');
   editorCat=''; editorTags=[];
   renderEditorCats(); renderEditorTags();
   ['pf-authors','pf-year','pf-venue','pf-arxiv','pf-code','pf-s1','pf-s2','pf-s3'].forEach(id => {
@@ -3287,7 +3256,7 @@ async function draftClearAfterPublish() {
 
 function publishPost() {
   const title=document.getElementById('editor-title').value.trim();
-  const body=document.getElementById('editor-body').value.trim();
+  const body=LPE.getValue().trim();
   if(!title){toast('제목을 입력하세요.');return;}
   if(!body){toast('본문을 입력하세요.');return;}
   const list=editingSection==='posts'?posts:papers;
@@ -3449,97 +3418,267 @@ function handleTagInput(e){
   if(e.key==='Backspace'&&e.target.value===''&&editorTags.length){editorTags.pop();renderEditorTags();}
 }
 function rmTag(t){editorTags=editorTags.filter(x=>x!==t);renderEditorTags();}
-function ins(before,after){
-  const ta=document.getElementById('editor-body');
-  const s=ta.selectionStart,e=ta.selectionEnd,sel=ta.value.substring(s,e);
-  ta.value=ta.value.substring(0,s)+before+sel+after+ta.value.substring(e);
-  ta.focus();ta.selectionStart=s+before.length;ta.selectionEnd=s+before.length+sel.length;
-}
+function ins(before,after){LPE.insertAtCursor(before,after);}
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
-function switchTab(tab,el){
-  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  const ta=document.getElementById('editor-body');
-  const pv=document.getElementById('editor-preview');
-  if(tab==='write'){
-    ta.classList.remove('hidden');
-    pv.classList.remove('active');
-  } else {
-    updateLivePreview();
-    ta.classList.add('hidden');
-    pv.classList.add('active');
-  }
-}
-// ── EDITOR LINE-BY-LINE PREVIEW ──────────────────────────────────────────────
-// One input line = one display line. No injected newlines or block margins.
-function parseMdEditor(md){
-  if(!md) return '';
-  const lines=md.split('\n');
-  const parts=[];
-  let inCode=false, codeBuf=[], inMath=false, mathBuf=[];
-  for(let i=0;i<lines.length;i++){
-    const raw=lines[i];
-    // Code fence
-    if(/^```/.test(raw)){
-      if(!inCode){
-        inCode=true; codeBuf=[];
-        parts.push(`<span class="ep-line ep-code-fence">${esc(raw)}</span>`);
-      } else {
-        inCode=false;
-        codeBuf.forEach(l=>parts.push(`<span class="ep-line ep-code-inner">${esc(l)}</span>`));
-        parts.push(`<span class="ep-line ep-code-fence">${esc(raw)}</span>`);
-        codeBuf=[];
-      }
-      continue;
-    }
-    if(inCode){codeBuf.push(raw);continue;}
-    // Math fence $$
-    if(raw.trim()==='$$'){
-      if(!inMath){inMath=true;mathBuf=[];}
-      else{
-        inMath=false;
-        parts.push(`<div class="math-block">$$${mathBuf.join('\n')}$$</div>`);
-        mathBuf=[];
-      }
-      continue;
-    }
-    if(inMath){mathBuf.push(raw);continue;}
-    // Empty line
-    if(!raw.trim()){parts.push('<span class="ep-line ep-blank">\u200B</span>');continue;}
-    // HR
-    if(/^[ \t]*(-{3,}|\*{3,}|_{3,})[ \t]*$/.test(raw)){parts.push('<span class="ep-line ep-hr">\u200B</span>');continue;}
-    // Heading
-    const hm=raw.match(/^(#{1,6}) +(.*)/);
-    if(hm){parts.push(`<span class="ep-line ep-h ep-h${hm[1].length}">${pmi(hm[2])}</span>`);continue;}
-    // Blockquote
-    if(/^>[ ]?/.test(raw)){parts.push(`<span class="ep-line ep-bq">${pmi(raw.replace(/^>[ ]?/,''))}</span>`);continue;}
-    // Unordered list
-    const ulm=raw.match(/^([ \t]*)[-*+] +(.*)/);
-    if(ulm){const d=Math.floor(ulm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">\u2022 ${pmi(ulm[2])}</span>`);continue;}
-    // Ordered list
-    const olm=raw.match(/^([ \t]*)(\d+)\. +(.*)/);
-    if(olm){const d=Math.floor(olm[1].replace(/\t/g,'  ').length/2);parts.push(`<span class="ep-line ep-li" data-d="${d}">${olm[2]}. ${pmi(olm[3])}</span>`);continue;}
-    // Normal line
-    parts.push(`<span class="ep-line ep-text">${pmi(raw)}</span>`);
-  }
-  // flush unclosed code block
-  if(inCode) codeBuf.forEach(l=>parts.push(`<span class="ep-line ep-code-inner">${esc(l)}</span>`));
-  return parts.join('');
-}
 
-let _livePreviewTimer=null;
-function updateLivePreview(){
-  clearTimeout(_livePreviewTimer);
-  _livePreviewTimer=setTimeout(()=>{
-    const body=document.getElementById('editor-body');
-    const prev=document.getElementById('editor-preview');
-    if(!body||!prev) return;
-    prev.innerHTML=parseMdEditor(body.value);
-    if(window.renderMathInElement) renderMathInElement(prev,{
-      delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
-    });
-  },150);
-}
+// ── LIVE PREVIEW EDITOR (Obsidian-style) ────────────────────────────────────
+const LPE = (() => {
+  'use strict';
+  let wrap=null, hidden=null, cur=null, comp=false, activating=false;
+
+  function renderLineHTML(raw, inCode) {
+    if(inCode && !/^```/.test(raw))
+      return `<span style="font-family:var(--mono);font-size:.88rem;color:#cbd5e1">${esc(raw)||'​'}</span>`;
+    if(/^```/.test(raw))
+      return `<span style="font-family:var(--mono);font-size:.82rem;color:#60a5fa">${esc(raw)}</span>`;
+    if(!raw.trim()) return '​';
+    if(/^[ \t]*(-{3,}|\*{3,}|_{3,})[ \t]*$/.test(raw))
+      return '<span style="display:block;height:2px;background:var(--s200);margin:.4em 0;border-radius:1px;pointer-events:none"></span>';
+    const hm=raw.match(/^(#{1,6}) +(.*)/);
+    if(hm){
+      const n=hm[1].length;
+      const cfgs=[
+        {s:'1.65rem',w:'800',c:'var(--s900)',bar:'var(--blue)',bw:'6px',pl:'16px'},
+        {s:'1.25rem',w:'700',c:'var(--s900)',bar:'var(--blue)',bw:'5px',pl:'14px'},
+        {s:'1.06rem',w:'700',c:'var(--s800)',bar:'#60a5fa',bw:'4px',pl:'12px'},
+        {s:'.95rem', w:'600',c:'var(--s700)',bar:'#bfdbfe',bw:'3px',pl:'12px'},
+        {s:'.88rem', w:'600',c:'var(--s600)',bar:'#bfdbfe',bw:'3px',pl:'12px'},
+        {s:'.82rem', w:'600',c:'var(--s500)',bar:'#bfdbfe',bw:'3px',pl:'12px'},
+      ][n-1];
+      return `<span style="display:block;font-family:var(--sans);font-size:${cfgs.s};font-weight:${cfgs.w};color:${cfgs.c};line-height:1.3;position:relative;padding-left:${cfgs.pl};letter-spacing:-.02em;margin-top:.2em">${pmi(hm[2])}<span style="position:absolute;left:0;top:10%;bottom:10%;width:${cfgs.bw};border-radius:3px;background:${cfgs.bar}"></span></span>`;
+    }
+    if(/^>[ ]?/.test(raw))
+      return `<span style="display:block;border-left:3px solid #bfdbfe;padding-left:.75em;color:var(--s600);font-style:italic">${pmi(raw.replace(/^>[ ]?/,''))}</span>`;
+    const ulm=raw.match(/^([ \t]*)[-*+] +(.*)/);
+    if(ulm){const d=Math.floor(ulm[1].replace(/\t/g,'  ').length/2);return `<span style="display:block;padding-left:${1.4+d*1.4}em">• ${pmi(ulm[2])}</span>`;}
+    const olm=raw.match(/^([ \t]*)(\d+)\. +(.*)/);
+    if(olm){const d=Math.floor(olm[1].replace(/\t/g,'  ').length/2);return `<span style="display:block;padding-left:${1.4+d*1.4}em">${olm[2]}. ${pmi(olm[3])}</span>`;}
+    return `<span style="font-family:var(--serif);font-size:1.04rem;line-height:1.9;color:var(--s800)">${pmi(raw)}</span>`;
+  }
+
+  function makeLine(raw){const d=document.createElement('div');d.className='lp-line';d.dataset.raw=raw??'';return d;}
+
+  function ctxAt(lineEl){
+    let inCode=false;
+    for(const l of wrap.children){
+      if(l===lineEl) break;
+      if(/^```/.test(l.dataset.raw||'')) inCode=!inCode;
+    }
+    return inCode;
+  }
+
+  function applyRender(lineEl){
+    const raw=lineEl.dataset.raw||'';
+    const inCode=ctxAt(lineEl);
+    lineEl.className='lp-line';
+    if(inCode||/^```/.test(raw)){
+      lineEl.classList.add('lp-code-zone');
+      if(/^```/.test(raw)) lineEl.classList.add('lp-code-fence');
+    }
+    lineEl.innerHTML=renderLineHTML(raw,inCode);
+    if(window.renderMathInElement && (raw.includes('$')||raw.includes('$$'))){
+      try{renderMathInElement(lineEl,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});}catch(e){}
+    }
+  }
+
+  function renderAllExceptCur(){for(const l of wrap.children){if(l!==cur) applyRender(l);}}
+
+  function wrapHasFocus(){return wrap&&(document.activeElement===wrap||wrap.contains(document.activeElement));}
+
+  function findLine(node){
+    let el=node&&node.nodeType===3?node.parentElement:node;
+    while(el&&el!==wrap){if(el.parentElement===wrap&&el.classList.contains('lp-line'))return el;el=el.parentElement;}
+    return null;
+  }
+
+  function getOff(lineEl){
+    const sel=window.getSelection();if(!sel.rangeCount)return 0;
+    try{const r=document.createRange();r.setStart(lineEl,0);r.setEnd(sel.getRangeAt(0).startContainer,sel.getRangeAt(0).startOffset);return r.toString().length;}catch(e){return 0;}
+  }
+
+  function setOff(lineEl,pos){
+    if(!lineEl||!lineEl.isConnected)return;
+    const sel=window.getSelection();const range=document.createRange();
+    let rem=Math.max(0,pos),placed=false;
+    (function walk(node){
+      if(placed)return;
+      if(node.nodeType===3){if(rem<=node.textContent.length){range.setStart(node,rem);range.collapse(true);placed=true;}else rem-=node.textContent.length;}
+      else for(const c of node.childNodes)walk(c);
+    })(lineEl);
+    if(!placed){range.selectNodeContents(lineEl);range.collapse(false);}
+    try{sel.removeAllRanges();sel.addRange(range);}catch(e){}
+  }
+
+  function commit(){
+    if(!cur)return;
+    cur.dataset.raw=cur.textContent;
+    applyRender(cur);
+    cur=null;
+  }
+
+  function activate(lineEl,rawOff){
+    if(cur===lineEl)return;
+    activating=true;
+    commit();
+    cur=lineEl;
+    const raw=lineEl.dataset.raw||'';
+    lineEl.className='lp-line lp-active';
+    lineEl.textContent=raw;
+    const pos=rawOff!=null?Math.min(rawOff,raw.length):raw.length;
+    requestAnimationFrame(()=>{setOff(lineEl,pos);activating=false;});
+  }
+
+  function onSC(){
+    if(!wrapHasFocus()||comp||activating)return;
+    const sel=window.getSelection();if(!sel.rangeCount)return;
+    const line=findLine(sel.getRangeAt(0).startContainer);
+    if(!line||line===cur)return;
+    const rendText=line.innerText.replace(/​/g,'');
+    const rendOff=getOff(line);
+    const raw=line.dataset.raw||'';
+    const rawOff=rendText.length>0?Math.round(raw.length*(rendOff/rendText.length)):raw.length;
+    activate(line,rawOff);
+  }
+
+  function onInput(){
+    if(comp||!cur)return;
+    cur.normalize();
+    cur.dataset.raw=cur.textContent;
+    if(/^```/.test(cur.dataset.raw)||(cur.dataset.raw||'').trim()==='$$') renderAllExceptCur();
+    syncHidden();
+    if(typeof draftDirty!=='undefined') draftDirty=true;
+  }
+
+  function onKD(e){
+    if(comp)return;
+    if(e.key==='Enter')return handleEnter(e);
+    if(e.key==='Backspace')return handleBS(e);
+    if(e.key==='Delete')return handleDel(e);
+    if(e.key==='Tab')return handleTab(e);
+  }
+
+  function handleEnter(e){
+    if(!cur)return;e.preventDefault();
+    const off=getOff(cur),raw=cur.textContent;
+    const before=raw.slice(0,off),after=raw.slice(off);
+    let afterLine=after;
+    const lm=raw.match(/^([ \t]*)[-*+] (.*)/);
+    const om=raw.match(/^([ \t]*)(\d+)\. (.*)/);
+    if(lm&&!lm[2]&&!after){afterLine='';}
+    else if(lm&&after) afterLine=lm[1]+'- '+after;
+    else if(om&&after) afterLine=om[1]+(parseInt(om[2])+1)+'. '+after;
+    cur.dataset.raw=before;
+    const ref=cur;
+    commit();
+    const nl=makeLine(afterLine);
+    ref.after(nl);
+    syncHidden();
+    activate(nl,0);
+  }
+
+  function handleBS(e){
+    if(!cur)return;
+    if(getOff(cur)>0)return;
+    e.preventDefault();
+    const prev=cur.previousElementSibling;if(!prev)return;
+    const prevRaw=prev.dataset.raw||'',curRaw=cur.textContent;
+    const mp=prevRaw.length,merged=prevRaw+curRaw;
+    cur.remove();cur=null;
+    prev.dataset.raw=merged;
+    activate(prev,mp);
+    syncHidden();
+  }
+
+  function handleDel(e){
+    if(!cur)return;
+    const raw=cur.textContent;
+    if(getOff(cur)<raw.length)return;
+    e.preventDefault();
+    const next=cur.nextElementSibling;if(!next)return;
+    const nextRaw=next.dataset.raw||'',merged=raw+nextRaw;
+    next.remove();cur.dataset.raw=merged;cur.textContent=merged;
+    requestAnimationFrame(()=>setOff(cur,raw.length));
+    syncHidden();
+  }
+
+  function handleTab(e){
+    e.preventDefault();if(!cur)return;
+    const off=getOff(cur),raw=cur.textContent;
+    if(e.shiftKey){
+      const nr=raw.replace(/^  /,'');cur.dataset.raw=nr;cur.textContent=nr;
+      requestAnimationFrame(()=>setOff(cur,Math.max(0,off-(raw.length-nr.length))));
+    } else {
+      const nr=raw.slice(0,off)+'  '+raw.slice(off);cur.dataset.raw=nr;cur.textContent=nr;
+      requestAnimationFrame(()=>setOff(cur,off+2));
+    }
+    syncHidden();
+  }
+
+  function onPaste(e){
+    // Let image paste handler take over
+    if([...(e.clipboardData?.items||[])].some(i=>i.type.startsWith('image/'))) return;
+    e.preventDefault();
+    const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+    if(!cur||!text)return;
+    const off=getOff(cur),raw=cur.textContent;
+    const lines=text.replace(/\r\n?/g,'\n').split('\n');
+    if(lines.length===1){
+      const nr=raw.slice(0,off)+text+raw.slice(off);cur.dataset.raw=nr;cur.textContent=nr;
+      requestAnimationFrame(()=>setOff(cur,off+text.length));
+      syncHidden();return;
+    }
+    cur.dataset.raw=raw.slice(0,off)+lines[0];
+    const ref=cur;commit();
+    let ins=ref;
+    for(let i=1;i<lines.length-1;i++){const ml=makeLine(lines[i]);ins.after(ml);applyRender(ml);ins=ml;}
+    const ll=makeLine(lines[lines.length-1]+raw.slice(off));ins.after(ll);
+    syncHidden();
+    activate(ll,lines[lines.length-1].length);
+  }
+
+  function syncHidden(){
+    if(hidden) hidden.value=[...wrap.children].map(l=>l===cur?l.textContent:(l.dataset.raw||'')).join('\n');
+  }
+
+  function getValue(){syncHidden();return hidden?hidden.value:'';}
+
+  function setValue(md){
+    commit();wrap.innerHTML='';
+    const lines=(md||'').split('\n');
+    if(!lines.length)lines.push('');
+    lines.forEach(raw=>wrap.appendChild(makeLine(raw)));
+    renderAllExceptCur();
+    if(hidden)hidden.value=md||'';
+  }
+
+  function insertAtCursor(before,after){
+    if(!cur){const last=wrap.lastElementChild;if(!last)return;activate(last);setTimeout(()=>insertAtCursor(before,after),60);return;}
+    const sel=window.getSelection();
+    const off=getOff(cur);let selEnd=off;
+    if(sel.rangeCount){try{const r=document.createRange();r.setStart(cur,0);r.setEnd(sel.getRangeAt(0).endContainer,sel.getRangeAt(0).endOffset);selEnd=r.toString().length;}catch(e){}}
+    const raw=cur.textContent;
+    const [s,e2]=[Math.min(off,selEnd),Math.max(off,selEnd)];
+    const sel_text=raw.slice(s,e2);
+    const nr=raw.slice(0,s)+before+sel_text+after+raw.slice(e2);
+    cur.dataset.raw=nr;cur.textContent=nr;
+    requestAnimationFrame(()=>setOff(cur,s+before.length+sel_text.length));
+    syncHidden();
+    if(typeof draftDirty!=='undefined') draftDirty=true;
+  }
+
+  function init(wrapEl,hiddenEl){
+    wrap=wrapEl;hidden=hiddenEl;
+    wrap.addEventListener('input',onInput);
+    wrap.addEventListener('keydown',onKD);
+    wrap.addEventListener('paste',onPaste);
+    wrap.addEventListener('compositionstart',()=>{comp=true;});
+    wrap.addEventListener('compositionend',()=>{comp=false;if(cur){cur.normalize();cur.dataset.raw=cur.textContent;syncHidden();}});
+    document.addEventListener('selectionchange',onSC);
+  }
+
+  return{init,getValue,setValue,insertAtCursor,syncHidden,commit};
+})();
+
 
 // ── PROFILE ───────────────────────────────────────────────────────
 function openProfileEdit(){
@@ -3631,7 +3770,7 @@ function closeModal(id,event){
 }
 
 // ── MARKDOWN ──────────────────────────────────────────────────────
-// Shared inline renderer — used by both parseMd (published) and parseMdEditor (preview)
+// Shared inline renderer — used by parseMd (published) and LPE (live editor)
 function pmi(t){
   const mb=[],mi=[];
   // protect math before escaping
@@ -4197,13 +4336,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   recordVisit();
   setLang(currentLang);
   document.getElementById('editor-title').addEventListener('input', function() { autoResize(this); });
+  LPE.init(document.getElementById('lp-editor'), document.getElementById('editor-body'));
   window.dispatchEvent(new CustomEvent('blog-ready', {
     detail: { name: profile.blogName || profile.name || 'My Blog' }
   }));
   // Paste image in editor
   document.addEventListener('paste', async (e) => {
+    if (!document.getElementById('page-write').classList.contains('active')) return;
     const body = document.getElementById('editor-body');
-    if (!body || !document.getElementById('page-write').classList.contains('active')) return;
+    if (!body) return;
     const items = Array.from(e.clipboardData?.items || []);
     const imgItem = items.find(i => i.type.startsWith('image/'));
     if (!imgItem) return;
@@ -4213,11 +4354,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast('📤 사진 업로드 중...');
     const url = await uploadImageToSupabase(file, null, null, null);
     if (url) {
-      const pos = body.selectionStart;
+      LPE.syncHidden();
       const tag = `\n%%IMG%%${url}%%캡처%%\n`;
-      body.value = body.value.substring(0, pos) + tag + body.value.substring(pos);
-      body.selectionStart = body.selectionEnd = pos + tag.length;
-      updateLivePreview();
+      LPE.insertAtCursor(tag, '');
       toast('✅ 사진 삽입됨');
     }
   });
