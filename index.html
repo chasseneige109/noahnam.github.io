@@ -3556,16 +3556,76 @@ const LPE = (() => {
     if(typeof draftDirty!=='undefined') draftDirty=true;
   }
 
+  // ── Selection helpers ────────────────────────────────────────────
+  function getSelInfo(){
+    const sel=window.getSelection();
+    if(!sel||!sel.rangeCount)return null;
+    const range=sel.getRangeAt(0);
+    if(range.collapsed)return null;
+    const sl=findLine(range.startContainer)||cur;
+    const el=findLine(range.endContainer)||cur;
+    if(!sl||!el)return null;
+    let so=0,eo=0;
+    try{const r=document.createRange();r.setStart(sl,0);r.setEnd(range.startContainer,range.startOffset);so=r.toString().length;}catch(_){}
+    try{const r=document.createRange();r.setStart(el,0);r.setEnd(range.endContainer,range.endOffset);eo=r.toString().length;}catch(_){}
+    return{sl,el,so,eo};
+  }
+
+  // Delete current selection (single-line or multi-line). Returns true if something was deleted.
+  function deleteSel(){
+    const s=getSelInfo();if(!s)return false;
+    const{sl,el,so,eo}=s;
+    if(sl===el){
+      // single-line selection
+      const raw=sl===cur?sl.textContent:(sl.dataset.raw||'');
+      const nr=raw.slice(0,so)+raw.slice(eo);
+      if(sl!==cur){
+        if(cur){applyRender(cur);cur=null;}
+        cur=sl;sl.className='lp-line lp-active';sl.textContent=nr;
+      } else {
+        cur.textContent=nr;
+      }
+      cur.dataset.raw=nr;
+      setOff(cur,so);syncHidden();return true;
+    }
+    // multi-line selection
+    const startRaw=sl===cur?sl.textContent:(sl.dataset.raw||'');
+    const endRaw=el.dataset.raw||'';
+    const merged=startRaw.slice(0,so)+endRaw.slice(eo);
+    let node=sl.nextElementSibling;
+    while(node&&node!==el){const nx=node.nextElementSibling;node.remove();node=nx;}
+    el.remove();
+    if(cur&&cur!==sl){applyRender(cur);}
+    cur=sl;sl.className='lp-line lp-active';sl.textContent=merged;sl.dataset.raw=merged;
+    setOff(cur,so);syncHidden();return true;
+  }
+
   function onKD(e){
     if(comp)return;
     if(e.key==='Enter')return handleEnter(e);
     if(e.key==='Backspace')return handleBS(e);
     if(e.key==='Delete')return handleDel(e);
     if(e.key==='Tab')return handleTab(e);
+    // Printable char with multi-line selection: delete selection, let browser insert char
+    if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+      const s=getSelInfo();
+      if(s&&s.sl!==s.el){
+        e.preventDefault();
+        deleteSel();
+        const off2=getOff(cur),raw2=cur.textContent;
+        const nr2=raw2.slice(0,off2)+e.key+raw2.slice(off2);
+        cur.dataset.raw=nr2;cur.textContent=nr2;
+        requestAnimationFrame(()=>setOff(cur,off2+1));
+        syncHidden();if(typeof draftDirty!=='undefined')draftDirty=true;
+      }
+    }
   }
 
   function handleEnter(e){
-    if(!cur)return;e.preventDefault();
+    e.preventDefault();
+    // Delete any selection first, then split at cursor
+    deleteSel();
+    if(!cur)return;
     const off=getOff(cur),raw=cur.textContent;
     const before=raw.slice(0,off),after=raw.slice(off);
     let afterLine=after;
@@ -3574,9 +3634,10 @@ const LPE = (() => {
     if(lm&&!lm[2]&&!after){afterLine='';}
     else if(lm&&after) afterLine=lm[1]+'- '+after;
     else if(om&&after) afterLine=om[1]+(parseInt(om[2])+1)+'. '+after;
+    // Fix: set dataset.raw then applyRender directly (commit() would re-read textContent and overwrite)
     cur.dataset.raw=before;
-    const ref=cur;
-    commit();
+    applyRender(cur);
+    const ref=cur;cur=null;
     const nl=makeLine(afterLine);
     ref.after(nl);
     syncHidden();
@@ -3585,7 +3646,9 @@ const LPE = (() => {
 
   function handleBS(e){
     if(!cur)return;
-    if(getOff(cur)>0)return;
+    // Selection exists → delete it, don't merge lines
+    if(deleteSel()){e.preventDefault();return;}
+    if(getOff(cur)>0)return; // mid-line: let browser handle
     e.preventDefault();
     const prev=cur.previousElementSibling;if(!prev)return;
     const prevRaw=prev.dataset.raw||'',curRaw=cur.textContent;
@@ -3598,8 +3661,10 @@ const LPE = (() => {
 
   function handleDel(e){
     if(!cur)return;
+    // Selection exists → delete it
+    if(deleteSel()){e.preventDefault();return;}
     const raw=cur.textContent;
-    if(getOff(cur)<raw.length)return;
+    if(getOff(cur)<raw.length)return; // mid-line: let browser handle
     e.preventDefault();
     const next=cur.nextElementSibling;if(!next)return;
     const nextRaw=next.dataset.raw||'',merged=raw+nextRaw;
@@ -3610,6 +3675,7 @@ const LPE = (() => {
 
   function handleTab(e){
     e.preventDefault();if(!cur)return;
+    deleteSel(); // delete selection if any before indenting
     const off=getOff(cur),raw=cur.textContent;
     if(e.shiftKey){
       const nr=raw.replace(/^  /,'');cur.dataset.raw=nr;cur.textContent=nr;
@@ -3622,11 +3688,12 @@ const LPE = (() => {
   }
 
   function onPaste(e){
-    // Let image paste handler take over
     if([...(e.clipboardData?.items||[])].some(i=>i.type.startsWith('image/'))) return;
     e.preventDefault();
     const text=(e.clipboardData||window.clipboardData).getData('text/plain');
-    if(!cur||!text)return;
+    if(!text)return;
+    deleteSel(); // delete selection (single or multi-line) before pasting
+    if(!cur)return;
     const off=getOff(cur),raw=cur.textContent;
     const lines=text.replace(/\r\n?/g,'\n').split('\n');
     if(lines.length===1){
@@ -3634,8 +3701,10 @@ const LPE = (() => {
       requestAnimationFrame(()=>setOff(cur,off+text.length));
       syncHidden();return;
     }
+    // Multi-line paste: fix — use applyRender directly, not commit()
     cur.dataset.raw=raw.slice(0,off)+lines[0];
-    const ref=cur;commit();
+    applyRender(cur);
+    const ref=cur;cur=null;
     let ins=ref;
     for(let i=1;i<lines.length-1;i++){const ml=makeLine(lines[i]);ins.after(ml);applyRender(ml);ins=ml;}
     const ll=makeLine(lines[lines.length-1]+raw.slice(off));ins.after(ll);
