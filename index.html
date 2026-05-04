@@ -343,8 +343,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 /* 탭: 페이지 배경과 동일, 경계선만 */
 .rp-tab{width:20px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-left:1px solid var(--s200);border-top:1px solid var(--s200);border-bottom:none;border-right:none;border-radius:6px 0 0 6px;cursor:pointer;pointer-events:all;color:var(--s300);font-size:.8rem;margin-top:28px;box-shadow:-1px 0 6px rgba(0,0,0,.04);transition:color .15s,background .15s;padding:20px 0;flex-shrink:0;line-height:1}
 .rp-tab:hover{background:var(--s100);color:var(--blue)}
-/* 본체: 페이지 배경색, 왼쪽 선 구분만, 그림자 최소화 */
-.rp-body{flex:1;width:260px;background:var(--bg);border-left:1px solid var(--s200);border-top:none;border-bottom:none;border-right:none;border-radius:0;overflow-y:auto;overflow-x:hidden;pointer-events:all;box-shadow:-2px 0 12px rgba(0,0,0,.04);height:100%}
+/* 본체: 흰 배경 + 왼쪽 선만 — 글 위에 얹혀도 내용이 가려지지 않게 */
+.rp-body{flex:1;width:260px;background:#fff;border-left:1px solid var(--s200);border-top:none;border-bottom:none;border-right:none;border-radius:0;overflow-y:auto;overflow-x:hidden;pointer-events:all;box-shadow:-2px 0 10px rgba(0,0,0,.05);height:100%}
 .rp-body::-webkit-scrollbar{width:3px}.rp-body::-webkit-scrollbar-thumb{background:var(--s200);border-radius:2px}
 .rp-section{padding:16px 0 6px}
 .rp-section-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s300);padding:0 14px 8px;display:flex;align-items:center;justify-content:space-between}
@@ -375,7 +375,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .rp-toc-h3{font-weight:400;color:var(--s600)}
 .rp-toc-h4{font-weight:400;color:var(--s400);font-size:.76rem}
 .rp-empty{padding:10px 14px;color:var(--s300);font-size:.76rem;font-style:italic}
-@media(max-width:1100px){.right-panel{display:none!important}}
+@media(max-width:1279px){.right-panel{display:none!important}}
 
 /* ── RESPONSIVE ── */
 @media(max-width:860px){
@@ -1617,6 +1617,13 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
           <button class="rp-btn" onclick="insertMedia('video')">🎬 영상</button>
           <button class="rp-btn" onclick="insertMedia('pdf')">📄 PDF</button>
         </div>
+      </div>
+      <div class="rp-divider"></div>
+    </div>
+    <!-- 관리자: 수정 버튼 (글 읽기 전용) -->
+    <div class="rp-section" id="rp-edit-sec" style="display:none">
+      <div class="rp-action-btns">
+        <button class="rp-action-btn rp-action-draft" onclick="editCurrentArticle()">✎ 글 수정하기</button>
       </div>
       <div class="rp-divider"></div>
     </div>
@@ -4612,8 +4619,11 @@ function rpUpdate() {
   if (!isWrite && !isArticle) { panel.style.display = 'none'; return; }
   panel.style.display = 'flex';
 
-  const fmt = document.getElementById('rp-fmt-sec');
+  const fmt  = document.getElementById('rp-fmt-sec');
   if (fmt) fmt.style.display = isWrite ? 'block' : 'none';
+
+  const editSec = document.getElementById('rp-edit-sec');
+  if (editSec) editSec.style.display = (isArticle && typeof isAdmin !== 'undefined' && isAdmin) ? 'block' : 'none';
 
   _rpApply();
   _rpBuildToc(isWrite);
