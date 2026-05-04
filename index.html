@@ -433,7 +433,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
   .nav-tab{padding:5px 6px;font-size:.58rem}
   .landing-title{font-size:1.5rem}
 }
+/* KaTeX 오버플로우 수정 — 모든 화면 크기 */
 .katex{color:var(--s800)}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.katex-display>.katex{overflow-x:auto;overflow-y:hidden;max-width:100%}
 /* ── MEDIA IN ARTICLE ── */
 .media-img-wrap{margin:1.8em 0;text-align:center}
 .media-img-wrap img{max-width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
@@ -943,6 +946,46 @@ button, a, label { touch-action: manipulation; }
 
   /* ── 코드 블럭 가로 오버플로우 ── */
   .ep-pre { max-width: 100% !important; overflow-x: auto !important; }
+  .a-body pre { padding: 14px 16px !important; border-radius: 8px !important; }
+
+  /* ── KaTeX 수식 스크롤 (모바일 핵심 수정) ── */
+  .math-block {
+    padding: 12px 14px !important;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto !important;
+  }
+  .katex-display { overflow-x: auto !important; padding: 2px 0 !important; }
+  /* 인라인 수식이 포함된 단락이 잘리지 않도록 */
+  .ep-line, .a-body p { overflow-wrap: break-word; word-break: break-word; }
+
+  /* ── 글 본문 가독성 ── */
+  .a-body { font-size: .97rem !important; line-height: 1.85 !important; }
+  .ep-line { line-height: 1.82 !important; }
+
+  /* ── 단락 간격 ── */
+  .a-body p { margin-bottom: 1.2em !important; }
+
+  /* ── 헤딩 상단 여백 압축 ── */
+  .a-body h1 { font-size: 1.3rem !important; margin-top: 1.6em !important; }
+  .a-body h2 { font-size: 1.1rem !important; margin-top: 1.4em !important; }
+  .a-body h3 { font-size: .97rem !important; margin-top: 1.2em !important; }
+
+  /* ── 인용 / 리스트 들여쓰기 ── */
+  .ep-bq { padding-left: .55em !important; }
+  .a-body blockquote { padding-left: 12px !important; }
+  .a-body ul, .a-body ol { padding-left: 1.4em !important; }
+  .ep-li         { padding-left: 1.1em !important; }
+  .ep-li[data-d="1"] { padding-left: 2.2em !important; }
+  .ep-li[data-d="2"] { padding-left: 3.3em !important; }
+
+  /* ── 인라인 코드 ── */
+  .ep-code, .a-body code { font-size: .82em !important; padding: 1px 4px !important; }
+
+  /* ── article-topbar 버튼 ── */
+  .article-topbar { padding: 12px 0 10px !important; margin-bottom: 28px !important; }
+  .a-tags { margin-bottom: 8px !important; }
+  .a-title { margin-bottom: 10px !important; }
+  .a-meta { padding-bottom: 20px !important; margin-bottom: 24px !important; }
 }
 
 
