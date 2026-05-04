@@ -333,6 +333,33 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .vlog-badge.today{background:#eff6ff;color:#2563eb}
 .vlog-badge.ret{background:#f3e8ff;color:#7c3aed}
 .vlog-empty{text-align:center;padding:48px 20px;color:var(--s400);font-size:.82rem}
+/* ── RIGHT PANEL (outline + format toolbar) ── */
+.right-panel{position:fixed;top:52px;right:0;width:196px;max-height:calc(100vh - 60px);z-index:150;display:flex;flex-direction:row;align-items:flex-start;transition:transform .25s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.right-panel.rp-collapsed{transform:translateX(178px)}
+.rp-tab{width:18px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--s200);border-right:none;border-radius:8px 0 0 8px;cursor:pointer;pointer-events:all;color:var(--s400);font-size:.82rem;margin-top:20px;box-shadow:-2px 2px 8px rgba(0,0,0,.05);transition:background .15s,color .15s;padding:14px 0;flex-shrink:0;line-height:1}
+.rp-tab:hover{background:#f0f6ff;color:var(--blue)}
+.rp-body{flex:1;width:178px;background:#fff;border:1px solid var(--s200);border-right:none;border-radius:12px 0 0 12px;overflow-y:auto;overflow-x:hidden;pointer-events:all;box-shadow:-4px 0 16px rgba(0,0,0,.06);max-height:calc(100vh - 60px)}
+.rp-body::-webkit-scrollbar{width:3px}.rp-body::-webkit-scrollbar-thumb{background:var(--s200);border-radius:2px}
+.rp-section{padding:10px 0 4px}
+.rp-section-title{font-size:.57rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s400);padding:0 10px 5px;display:flex;align-items:center;justify-content:space-between}
+.rp-toc-count{background:var(--s100);color:var(--s500);border-radius:8px;padding:1px 6px;font-size:.58rem;font-family:var(--mono)}
+.rp-fmt-group{padding:0 8px 7px}
+.rp-fmt-label{font-size:.57rem;color:var(--s400);margin-bottom:4px;padding-left:2px;font-weight:600;letter-spacing:.04em}
+.rp-fmt-btns{display:flex;flex-wrap:wrap;gap:3px}
+.rp-btn{padding:4px 0;min-width:34px;border-radius:5px;border:1px solid var(--s200);background:#fff;color:var(--s700);font-size:.7rem;font-weight:600;font-family:var(--sans);cursor:pointer;transition:all .12s;text-align:center;line-height:1.2}
+.rp-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.rp-btn:active{transform:scale(.93)}
+.rp-btn-mono{font-family:var(--mono);font-size:.65rem}
+.rp-divider{height:1px;background:var(--s100);margin:2px 0 0}
+.rp-toc-item{padding:5px 8px;cursor:pointer;color:var(--s600);font-size:.7rem;line-height:1.35;border-radius:4px;margin:1px 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .1s,color .1s}
+.rp-toc-item:hover{background:#eff6ff;color:var(--blue)}
+.rp-toc-h1{font-weight:700;color:var(--s800)}
+.rp-toc-h2{font-weight:600;color:var(--s700)}
+.rp-toc-h3{font-weight:400}
+.rp-toc-h4{font-weight:400;color:var(--s400);font-size:.66rem}
+.rp-empty{padding:8px 12px;color:var(--s300);font-size:.68rem;font-style:italic}
+@media(max-width:1000px){.right-panel{display:none!important}}
+
 /* ── RESPONSIVE ── */
 @media(max-width:860px){
   .two-col,.three-col-sidebar{grid-template-columns:1fr}
@@ -1449,6 +1476,66 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
   </div>
 </div>
 
+
+<!-- ── RIGHT PANEL ─────────────────────────────────────────────── -->
+<div id="right-panel" class="right-panel" style="display:none">
+  <button class="rp-tab" id="rp-tab-btn" onclick="rpToggle()" title="패널 열기/닫기"><span id="rp-arrow">‹</span></button>
+  <div class="rp-body" id="rp-body">
+    <!-- 서식 도구 (에디터 전용) -->
+    <div class="rp-section" id="rp-fmt-sec" style="display:none">
+      <div class="rp-section-title">서식</div>
+      <div class="rp-fmt-group">
+        <div class="rp-fmt-label">제목</div>
+        <div class="rp-fmt-btns">
+          <button class="rp-btn" onclick="ins('# ','')">H1</button>
+          <button class="rp-btn" onclick="ins('## ','')">H2</button>
+          <button class="rp-btn" onclick="ins('### ','')">H3</button>
+          <button class="rp-btn" onclick="ins('#### ','')">H4</button>
+        </div>
+      </div>
+      <div class="rp-fmt-group">
+        <div class="rp-fmt-label">강조</div>
+        <div class="rp-fmt-btns">
+          <button class="rp-btn" onclick="ins('**','**')"><b>B</b></button>
+          <button class="rp-btn" onclick="ins('*','*')"><i>I</i></button>
+          <button class="rp-btn" onclick="ins('~~','~~')"><s>S</s></button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('`','`')">` `</button>
+        </div>
+      </div>
+      <div class="rp-fmt-group">
+        <div class="rp-fmt-label">목록 / 블록</div>
+        <div class="rp-fmt-btns">
+          <button class="rp-btn" onclick="ins('- ','')">•</button>
+          <button class="rp-btn" onclick="ins('1. ','')">1.</button>
+          <button class="rp-btn" onclick="ins('> ','')">❝</button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('```\n','\n```')">{ }</button>
+        </div>
+      </div>
+      <div class="rp-fmt-group">
+        <div class="rp-fmt-label">수식</div>
+        <div class="rp-fmt-btns">
+          <button class="rp-btn rp-btn-mono" onclick="ins('$','$')">$</button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('$$\n','\n$$')">$$</button>
+        </div>
+      </div>
+      <div class="rp-fmt-group">
+        <div class="rp-fmt-label">기타</div>
+        <div class="rp-fmt-btns">
+          <button class="rp-btn" onclick="ins('---\n','')">─ hr</button>
+          <button class="rp-btn" onclick="ins('[','](url)')">🔗</button>
+          <button class="rp-btn" onclick="ins('![alt](',')')">🖼</button>
+        </div>
+      </div>
+      <div class="rp-divider"></div>
+    </div>
+    <!-- 목차 -->
+    <div class="rp-section">
+      <div class="rp-section-title">목차 <span id="rp-toc-count" class="rp-toc-count"></span></div>
+      <div id="rp-toc"><div class="rp-empty">목차 없음</div></div>
+    </div>
+  </div>
+</div>
+
 </div><div id="modal-pw" class="modal-overlay" style="display:none" onclick="closeModal('modal-pw',event)">
   <div class="modal" style="max-width:340px">
 <div class="modal-drag-handle"></div>
@@ -2124,6 +2211,7 @@ function showSection(name) {
   window.scrollTo(0,0);
   renderCurrentPage();
   updateWriteBtn();
+  rpUpdate();
 }
 
 function renderCurrentPage() {
@@ -3003,6 +3091,7 @@ async function openPost(id,section) {
       delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false
     });
   },60);
+  rpUpdate();
 }
 function editCurrentArticle(){if(currentPostId)openEdit(currentPostId,currentSection);}
 function deleteCurrentArticle(){if(currentPostId)askDelete(currentPostId,currentSection);}
@@ -3028,6 +3117,7 @@ function openWrite(sectionHint) {
   draftDirty=false; currentDraftId=null;
   draftStartWatcher();
   setTimeout(draftCheckRestore, 150);
+  rpUpdate();
 }
 async function openEdit(id,section) {
   if(!isAdmin) return;
@@ -3055,6 +3145,7 @@ async function openEdit(id,section) {
   // draft: 수정 중엔 restore 배너 안 띄움, watcher만
   draftDirty=false;
   draftStartWatcher();
+  rpUpdate();
 }
 function cancelWrite() {
   // 나갈 때 변경사항 있으면 자동저장
@@ -3554,6 +3645,7 @@ const LPE = (() => {
     if(/^```/.test(cur.dataset.raw)||(cur.dataset.raw||'').trim()==='$$') renderAllExceptCur();
     syncHidden();
     if(typeof draftMarkDirty==='function') draftMarkDirty();
+    if(typeof rpDeferUpdate==='function') rpDeferUpdate();
   }
 
   // ── Selection helpers ────────────────────────────────────────────
@@ -4375,6 +4467,102 @@ async function clearVisitorLog() {
   } catch(e) {
     toast('초기화 실패: ' + e.message);
   }
+}
+
+// ── RIGHT PANEL ──────────────────────────────────────────────────
+let _rpOpen = localStorage.getItem('rp_open') !== 'false';
+let _rpUpdateTimer = null;
+
+function rpToggle() {
+  _rpOpen = !_rpOpen;
+  localStorage.setItem('rp_open', _rpOpen);
+  _rpApply();
+}
+
+function _rpApply() {
+  const panel = document.getElementById('right-panel');
+  const arrow = document.getElementById('rp-arrow');
+  if (!panel) return;
+  panel.classList.toggle('rp-collapsed', !_rpOpen);
+  if (arrow) arrow.textContent = _rpOpen ? '›' : '‹';
+}
+
+function rpDeferUpdate() {
+  clearTimeout(_rpUpdateTimer);
+  _rpUpdateTimer = setTimeout(rpUpdate, 280);
+}
+
+function rpUpdate() {
+  const panel = document.getElementById('right-panel');
+  if (!panel) return;
+  const isWrite   = document.getElementById('page-write')?.classList.contains('active');
+  const isArticle = document.getElementById('page-article')?.classList.contains('active');
+
+  if (!isWrite && !isArticle) { panel.style.display = 'none'; return; }
+  panel.style.display = 'flex';
+
+  const fmt = document.getElementById('rp-fmt-sec');
+  if (fmt) fmt.style.display = isWrite ? 'block' : 'none';
+
+  _rpApply();
+  _rpBuildToc(isWrite);
+}
+
+function _rpBuildToc(isEditor) {
+  const toc   = document.getElementById('rp-toc');
+  const count = document.getElementById('rp-toc-count');
+  if (!toc) return;
+
+  const headings = [];
+
+  if (isEditor) {
+    const lpe = document.getElementById('lp-editor');
+    if (lpe) {
+      [...lpe.children].forEach((line, idx) => {
+        const raw = line.classList.contains('lp-active') ? line.textContent : (line.dataset.raw || '');
+        const m = raw.match(/^(#{1,4}) +(.*)/);
+        if (m) headings.push({ level: +m[1].length, text: m[2].replace(/\*\*|__|~~|\*/g, ''), idx });
+      });
+    }
+  } else {
+    const body = document.getElementById('article-body');
+    if (body) {
+      body.querySelectorAll('.ep-h1,.ep-h2,.ep-h3,.ep-h4').forEach((el, i) => {
+        const level = el.classList.contains('ep-h1') ? 1 : el.classList.contains('ep-h2') ? 2 : el.classList.contains('ep-h3') ? 3 : 4;
+        if (!el.id) el.id = 'rp-h-' + i;
+        headings.push({ level, text: el.textContent.trim(), id: el.id });
+      });
+    }
+  }
+
+  if (count) count.textContent = headings.length || '';
+
+  if (!headings.length) {
+    toc.innerHTML = '<div class="rp-empty">목차 없음</div>';
+    return;
+  }
+
+  toc.innerHTML = headings.map(h => {
+    const indent = (h.level - 1) * 10;
+    const txt = h.text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return isEditor
+      ? `<div class="rp-toc-item rp-toc-h${h.level}" style="padding-left:${6+indent}px" onclick="rpGoLine(${h.idx})" title="${txt}">${txt}</div>`
+      : `<div class="rp-toc-item rp-toc-h${h.level}" style="padding-left:${6+indent}px" onclick="rpGoId('${h.id}')" title="${txt}">${txt}</div>`;
+  }).join('');
+}
+
+function rpGoLine(idx) {
+  const lpe = document.getElementById('lp-editor');
+  if (!lpe || !lpe.children[idx]) return;
+  lpe.children[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function rpGoId(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // offset for fixed navbar
+  const top = el.getBoundingClientRect().top + window.scrollY - 70;
+  window.scrollTo({ top, behavior: 'smooth' });
 }
 
 // 관리자 로그인 시 소유자 기기로 마킹 + 로그 버튼 표시
