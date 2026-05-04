@@ -338,30 +338,43 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .vlog-badge.ret{background:#f3e8ff;color:#7c3aed}
 .vlog-empty{text-align:center;padding:48px 20px;color:var(--s400);font-size:.82rem}
 /* ── RIGHT PANEL (outline + format toolbar) ── */
-.right-panel{position:fixed;top:64px;right:0;width:260px;max-height:calc(100vh - 72px);z-index:150;display:flex;flex-direction:row;align-items:flex-start;transition:transform .25s cubic-bezier(.4,0,.2,1);pointer-events:none}
-.right-panel.rp-collapsed{transform:translateX(240px)}
-.rp-tab{width:20px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--s200);border-right:none;border-radius:8px 0 0 8px;cursor:pointer;pointer-events:all;color:var(--s400);font-size:.88rem;margin-top:16px;box-shadow:-2px 2px 8px rgba(0,0,0,.05);transition:background .15s,color .15s;padding:18px 0;flex-shrink:0;line-height:1}
-.rp-tab:hover{background:#f0f6ff;color:var(--blue)}
-.rp-body{flex:1;width:240px;background:#fff;border:1px solid var(--s200);border-right:none;border-radius:12px 0 0 12px;overflow-y:auto;overflow-x:hidden;pointer-events:all;box-shadow:-4px 0 16px rgba(0,0,0,.06);max-height:calc(100vh - 72px)}
-.rp-body::-webkit-scrollbar{width:4px}.rp-body::-webkit-scrollbar-thumb{background:var(--s200);border-radius:2px}
-.rp-section{padding:14px 0 6px}
-.rp-section-title{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--s400);padding:0 14px 7px;display:flex;align-items:center;justify-content:space-between}
-.rp-toc-count{background:var(--s100);color:var(--s500);border-radius:8px;padding:1px 7px;font-size:.65rem;font-family:var(--mono)}
-.rp-fmt-group{padding:0 10px 9px}
-.rp-fmt-label{font-size:.65rem;color:var(--s400);margin-bottom:5px;padding-left:2px;font-weight:600;letter-spacing:.04em}
+.right-panel{position:fixed;top:60px;right:0;width:280px;height:calc(100vh - 60px);z-index:150;display:flex;flex-direction:row;align-items:flex-start;transition:transform .25s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.right-panel.rp-collapsed{transform:translateX(260px)}
+/* 탭: 페이지 배경과 동일, 경계선만 */
+.rp-tab{width:20px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-left:1px solid var(--s200);border-top:1px solid var(--s200);border-bottom:none;border-right:none;border-radius:6px 0 0 6px;cursor:pointer;pointer-events:all;color:var(--s300);font-size:.8rem;margin-top:28px;box-shadow:-1px 0 6px rgba(0,0,0,.04);transition:color .15s,background .15s;padding:20px 0;flex-shrink:0;line-height:1}
+.rp-tab:hover{background:var(--s100);color:var(--blue)}
+/* 본체: 페이지 배경색, 왼쪽 선 구분만, 그림자 최소화 */
+.rp-body{flex:1;width:260px;background:var(--bg);border-left:1px solid var(--s200);border-top:none;border-bottom:none;border-right:none;border-radius:0;overflow-y:auto;overflow-x:hidden;pointer-events:all;box-shadow:-2px 0 12px rgba(0,0,0,.04);height:100%}
+.rp-body::-webkit-scrollbar{width:3px}.rp-body::-webkit-scrollbar-thumb{background:var(--s200);border-radius:2px}
+.rp-section{padding:16px 0 6px}
+.rp-section-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--s300);padding:0 14px 8px;display:flex;align-items:center;justify-content:space-between}
+.rp-toc-count{background:var(--s200);color:var(--s500);border-radius:8px;padding:1px 7px;font-size:.6rem;font-family:var(--mono)}
+/* 글 관리 버튼 */
+.rp-action-btns{display:flex;flex-direction:column;gap:5px;padding:0 12px 10px}
+.rp-action-btn{padding:8px 12px;border-radius:8px;font-size:.76rem;font-weight:700;font-family:var(--sans);cursor:pointer;transition:all .15s;text-align:left;letter-spacing:.01em;border:none}
+.rp-action-pub{background:var(--blue);color:#fff}
+.rp-action-pub:hover{background:#1d4ed8}
+.rp-action-draft{background:#fff;color:var(--s700);border:1px solid var(--s200)!important}
+.rp-action-draft:hover{border-color:var(--blue)!important;color:var(--blue)}
+.rp-action-cancel{background:none;color:var(--s400);border:1px solid transparent!important;font-size:.7rem}
+.rp-action-cancel:hover{color:var(--s600);background:var(--s100)}
+/* 서식 버튼 */
+.rp-fmt-group{padding:0 12px 9px}
+.rp-fmt-label{font-size:.6rem;color:var(--s300);margin-bottom:5px;padding-left:2px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .rp-fmt-btns{display:flex;flex-wrap:wrap;gap:4px}
-.rp-btn{padding:5px 2px;min-width:38px;border-radius:6px;border:1px solid var(--s200);background:#fff;color:var(--s700);font-size:.75rem;font-weight:600;font-family:var(--sans);cursor:pointer;transition:all .12s;text-align:center;line-height:1.2}
+.rp-btn{padding:5px 2px;min-width:40px;border-radius:6px;border:1px solid var(--s200);background:#fff;color:var(--s600);font-size:.74rem;font-weight:600;font-family:var(--sans);cursor:pointer;transition:all .12s;text-align:center;line-height:1.2}
 .rp-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
 .rp-btn:active{transform:scale(.93)}
-.rp-btn-mono{font-family:var(--mono);font-size:.7rem}
-.rp-divider{height:1px;background:var(--s100);margin:4px 0 0}
-.rp-toc-item{padding:7px 10px;cursor:pointer;color:var(--s600);font-size:.85rem;line-height:1.4;border-radius:5px;margin:1px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .1s,color .1s}
-.rp-toc-item:hover{background:#eff6ff;color:var(--blue)}
+.rp-btn-mono{font-family:var(--mono);font-size:.68rem}
+.rp-divider{height:1px;background:var(--s200);margin:6px 0 2px;opacity:.5}
+/* 목차 */
+.rp-toc-item{padding:6px 10px;cursor:pointer;color:var(--s600);font-size:.84rem;line-height:1.4;border-radius:5px;margin:1px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .1s,color .1s}
+.rp-toc-item:hover{background:rgba(37,99,235,.06);color:var(--blue)}
 .rp-toc-h1{font-weight:700;color:var(--s800)}
 .rp-toc-h2{font-weight:600;color:var(--s700)}
 .rp-toc-h3{font-weight:400;color:var(--s600)}
-.rp-toc-h4{font-weight:400;color:var(--s400);font-size:.78rem}
-.rp-empty{padding:10px 14px;color:var(--s300);font-size:.78rem;font-style:italic}
+.rp-toc-h4{font-weight:400;color:var(--s400);font-size:.76rem}
+.rp-empty{padding:10px 14px;color:var(--s300);font-size:.76rem;font-style:italic}
 @media(max-width:1100px){.right-panel{display:none!important}}
 
 /* ── RESPONSIVE ── */
@@ -1549,9 +1562,18 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
 <div id="right-panel" class="right-panel" style="display:none">
   <button class="rp-tab" id="rp-tab-btn" onclick="rpToggle()" title="패널 열기/닫기"><span id="rp-arrow">‹</span></button>
   <div class="rp-body" id="rp-body">
-    <!-- 서식 도구 (에디터 전용) -->
+    <!-- 서식 도구 + 글 관리 (에디터 전용) -->
     <div class="rp-section" id="rp-fmt-sec" style="display:none">
-      <div class="rp-section-title">서식</div>
+      <!-- 글 관리 -->
+      <div class="rp-section-title">글 관리</div>
+      <div class="rp-action-btns">
+        <button class="rp-action-btn rp-action-pub" onclick="publishPost()">🚀 발행하기</button>
+        <button class="rp-action-btn rp-action-draft" onclick="draftSaveNow()">💾 임시저장</button>
+        <button class="rp-action-btn rp-action-cancel" onclick="cancelWrite()">← 작성 취소</button>
+      </div>
+      <div class="rp-divider"></div>
+      <!-- 서식 -->
+      <div class="rp-section-title" style="padding-top:10px">서식</div>
       <div class="rp-fmt-group">
         <div class="rp-fmt-label">제목</div>
         <div class="rp-fmt-btns">
@@ -1573,25 +1595,27 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
       <div class="rp-fmt-group">
         <div class="rp-fmt-label">목록 / 블록</div>
         <div class="rp-fmt-btns">
-          <button class="rp-btn" onclick="ins('- ','')">•</button>
-          <button class="rp-btn" onclick="ins('1. ','')">1.</button>
-          <button class="rp-btn" onclick="ins('> ','')">❝</button>
-          <button class="rp-btn rp-btn-mono" onclick="ins('```\n','\n```')">{ }</button>
+          <button class="rp-btn" onclick="ins('- ','')">•목록</button>
+          <button class="rp-btn" onclick="ins('1. ','')">1.목록</button>
+          <button class="rp-btn" onclick="ins('> ','')">❝인용</button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('```\n','\n```')">코드</button>
         </div>
       </div>
       <div class="rp-fmt-group">
         <div class="rp-fmt-label">수식</div>
         <div class="rp-fmt-btns">
-          <button class="rp-btn rp-btn-mono" onclick="ins('$','$')">$</button>
-          <button class="rp-btn rp-btn-mono" onclick="ins('$$\n','\n$$')">$$</button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('$','$')">$ 인라인</button>
+          <button class="rp-btn rp-btn-mono" onclick="ins('$$\n','\n$$')">$$ 블록</button>
         </div>
       </div>
       <div class="rp-fmt-group">
-        <div class="rp-fmt-label">기타</div>
+        <div class="rp-fmt-label">삽입</div>
         <div class="rp-fmt-btns">
-          <button class="rp-btn" onclick="ins('---\n','')">─ hr</button>
-          <button class="rp-btn" onclick="ins('[','](url)')">🔗</button>
-          <button class="rp-btn" onclick="ins('![alt](',')')">🖼</button>
+          <button class="rp-btn" onclick="ins('---\n','')">── 선</button>
+          <button class="rp-btn" onclick="ins('[','](url)')">🔗 링크</button>
+          <button class="rp-btn" onclick="insertMedia('image')">🖼 사진</button>
+          <button class="rp-btn" onclick="insertMedia('video')">🎬 영상</button>
+          <button class="rp-btn" onclick="insertMedia('pdf')">📄 PDF</button>
         </div>
       </div>
       <div class="rp-divider"></div>
