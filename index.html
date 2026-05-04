@@ -336,6 +336,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .vlog-badge.new{background:#dcfce7;color:#16a34a}
 .vlog-badge.today{background:#eff6ff;color:#2563eb}
 .vlog-badge.ret{background:#f3e8ff;color:#7c3aed}
+.vlog-badge.user{background:#fff7ed;color:#c2410c;font-family:var(--mono);letter-spacing:.01em}
 .vlog-empty{text-align:center;padding:48px 20px;color:var(--s400);font-size:.82rem}
 /* ── RIGHT PANEL (outline + format toolbar) ── */
 .right-panel{position:fixed;top:60px;right:0;width:280px;height:calc(100vh - 60px);z-index:150;display:flex;flex-direction:row;align-items:flex-start;transition:transform .25s cubic-bezier(.4,0,.2,1);pointer-events:none}
@@ -1920,9 +1921,9 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
     </div>
     <div class="vlog-stats">
       <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-total">-</div><div class="vlog-stat-label">총 방문</div></div>
+      <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-users">-</div><div class="vlog-stat-label">고유 유저</div></div>
       <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-today">-</div><div class="vlog-stat-label">오늘</div></div>
       <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-new">-</div><div class="vlog-stat-label">1시간 내</div></div>
-      <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-ret">-</div><div class="vlog-stat-label">재방문</div></div>
       <div class="vlog-stat"><div class="vlog-stat-num" id="vlog-stat-article">-</div><div class="vlog-stat-label">글 읽음</div></div>
     </div>
     <div class="vlog-list" id="vlog-list">
@@ -4409,9 +4410,13 @@ async function recordVisit() {
     const page = location.href;
     const referrer = document.referrer || '직접 방문';
 
-    // 재방문 여부
-    const is_return = !!localStorage.getItem('_visited');
-    localStorage.setItem('_visited', '1');
+    // 고유 유저 ID — 없으면 생성, 있으면 재방문
+    let uid = localStorage.getItem('_uid');
+    const is_return = !!uid;
+    if (!uid) {
+      uid = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem('_uid', uid);
+    }
 
     // 기기 추가 정보
     const screen = `${window.screen.width}×${window.screen.height}`;
@@ -4439,7 +4444,7 @@ async function recordVisit() {
       device, os, browser,
       country, city, timezone,
       page, referrer,
-      is_return, screen, lang, connection,
+      is_return, screen, lang, connection, uid,
     }]).select('id').single();
 
     if (!error && inserted?.id) {
@@ -4507,16 +4512,23 @@ async function openVisitorLog() {
     const now = new Date();
     const todayStr = now.toDateString();
 
+    // uid → 유저 번호 맵 (시간순 첫 등장 기준)
+    const uidMap = {};
+    let uidCounter = 0;
+    [...(data||[])].reverse().forEach(row => {
+      if (row.uid && !(row.uid in uidMap)) uidMap[row.uid] = ++uidCounter;
+    });
+
     // 통계
     const statTotal   = count || 0;
+    const statUsers   = uidCounter;
     const statToday   = (data||[]).filter(r => new Date(r.visited_at).toDateString() === todayStr).length;
     const statNew     = (data||[]).filter(r => (now - new Date(r.visited_at)) < 3600000).length;
-    const statRet     = (data||[]).filter(r => r.is_return).length;
     const statArticle = (data||[]).filter(r => r.article).length;
     document.getElementById('vlog-stat-total').textContent   = statTotal.toLocaleString();
+    document.getElementById('vlog-stat-users').textContent   = statUsers.toLocaleString();
     document.getElementById('vlog-stat-today').textContent   = statToday.toLocaleString();
     document.getElementById('vlog-stat-new').textContent     = statNew.toLocaleString();
-    document.getElementById('vlog-stat-ret').textContent     = statRet.toLocaleString();
     document.getElementById('vlog-stat-article').textContent = statArticle.toLocaleString();
 
     if (!data || !data.length) {
@@ -4532,8 +4544,10 @@ async function openVisitorLog() {
       const ts = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`
                + `<br>${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
 
+      const userNum = row.uid && uidMap[row.uid] ? uidMap[row.uid] : null;
       const badges = [
-        isNew   ? '<span class="vlog-badge new">NEW</span>'   : isToday ? '<span class="vlog-badge today">오늘</span>' : '',
+        userNum ? `<span class="vlog-badge user">U#${userNum}</span>` : '',
+        isNew   ? '<span class="vlog-badge new">NEW</span>' : isToday ? '<span class="vlog-badge today">오늘</span>' : '',
         row.is_return ? '<span class="vlog-badge ret">재방문</span>' : '',
       ].filter(Boolean).join('');
 
