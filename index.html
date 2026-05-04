@@ -922,6 +922,27 @@ button, a, label { touch-action: manipulation; }
 
   /* ── paper-meta 그리드 1열 ── */
   .paper-meta-grid, .paper-fields-grid { grid-template-columns: 1fr !important; }
+
+  /* ── article & editor 좌우 패딩 ── */
+  .article-wrap { padding-left: 16px !important; padding-right: 16px !important; }
+  .editor-wrap  { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* ── 글 제목 모바일 축소 ── */
+  .a-title { font-size: 1.45rem !important; line-height: 1.25 !important; }
+  .a-meta  { flex-wrap: wrap !important; gap: 5px 10px !important; font-size: .6rem !important; }
+
+  /* ── ep-h 헤딩 모바일 크기 ── */
+  .ep-h1 { font-size: 1.35rem !important; padding-bottom: 5px !important; }
+  .ep-h2 { font-size: 1.12rem !important; }
+  .ep-h3 { font-size: .98rem !important; }
+  .ep-h4 { font-size: .75rem !important; }
+
+  /* ── LPE 에디터 줄 폰트 크기: iOS 자동 줌 방지 (16px 이상 필요) ── */
+  #lp-editor { font-size: 16px !important; }
+  .ep-line   { font-size: 1rem !important; }
+
+  /* ── 코드 블럭 가로 오버플로우 ── */
+  .ep-pre { max-width: 100% !important; overflow-x: auto !important; }
 }
 
 
@@ -3698,9 +3719,9 @@ const LPE = (() => {
 
   function onKD(e){
     if(comp)return;
-    if(e.key==='Enter')return handleEnter(e);
-    if(e.key==='Backspace')return handleBS(e);
-    if(e.key==='Delete')return handleDel(e);
+    if(e.key==='Enter'){_kdMark();return handleEnter(e);}
+    if(e.key==='Backspace'){_kdMark();return handleBS(e);}
+    if(e.key==='Delete'){_kdMark();return handleDel(e);}
     if(e.key==='Tab')return handleTab(e);
     // Printable char with multi-line selection: delete selection, let browser insert char
     if(e.key.length===1&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
@@ -3838,6 +3859,11 @@ const LPE = (() => {
     if(typeof draftMarkDirty==='function') draftMarkDirty();
   }
 
+  // 마지막 Enter/BS/Del을 keydown이 처리했는지 추적 (중복 방지)
+  let _kdHandledAt = 0;
+  function _kdMark(){ _kdHandledAt = Date.now(); }
+  function _kdRecent(){ return Date.now() - _kdHandledAt < 80; }
+
   function init(wrapEl,hiddenEl){
     wrap=wrapEl;hidden=hiddenEl;
     wrap.addEventListener('input',onInput);
@@ -3846,6 +3872,20 @@ const LPE = (() => {
     wrap.addEventListener('compositionstart',()=>{comp=true;});
     wrap.addEventListener('compositionend',()=>{comp=false;if(cur){cur.normalize();cur.dataset.raw=cur.textContent;syncHidden();}});
     document.addEventListener('selectionchange',onSC);
+    // Android 소프트 키보드: keydown이 Enter/BS/Del을 잡지 못할 때 beforeinput으로 처리
+    wrap.addEventListener('beforeinput',e=>{
+      if(comp)return;
+      if(e.inputType==='insertParagraph'){
+        if(_kdRecent())return; // keydown이 이미 처리함
+        handleEnter(e);
+      } else if(e.inputType==='deleteContentBackward'){
+        if(_kdRecent())return;
+        handleBS(e);
+      } else if(e.inputType==='deleteContentForward'){
+        if(_kdRecent())return;
+        handleDel(e);
+      }
+    });
   }
 
   return{init,getValue,setValue,insertAtCursor,syncHidden,commit};
