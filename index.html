@@ -2927,11 +2927,10 @@ function renderPostsPage() {
   buildFilterSidebar('posts-filter-sidebar','posts');
   buildMobFilter('posts');
   let list=[...posts];
-  const fc=filterCat.posts,ft=filterTag.posts;
+  const fc=filterCat.posts;
   if(fc) list=list.filter(p=>p.cat&&(p.cat===fc||p.cat.startsWith(fc+'/')));
-  if(ft) list=list.filter(p=>(p.tags||[]).includes(ft));
   list.sort((a,b)=>sortDesc.posts?b.id-a.id:a.id-b.id);
-  let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Posts (${list.length})`;
+  let label=fc?`${fc} (${list.length})`:`Posts (${list.length})`;
   document.getElementById('posts-filter-label').textContent=label;
   renderColBtns('posts');
   const cols=postGridCols.posts;
@@ -2976,7 +2975,7 @@ function renderColBtns(section) {
 }
 
 function postCardHTML(p,section) {
-  const tags=(p.tags||[]).map(t=>`<span class="pc-tag">#${esc(t)}</span>`).join('');
+  const tags=section==='posts'?'':(p.tags||[]).map(t=>`<span class="pc-tag">#${esc(t)}</span>`).join('');
   const cat=p.cat?`<span class="pc-cat">${esc(p.cat)}</span>`:'';
   // Papers 전용: 연도/학회 메타
   const paperMeta = section==='paper' ? (()=>{
@@ -3160,7 +3159,8 @@ async function openPost(id,section) {
   currentPostId=id; currentSection=section;
   history.pushState(null,'','#'+section+'/'+id);
   document.getElementById('article-tags').innerHTML=
-    (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')+(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join('');
+    (p.cat?`<span class="a-cat">${esc(p.cat)}</span>`:'')
+    +(section!=='posts'?(p.tags||[]).map(t=>`<span class="a-tag">#${esc(t)}</span>`).join(''):'');
   document.getElementById('article-title').textContent=p.title;
   document.getElementById('article-date').textContent=fmtDate(p.createdAt);
   const shareBtn=document.getElementById('article-share-btn');
@@ -3521,6 +3521,9 @@ function selectSection(sec,btn) {
   // paper 필드 토글
   const pf = document.getElementById('paper-fields');
   if(pf) pf.classList.toggle('visible', sec==='paper');
+  // 태그 입력행: posts에선 숨김
+  const tr = document.getElementById('editor-tags-row');
+  if(tr) tr.style.display = sec==='posts' ? 'none' : '';
 }
 function renderEditorCats() {
   const cats=categories[editingSection]||[];
