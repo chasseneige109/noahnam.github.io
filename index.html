@@ -2988,7 +2988,7 @@ function postCardHTML(p,section) {
     <div class="pc-top">${cat}${tags}</div>
     <div class="pc-title">${esc(p.title)}</div>
     ${paperMeta}
-    <div class="pc-excerpt">${esc(excerpt(p.preview||p.body))}</div>
+    ${section!=='posts'?`<div class="pc-excerpt">${esc(excerpt(p.preview||p.body))}</div>`:''}
     <div class="pc-footer">
       <span class="pc-date">${fmtDate(p.createdAt)}</span>
       <div class="pc-actions admin-only" onclick="event.stopPropagation()">
