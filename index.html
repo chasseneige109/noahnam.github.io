@@ -2770,8 +2770,8 @@ function buildMobFilter(section) {
     html += `</div>`;
   }
 
-  // 태그 칩
-  if (allTags.length) {
+  // 태그 칩 (posts 제외)
+  if (allTags.length && section !== 'posts') {
     html += `<div class="mob-filter-label">Tags</div>`;
     html += `<div class="mob-filter-scroll">`;
     allTags.forEach(t => {
@@ -2889,7 +2889,7 @@ function buildFilterSidebar(containerId, section) {
 
   html+=`</div>`;
 
-  if(allTags.size) {
+  if(allTags.size && section !== 'posts') {
     html+=`<div class="gc tag-card">
       <div class="sec-label">Tags</div>
       <div class="tag-cloud">
