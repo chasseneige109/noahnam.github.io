@@ -3882,10 +3882,33 @@ const LPE = (() => {
     syncHidden();
   }
 
+  function htmlToPlain(html){
+    const tmp=document.createElement('div');
+    tmp.innerHTML=html;
+    const BLOCK=new Set(['p','div','li','h1','h2','h3','h4','h5','h6','pre','blockquote','tr','br']);
+    function walk(node){
+      let out='';
+      for(const child of node.childNodes){
+        if(child.nodeType===3){out+=child.textContent;}
+        else if(child.nodeType===1){
+          const tag=child.tagName.toLowerCase();
+          if(tag==='br'){out+='\n';}
+          else{
+            out+=walk(child);
+            if(BLOCK.has(tag)||(child.className&&child.className.includes('ep-line')))out+='\n';
+          }
+        }
+      }
+      return out;
+    }
+    return walk(tmp).replace(/\n{3,}/g,'\n\n').replace(/^\n+|\n+$/g,'');
+  }
+
   function onPaste(e){
     if([...(e.clipboardData?.items||[])].some(i=>i.type.startsWith('image/'))) return;
     e.preventDefault();
-    const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+    const rawHtml=e.clipboardData?.getData('text/html');
+    const text=rawHtml?htmlToPlain(rawHtml):((e.clipboardData||window.clipboardData).getData('text/plain'));
     if(!text)return;
     deleteSel(); // delete selection (single or multi-line) before pasting
     if(!cur)return;
