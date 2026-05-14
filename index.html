@@ -448,7 +448,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
   .landing-title{font-size:1.5rem}
 }
 /* KaTeX 오버플로우 수정 — 모든 화면 크기 */
-.katex{color:var(--s800)}
+.katex{color:var(--s800);font-family:KaTeX_Main,"KaTeX_Main",Times New Roman,serif}
+.katex .mord.mathnormal,.katex .mord.mathit{font-family:KaTeX_Math,"KaTeX_Math",Times New Roman,serif;font-style:italic}
 .katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
 .katex-display>.katex{overflow-x:auto;overflow-y:hidden;max-width:100%}
 /* ── MEDIA IN ARTICLE ── */
