@@ -3894,6 +3894,14 @@ const LPE = (() => {
         else if(child.nodeType===1){
           const tag=child.tagName.toLowerCase();
           if(tag==='br'){out+='\n';}
+          else if(child.classList&&child.classList.contains('katex-display')){
+            const ann=child.querySelector('annotation[encoding="application/x-tex"]');
+            if(ann) out+=`$$${ann.textContent}$$`;
+          }
+          else if(child.classList&&child.classList.contains('katex')){
+            const ann=child.querySelector('annotation[encoding="application/x-tex"]');
+            if(ann) out+=`$${ann.textContent}$`;
+          }
           else{
             out+=walk(child);
             if(BLOCK.has(tag)||(child.className&&child.className.includes('ep-line')))out+='\n';
