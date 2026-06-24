@@ -1449,7 +1449,6 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div class="filter-bar">
           <span class="filter-label" id="posts-filter-label">Posts</span>
           <div class="post-col-control" id="posts-col-control"></div>
-          <button class="view-toggle-btn" id="posts-view-btn" onclick="toggleViewMode('posts')" title="폴더/목록 전환">📁 폴더</button>
           <button class="sort-btn" onclick="toggleSort('posts')">최신순 ↕</button>
         </div>
         <div id="posts-list"></div>
@@ -1470,7 +1469,6 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div class="filter-bar">
           <span class="filter-label" id="paper-filter-label">Paper Review</span>
           <div class="post-col-control" id="paper-col-control"></div>
-          <button class="view-toggle-btn" id="paper-view-btn" onclick="toggleViewMode('paper')" title="폴더/목록 전환">📁 폴더</button>
           <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
         </div>
         <div id="paper-list"></div>
@@ -2973,13 +2971,6 @@ function addSubFolder(section, parentPath) {
 }
 
 // ── POSTS/PAPER PAGES ─────────────────────────────────────────────
-function updateViewBtn(section) {
-  const btn = document.getElementById(section + '-view-btn');
-  if (!btn) return;
-  const isFolderMode = postViewMode[section] === 'folder';
-  btn.textContent = isFolderMode ? '📁 폴더' : '≡ 목록';
-  btn.classList.toggle('active', isFolderMode);
-}
 function renderPostsPage() {
   buildFilterSidebar('posts-filter-sidebar','posts');
   buildMobFilter('posts');
@@ -2990,15 +2981,11 @@ function renderPostsPage() {
   let label=fc?`${fc} (${list.length})`:`Posts (${list.length})`;
   document.getElementById('posts-filter-label').textContent=label;
   renderColBtns('posts');
-  updateViewBtn('posts');
   const cols=postGridCols.posts;
   const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
-  const isFolderMode = postViewMode.posts === 'folder' && !fc;
-  document.getElementById('posts-list').innerHTML = isFolderMode
-    ? renderGroupedPosts(list, 'posts', cols)
-    : list.length
-      ? `<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'posts')).join('')+`</div>`
-      : `<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+  document.getElementById('posts-list').innerHTML=list.length
+    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'posts')).join('')+`</div>`
+    :`<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
 }
 function renderPaperPage() {
   buildFilterSidebar('paper-filter-sidebar','paper');
@@ -3011,15 +2998,11 @@ function renderPaperPage() {
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Paper Review (${list.length})`;
   document.getElementById('paper-filter-label').textContent=label;
   renderColBtns('paper');
-  updateViewBtn('paper');
   const cols=postGridCols.paper;
   const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
-  const isFolderMode = postViewMode.paper === 'folder' && !fc && !ft;
-  document.getElementById('paper-list').innerHTML = isFolderMode
-    ? renderGroupedPosts(list, 'paper', cols)
-    : list.length
-      ? `<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'paper')).join('')+`</div>`
-      : `<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
+  document.getElementById('paper-list').innerHTML=list.length
+    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'paper')).join('')+`</div>`
+    :`<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
 }
 
 async function setPostCols(section, cols) {
