@@ -597,17 +597,25 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-row.dnd-over-inside{background:var(--blue-bg)!important;outline:1.5px dashed var(--blue-l);border-radius:var(--r)}
 
 /* ── GROUPED POST VIEW ── */
-.post-group-section{margin-bottom:18px}
-.post-group-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow);border-radius:var(--r2);cursor:pointer;user-select:none;transition:all .2s}
-.post-group-header:hover{border-color:rgba(59,130,246,.2);box-shadow:var(--shadow-lg)}
-.post-group-toggle{font-size:.55rem;color:var(--s400);transition:transform .2s;flex-shrink:0}
-.post-group-toggle.open{transform:rotate(90deg)}
-.post-group-icon{font-size:.95rem;flex-shrink:0}
-.post-group-name{font-size:.85rem;font-weight:700;color:var(--s800);flex:1}
-.post-group-count{font-family:var(--mono);font-size:.62rem;color:var(--s400);background:var(--s100);padding:1px 7px;border-radius:10px;flex-shrink:0}
+.post-group-section{margin-bottom:32px}
+.post-group-header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);border-left:3px solid var(--blue-l);border-radius:var(--r3);box-shadow:var(--shadow);cursor:pointer;user-select:none;transition:all .22s;margin-bottom:14px}
+.post-group-header:hover{box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.25);transform:translateY(-1px)}
+.post-group-icon{font-size:1.4rem;flex-shrink:0;transition:transform .2s}
+.post-group-header:hover .post-group-icon{transform:scale(1.1)}
+.post-group-name{font-size:1.05rem;font-weight:800;color:var(--s900);flex:1;letter-spacing:-.02em}
+.post-group-count{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:12px;border:1px solid #bfdbfe;flex-shrink:0}
+.post-group-arrow{font-size:.7rem;color:var(--s400);transition:transform .22s;flex-shrink:0}
+.post-group-arrow.open{transform:rotate(90deg)}
 .post-group-body{overflow:hidden;transition:max-height .3s ease}
-.post-group-body-inner{padding-top:10px}
-.view-toggle-btn{padding:4px 11px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.04em;border:1px solid var(--s200);background:#fff;color:var(--s500);cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.post-group-body-inner{padding-bottom:4px}
+.post-group-sub{margin-top:14px;padding-left:20px;border-left:2px solid var(--s200)}
+.post-group-sub .post-group-header{border-left-color:var(--s300);background:rgba(255,255,255,.7);padding:14px 20px}
+.post-group-sub .post-group-name{font-size:.92rem;font-weight:700}
+/* 루트 드롭존 */
+.folder-root-dropzone{display:none;align-items:center;justify-content:center;gap:6px;padding:7px 10px;margin-bottom:8px;border:1.5px dashed var(--s300);border-radius:var(--r);font-size:.7rem;color:var(--s400);transition:all .15s;cursor:default}
+.folder-root-dropzone.dnd-active{display:flex}
+.folder-root-dropzone.dnd-over-inside{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.view-toggle-btn{padding:5px 12px;border-radius:16px;font-size:.68rem;font-weight:700;border:1px solid var(--s200);background:#fff;color:var(--s500);cursor:pointer;transition:all .15s;font-family:var(--sans)}
 .view-toggle-btn:hover,.view-toggle-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
 
 /* ── PAPER META BOX ── */
@@ -2903,6 +2911,10 @@ function buildFilterSidebar(containerId, section) {
   // Folder-style category tree with unlimited nesting
   html+=`<div class="gc folder-card">
     <div class="sec-label" style="margin-bottom:8px">Categories</div>
+    <div class="folder-root-dropzone" id="folder-root-dz-${section}"
+      ondragover="dndOverRoot(event,'${section}')" ondragleave="dndLeaveRoot(event,'${section}')" ondrop="dndDropRoot(event,'${section}')">
+      ↑ 최상위로 이동
+    </div>
     <div class="folder-all ${!fc?'active':''}" onclick="setCatFilter('${section}',null)">
       <span class="folder-all-icon">🗂</span>
       <span class="folder-all-name">All</span>
@@ -3667,7 +3679,31 @@ function dndStart(e, section, path) {
   dndState = { section, path };
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', path);
-  setTimeout(() => e.target.classList.add('dnd-dragging'), 0);
+  setTimeout(() => {
+    e.target.classList.add('dnd-dragging');
+    // 루트 드롭존 노출 (하위 폴더에서만 의미 있음)
+    if (path.includes('/')) {
+      const dz = document.getElementById('folder-root-dz-' + section);
+      if (dz) dz.classList.add('dnd-active');
+    }
+  }, 0);
+}
+function dndOverRoot(e, section) {
+  if (!dndState || dndState.section !== section || !dndState.path.includes('/')) return;
+  e.preventDefault();
+  document.getElementById('folder-root-dz-' + section)?.classList.add('dnd-over-inside');
+}
+function dndLeaveRoot(e, section) {
+  document.getElementById('folder-root-dz-' + section)?.classList.remove('dnd-over-inside');
+}
+async function dndDropRoot(e, section) {
+  e.preventDefault();
+  dndLeaveRoot(e, section);
+  if (!dndState || dndState.section !== section) { dndEnd(e); return; }
+  const srcPath = dndState.path;
+  dndEnd(e);
+  // 루트로 이동: 부모 없애고 이름만 남김
+  await moveFolderTo(section, srcPath, null, 'root');
 }
 function dndOver(e, section, path) {
   if (!dndState || dndState.path === path) return;
@@ -3689,6 +3725,7 @@ function dndLeave(e) {
 function dndEnd(e) {
   document.querySelectorAll('.dnd-dragging,.dnd-over-top,.dnd-over-bottom,.dnd-over-inside')
     .forEach(el => el.classList.remove('dnd-dragging','dnd-over-top','dnd-over-bottom','dnd-over-inside'));
+  document.querySelectorAll('.folder-root-dropzone').forEach(el => el.classList.remove('dnd-active','dnd-over-inside'));
   dndState = null;
 }
 async function dndDrop(e, section, targetPath) {
@@ -3708,14 +3745,15 @@ async function dndDrop(e, section, targetPath) {
 async function moveFolderTo(section, srcPath, targetPath, pos) {
   const cats = categories[section] || [];
   const srcName  = srcPath.split('/').pop();
-  const tgtParts = targetPath.split('/');
 
   let newPath;
-  if (pos === 'inside') {
-    // 타겟 폴더의 자식으로
+  if (pos === 'root') {
+    // 최상위로
+    newPath = srcName;
+  } else if (pos === 'inside') {
     newPath = targetPath + '/' + srcName;
   } else {
-    // 타겟과 같은 부모 레벨로 (before/after는 순서만 다름)
+    const tgtParts = targetPath.split('/');
     const parentParts = tgtParts.slice(0, -1);
     newPath = parentParts.length ? parentParts.join('/') + '/' + srcName : srcName;
   }
@@ -3786,25 +3824,25 @@ function renderGroupedPosts(fullList, section, cols) {
   const gridCls = cols > 1 ? `posts-grid-wrap cols-${cols}` : 'posts-grid-wrap';
   let html = '';
 
-  function renderGroup(node, depth) {
+  function renderGroup(node, isNested) {
     const path = node.path;
+    const sp   = path.replace(/'/g, "\\'");
     const groupPosts = fullList.filter(p => p.cat && (p.cat === path || p.cat.startsWith(path + '/')));
     if (!groupPosts.length && !node.children.length) return '';
-    const isOpen = postGroupOpen[section][path] !== false; // 기본 펼침
+    const isOpen = postGroupOpen[section][path] !== false;
     const bodyId = `pg-body-${section}-${path.replace(/[^a-z0-9]/gi,'_')}`;
-    const indent = depth > 0 ? `margin-left:${depth * 18}px;` : '';
-    let g = `<div class="post-group-section" style="${indent}">
-      <div class="post-group-header" onclick="togglePostGroup('${section}','${path.replace(/'/g,"\\'")}')">
-        <span class="post-group-toggle${isOpen?' open':''}">▶</span>
+    const wrapCls = isNested ? 'post-group-sub' : 'post-group-section';
+
+    let g = `<div class="${wrapCls}">
+      <div class="post-group-header" onclick="togglePostGroup('${section}','${sp}')">
         <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
         <span class="post-group-name">${esc(node.name)}</span>
-        <span class="post-group-count">${groupPosts.length}</span>
+        <span class="post-group-count">${groupPosts.length}개</span>
+        <span class="post-group-arrow${isOpen?' open':''}">▶</span>
       </div>
       <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
         <div class="post-group-body-inner">`;
-    // 하위 폴더 먼저
-    node.children.forEach(child => { g += renderGroup(child, 0); });
-    // 이 폴더 직속 글
+    node.children.forEach(child => { g += renderGroup(child, true); });
     const directPosts = fullList.filter(p => p.cat === path);
     if (directPosts.length) {
       g += `<div class="${gridCls}">` + directPosts.map(p => postCardHTML(p, section)).join('') + '</div>';
@@ -3813,19 +3851,18 @@ function renderGroupedPosts(fullList, section, cols) {
     return g;
   }
 
-  tree.forEach(node => { html += renderGroup(node, 0); });
+  tree.forEach(node => { html += renderGroup(node, false); });
 
-  // 미분류 글
-  const uncategorized = fullList.filter(p => !p.cat || !cats.includes(p.cat));
+  const uncategorized = fullList.filter(p => !p.cat || !cats.some(c => c === p.cat));
   if (uncategorized.length) {
     const isOpen = postGroupOpen[section]['__none__'] !== false;
     const bodyId = `pg-body-${section}-__none__`;
     html += `<div class="post-group-section">
-      <div class="post-group-header" onclick="togglePostGroup('${section}','__none__')">
-        <span class="post-group-toggle${isOpen?' open':''}">▶</span>
+      <div class="post-group-header" style="border-left-color:var(--s300)" onclick="togglePostGroup('${section}','__none__')">
         <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
-        <span class="post-group-name" style="color:var(--s500)">미분류</span>
-        <span class="post-group-count">${uncategorized.length}</span>
+        <span class="post-group-name" style="color:var(--s600)">미분류</span>
+        <span class="post-group-count" style="background:var(--s100);border-color:var(--s200);color:var(--s500)">${uncategorized.length}개</span>
+        <span class="post-group-arrow${isOpen?' open':''}">▶</span>
       </div>
       <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
         <div class="post-group-body-inner">
