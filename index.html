@@ -597,20 +597,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-row.dnd-over-inside{background:var(--blue-bg)!important;outline:1.5px dashed var(--blue-l);border-radius:var(--r)}
 
 /* ── GROUPED POST VIEW ── */
-.post-group-section{margin-bottom:32px}
-.post-group-header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);border-left:3px solid var(--blue-l);border-radius:var(--r3);box-shadow:var(--shadow);cursor:pointer;user-select:none;transition:all .22s;margin-bottom:14px}
-.post-group-header:hover{box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.25);transform:translateY(-1px)}
-.post-group-icon{font-size:1.4rem;flex-shrink:0;transition:transform .2s}
-.post-group-header:hover .post-group-icon{transform:scale(1.1)}
-.post-group-name{font-size:1.05rem;font-weight:800;color:var(--s900);flex:1;letter-spacing:-.02em}
-.post-group-count{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:12px;border:1px solid #bfdbfe;flex-shrink:0}
-.post-group-arrow{font-size:.7rem;color:var(--s400);transition:transform .22s;flex-shrink:0}
-.post-group-arrow.open{transform:rotate(90deg)}
-.post-group-body{overflow:hidden;transition:max-height .3s ease}
-.post-group-body-inner{padding-bottom:4px}
-.post-group-sub{margin-top:14px;padding-left:20px;border-left:2px solid var(--s200)}
-.post-group-sub .post-group-header{border-left-color:var(--s300);background:rgba(255,255,255,.7);padding:14px 20px}
-.post-group-sub .post-group-name{font-size:.92rem;font-weight:700}
+/* 폴더 그리드 */
+.folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.folder-grid-card{padding:22px 16px 18px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);border-radius:var(--r3);box-shadow:var(--shadow);cursor:pointer;user-select:none;transition:all .22s;text-align:center;position:relative}
+.folder-grid-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(59,130,246,.2)}
+.folder-grid-card.active{border-color:var(--blue);box-shadow:0 0 0 3px #bfdbfe,var(--shadow)}
+.folder-grid-icon{font-size:2rem;margin-bottom:10px;display:block;transition:transform .2s}
+.folder-grid-card:hover .folder-grid-icon{transform:scale(1.08)}
+.folder-grid-name{font-size:.88rem;font-weight:800;color:var(--s900);letter-spacing:-.02em;margin-bottom:6px;word-break:break-word}
+.folder-grid-count{font-size:.68rem;font-weight:700;color:var(--blue);background:var(--blue-bg);border:1px solid #bfdbfe;padding:2px 9px;border-radius:10px;display:inline-block}
+/* 펼쳐진 폴더 영역 */
+.folder-expand-wrap{margin-bottom:32px}
+.folder-expand-label{display:flex;align-items:center;gap:10px;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+.folder-expand-label::before{content:'';display:block;width:18px;height:2px;background:#bfdbfe}
+/* 서브폴더 작은 그리드 */
+.subfolder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.subfolder-card{padding:12px 10px;background:rgba(255,255,255,.8);border:1px solid var(--s200);border-radius:var(--r2);cursor:pointer;text-align:center;transition:all .18s}
+.subfolder-card:hover{border-color:var(--blue-l);background:var(--blue-bg)}
+.subfolder-card.active{border-color:var(--blue);background:var(--blue-bg)}
+.subfolder-icon{font-size:1.1rem;display:block;margin-bottom:4px}
+.subfolder-name{font-size:.72rem;font-weight:700;color:var(--s800);word-break:break-word}
+.subfolder-count{font-size:.6rem;color:var(--s500);margin-top:2px}
 /* 루트 드롭존 */
 .folder-root-dropzone{display:none;align-items:center;justify-content:center;gap:6px;padding:7px 10px;margin-bottom:8px;border:1.5px dashed var(--s300);border-radius:var(--r);font-size:.7rem;color:var(--s400);transition:all .15s;cursor:default}
 .folder-root-dropzone.dnd-active{display:flex}
@@ -3806,73 +3813,90 @@ function toggleViewMode(section) {
 // ── 메인 영역 폴더 그룹 펼침/접기 ────────────────────────────────
 function togglePostGroup(section, path) {
   postGroupOpen[section][path] = !postGroupOpen[section][path];
-  const bodyEl = document.getElementById(`pg-body-${section}-${path.replace(/[^a-z0-9]/gi,'_')}`);
-  if (bodyEl) {
-    const isOpen = postGroupOpen[section][path];
-    bodyEl.style.maxHeight = isOpen ? bodyEl.scrollHeight + 'px' : '0';
-    const btn = bodyEl.previousElementSibling?.querySelector('.post-group-toggle');
-    if (btn) btn.classList.toggle('open', isOpen);
-    const icon = bodyEl.previousElementSibling?.querySelector('.post-group-icon');
-    if (icon) icon.textContent = isOpen ? '📂' : '📁';
-  }
+  section === 'posts' ? renderPostsPage() : renderPaperPage();
 }
 
 // ── 폴더 그룹별 렌더링 ───────────────────────────────────────────
 function renderGroupedPosts(fullList, section, cols) {
-  const cats = categories[section] || [];
-  const tree  = buildFolderTree(cats);
+  const cats    = categories[section] || [];
+  const tree    = buildFolderTree(cats);
   const gridCls = cols > 1 ? `posts-grid-wrap cols-${cols}` : 'posts-grid-wrap';
-  let html = '';
 
-  function renderGroup(node, isNested) {
-    const path = node.path;
-    const sp   = path.replace(/'/g, "\\'");
-    const groupPosts = fullList.filter(p => p.cat && (p.cat === path || p.cat.startsWith(path + '/')));
-    if (!groupPosts.length && !node.children.length) return '';
-    const isOpen = postGroupOpen[section][path] !== false;
-    const bodyId = `pg-body-${section}-${path.replace(/[^a-z0-9]/gi,'_')}`;
-    const wrapCls = isNested ? 'post-group-sub' : 'post-group-section';
-
-    let g = `<div class="${wrapCls}">
-      <div class="post-group-header" onclick="togglePostGroup('${section}','${sp}')">
-        <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
-        <span class="post-group-name">${esc(node.name)}</span>
-        <span class="post-group-count">${groupPosts.length}개</span>
-        <span class="post-group-arrow${isOpen?' open':''}">▶</span>
-      </div>
-      <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
-        <div class="post-group-body-inner">`;
-    node.children.forEach(child => { g += renderGroup(child, true); });
-    const directPosts = fullList.filter(p => p.cat === path);
-    if (directPosts.length) {
-      g += `<div class="${gridCls}">` + directPosts.map(p => postCardHTML(p, section)).join('') + '</div>';
-    }
-    g += `</div></div></div>`;
-    return g;
-  }
-
-  tree.forEach(node => { html += renderGroup(node, false); });
-
+  // 미분류
   const uncategorized = fullList.filter(p => !p.cat || !cats.some(c => c === p.cat));
+
+  if (!tree.length && !uncategorized.length)
+    return `<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+
+  // 루트 폴더 카드 그리드
+  let folderGrid = `<div class="folder-grid">`;
+  tree.forEach(node => {
+    const path  = node.path;
+    const sp    = path.replace(/'/g, "\\'");
+    const cnt   = fullList.filter(p => p.cat && (p.cat === path || p.cat.startsWith(path + '/'))).length;
+    const isOpen = !!postGroupOpen[section][path];
+    folderGrid += `<div class="folder-grid-card${isOpen?' active':''}" onclick="togglePostGroup('${section}','${sp}')">
+      <span class="folder-grid-icon">${isOpen?'📂':'📁'}</span>
+      <div class="folder-grid-name">${esc(node.name)}</div>
+      <span class="folder-grid-count">${cnt}개</span>
+    </div>`;
+  });
   if (uncategorized.length) {
-    const isOpen = postGroupOpen[section]['__none__'] !== false;
-    const bodyId = `pg-body-${section}-__none__`;
-    html += `<div class="post-group-section">
-      <div class="post-group-header" style="border-left-color:var(--s300)" onclick="togglePostGroup('${section}','__none__')">
-        <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
-        <span class="post-group-name" style="color:var(--s600)">미분류</span>
-        <span class="post-group-count" style="background:var(--s100);border-color:var(--s200);color:var(--s500)">${uncategorized.length}개</span>
-        <span class="post-group-arrow${isOpen?' open':''}">▶</span>
-      </div>
-      <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
-        <div class="post-group-body-inner">
-          <div class="${gridCls}">${uncategorized.map(p=>postCardHTML(p,section)).join('')}</div>
-        </div>
-      </div>
+    const isOpen = !!postGroupOpen[section]['__none__'];
+    folderGrid += `<div class="folder-grid-card${isOpen?' active':''}" style="border-color:var(--s200)" onclick="togglePostGroup('${section}','__none__')">
+      <span class="folder-grid-icon">${isOpen?'📂':'📁'}</span>
+      <div class="folder-grid-name" style="color:var(--s600)">미분류</div>
+      <span class="folder-grid-count" style="background:var(--s100);border-color:var(--s200);color:var(--s500)">${uncategorized.length}개</span>
+    </div>`;
+  }
+  folderGrid += `</div>`;
+
+  // 열린 폴더 내용 렌더
+  let expandHtml = '';
+  tree.forEach(node => {
+    if (!postGroupOpen[section][node.path]) return;
+    const path       = node.path;
+    const directPosts = fullList.filter(p => p.cat === path);
+    expandHtml += `<div class="folder-expand-wrap">
+      <div class="folder-expand-label">📂 ${esc(node.name)}</div>`;
+    // 서브폴더 있으면 작은 그리드로
+    if (node.children.length) {
+      expandHtml += `<div class="subfolder-grid">`;
+      node.children.forEach(child => {
+        const cp   = child.path;
+        const csp  = cp.replace(/'/g,"\\'" );
+        const ccnt = fullList.filter(p => p.cat && (p.cat === cp || p.cat.startsWith(cp + '/'))).length;
+        const cOpen = !!postGroupOpen[section][cp];
+        expandHtml += `<div class="subfolder-card${cOpen?' active':''}" onclick="togglePostGroup('${section}','${csp}')">
+          <span class="subfolder-icon">${cOpen?'📂':'📁'}</span>
+          <div class="subfolder-name">${esc(child.name)}</div>
+          <div class="subfolder-count">${ccnt}개</div>
+        </div>`;
+      });
+      expandHtml += `</div>`;
+      // 열린 서브폴더 포스트
+      node.children.forEach(child => {
+        if (!postGroupOpen[section][child.path]) return;
+        const subPosts = fullList.filter(p => p.cat && (p.cat === child.path || p.cat.startsWith(child.path + '/')));
+        if (!subPosts.length) return;
+        expandHtml += `<div class="folder-expand-label" style="font-size:.62rem;margin-bottom:10px">📁 ${esc(child.name)}</div>
+          <div class="${gridCls}" style="margin-bottom:16px">${subPosts.map(p=>postCardHTML(p,section)).join('')}</div>`;
+      });
+    }
+    if (directPosts.length)
+      expandHtml += `<div class="${gridCls}">${directPosts.map(p=>postCardHTML(p,section)).join('')}</div>`;
+    expandHtml += `</div>`;
+  });
+
+  // 미분류 열린 경우
+  if (postGroupOpen[section]['__none__'] && uncategorized.length) {
+    expandHtml += `<div class="folder-expand-wrap">
+      <div class="folder-expand-label">📂 미분류</div>
+      <div class="${gridCls}">${uncategorized.map(p=>postCardHTML(p,section)).join('')}</div>
     </div>`;
   }
 
-  return html || `<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+  return folderGrid + expandHtml;
 }
 
 function renderEditorTags(){
