@@ -3696,10 +3696,9 @@ async function dndDropRoot(e, section) {
   await moveFolderTo(section, srcPath, null, 'root');
 }
 function dndOver(e, section, path) {
+  e.preventDefault(); // drop 이벤트가 발생하려면 반드시 먼저 호출
   if (!dndState || dndState.path === path) return;
-  // 드래그 소스가 타겟의 조상이면 금지
   if (path.startsWith(dndState.path + '/')) return;
-  e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
   const el = e.currentTarget;
   el.classList.remove('dnd-over-top','dnd-over-bottom','dnd-over-inside');
@@ -3775,7 +3774,8 @@ async function moveFolderTo(section, srcPath, targetPath, pos) {
   const list = section === 'posts' ? posts : papers;
   const changed = [];
   list.forEach(p => {
-    const np = remap(p.cat || '');
+    if (!p.cat) return;
+    const np = remap(p.cat);
     if (np !== p.cat) { p.cat = np; changed.push(p); }
   });
 
