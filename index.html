@@ -589,6 +589,26 @@ body{font-family:var(--sans);background:var(--bg);color:var(--s800);line-height:
 .folder-post-dot{width:4px;height:4px;border-radius:50%;background:var(--s300);flex-shrink:0}
 .folder-post-title{font-size:.75rem;color:var(--s600);line-height:1.4;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* ── FOLDER DND ── */
+.folder-row[draggable]{cursor:grab}
+.folder-row.dnd-dragging{opacity:.35}
+.folder-row.dnd-over-top{box-shadow:inset 0 2px 0 var(--blue)}
+.folder-row.dnd-over-bottom{box-shadow:inset 0 -2px 0 var(--blue)}
+.folder-row.dnd-over-inside{background:var(--blue-bg)!important;outline:1.5px dashed var(--blue-l);border-radius:var(--r)}
+
+/* ── GROUPED POST VIEW ── */
+.post-group-section{margin-bottom:18px}
+.post-group-header{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:var(--shadow);border-radius:var(--r2);cursor:pointer;user-select:none;transition:all .2s}
+.post-group-header:hover{border-color:rgba(59,130,246,.2);box-shadow:var(--shadow-lg)}
+.post-group-toggle{font-size:.55rem;color:var(--s400);transition:transform .2s;flex-shrink:0}
+.post-group-toggle.open{transform:rotate(90deg)}
+.post-group-icon{font-size:.95rem;flex-shrink:0}
+.post-group-name{font-size:.85rem;font-weight:700;color:var(--s800);flex:1}
+.post-group-count{font-family:var(--mono);font-size:.62rem;color:var(--s400);background:var(--s100);padding:1px 7px;border-radius:10px;flex-shrink:0}
+.post-group-body{overflow:hidden;transition:max-height .3s ease}
+.post-group-body-inner{padding-top:10px}
+.view-toggle-btn{padding:4px 11px;border-radius:16px;font-size:.65rem;font-weight:700;letter-spacing:.04em;border:1px solid var(--s200);background:#fff;color:var(--s500);cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.view-toggle-btn:hover,.view-toggle-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
 
 /* ── PAPER META BOX ── */
 .paper-meta-box{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:var(--r2);padding:20px 24px;margin-bottom:28px}
@@ -1414,6 +1434,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div class="filter-bar">
           <span class="filter-label" id="posts-filter-label">Posts</span>
           <div class="post-col-control" id="posts-col-control"></div>
+          <button class="view-toggle-btn" id="posts-view-btn" onclick="toggleViewMode('posts')" title="폴더/목록 전환">📁 폴더</button>
           <button class="sort-btn" onclick="toggleSort('posts')">최신순 ↕</button>
         </div>
         <div id="posts-list"></div>
@@ -1434,6 +1455,7 @@ document.addEventListener('gestureend',    function(e){e.preventDefault();},{pas
         <div class="filter-bar">
           <span class="filter-label" id="paper-filter-label">Paper Review</span>
           <div class="post-col-control" id="paper-col-control"></div>
+          <button class="view-toggle-btn" id="paper-view-btn" onclick="toggleViewMode('paper')" title="폴더/목록 전환">📁 폴더</button>
           <button class="sort-btn" onclick="toggleSort('paper')">최신순 ↕</button>
         </div>
         <div id="paper-list"></div>
@@ -2742,7 +2764,10 @@ function askDeleteCvEntry(secId,entryId) {
 }
 
 // ── POSTS/PAPER FILTER SIDEBAR ────────────────────────────────────
-let folderOpen = { posts:{}, paper:{} };
+let folderOpen    = { posts:{}, paper:{} };
+let postViewMode  = { posts:'folder', paper:'folder' }; // 'folder' | 'list'
+let postGroupOpen = { posts:{}, paper:{} };             // 메인 영역 폴더 그룹 펼침 상태
+let dndState      = null;                               // { section, path }
 
 
 function buildMobFilter(section) {
@@ -2822,8 +2847,13 @@ function renderFolderNode(node, list, section, fc, level) {
   const levelCls = `folder-level-${Math.min(level, 3)}`;
   const escapedPath = esc(path);
 
+  const sp = path.replace(/'/g,"\\'");
+  const dndAttrs = isAdmin
+    ? `draggable="true" ondragstart="dndStart(event,'${section}','${sp}')" ondragover="dndOver(event,'${section}','${sp}')" ondragleave="dndLeave(event)" ondrop="dndDrop(event,'${section}','${sp}')" ondragend="dndEnd(event)"`
+    : '';
+
   let html = `<div class="folder-item ${levelCls}">
-    <div class="folder-row ${isActive?'active':''}" title="${escapedPath}" onclick="toggleFolder('${section}','${escapedPath.replace(/'/g,"\\'")}')">
+    <div class="folder-row ${isActive?'active':''}" title="${escapedPath}" ${dndAttrs} onclick="toggleFolder('${section}','${sp}')">
       ${hasChildren
         ? `<span class="folder-toggle ${isOpen?'open':''}">▶</span>`
         : `<span style="width:10px;flex-shrink:0"></span>`}
@@ -2924,6 +2954,13 @@ function addSubFolder(section, parentPath) {
 }
 
 // ── POSTS/PAPER PAGES ─────────────────────────────────────────────
+function updateViewBtn(section) {
+  const btn = document.getElementById(section + '-view-btn');
+  if (!btn) return;
+  const isFolderMode = postViewMode[section] === 'folder';
+  btn.textContent = isFolderMode ? '📁 폴더' : '≡ 목록';
+  btn.classList.toggle('active', isFolderMode);
+}
 function renderPostsPage() {
   buildFilterSidebar('posts-filter-sidebar','posts');
   buildMobFilter('posts');
@@ -2934,11 +2971,15 @@ function renderPostsPage() {
   let label=fc?`${fc} (${list.length})`:`Posts (${list.length})`;
   document.getElementById('posts-filter-label').textContent=label;
   renderColBtns('posts');
+  updateViewBtn('posts');
   const cols=postGridCols.posts;
   const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
-  document.getElementById('posts-list').innerHTML=list.length
-    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'posts')).join('')+`</div>`
-    :`<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+  const isFolderMode = postViewMode.posts === 'folder' && !fc;
+  document.getElementById('posts-list').innerHTML = isFolderMode
+    ? renderGroupedPosts(list, 'posts', cols)
+    : list.length
+      ? `<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'posts')).join('')+`</div>`
+      : `<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
 }
 function renderPaperPage() {
   buildFilterSidebar('paper-filter-sidebar','paper');
@@ -2951,11 +2992,15 @@ function renderPaperPage() {
   let label=fc||ft?`${fc||('#'+ft)} (${list.length})`:`Paper Review (${list.length})`;
   document.getElementById('paper-filter-label').textContent=label;
   renderColBtns('paper');
+  updateViewBtn('paper');
   const cols=postGridCols.paper;
   const gridCls=cols>1?`posts-grid-wrap cols-${cols}`:'posts-grid-wrap';
-  document.getElementById('paper-list').innerHTML=list.length
-    ?`<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'paper')).join('')+`</div>`
-    :`<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
+  const isFolderMode = postViewMode.paper === 'folder' && !fc && !ft;
+  document.getElementById('paper-list').innerHTML = isFolderMode
+    ? renderGroupedPosts(list, 'paper', cols)
+    : list.length
+      ? `<div class="${gridCls}">`+list.map(p=>postCardHTML(p,'paper')).join('')+`</div>`
+      : `<div class="empty-state"><div class="empty-icon">📄</div><h3>리뷰가 없습니다</h3></div>`;
 }
 
 async function setPostCols(section, cols) {
@@ -3616,6 +3661,183 @@ async function deleteFolderCat(section, path) {
   section === 'posts' ? renderPostsPage() : renderPaperPage();
   toast(`폴더 삭제됨 (글 ${affected.length}개는 미분류로 이동)`);
 }
+
+// ── FOLDER DRAG-AND-DROP ──────────────────────────────────────────
+function dndStart(e, section, path) {
+  dndState = { section, path };
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', path);
+  setTimeout(() => e.target.classList.add('dnd-dragging'), 0);
+}
+function dndOver(e, section, path) {
+  if (!dndState || dndState.path === path) return;
+  // 드래그 소스가 타겟의 조상이면 금지
+  if (path.startsWith(dndState.path + '/')) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const el = e.currentTarget;
+  el.classList.remove('dnd-over-top','dnd-over-bottom','dnd-over-inside');
+  const rect = el.getBoundingClientRect();
+  const rel  = (e.clientY - rect.top) / rect.height;
+  if (rel < 0.25)      el.classList.add('dnd-over-top');
+  else if (rel > 0.75) el.classList.add('dnd-over-bottom');
+  else                 el.classList.add('dnd-over-inside');
+}
+function dndLeave(e) {
+  e.currentTarget.classList.remove('dnd-over-top','dnd-over-bottom','dnd-over-inside');
+}
+function dndEnd(e) {
+  document.querySelectorAll('.dnd-dragging,.dnd-over-top,.dnd-over-bottom,.dnd-over-inside')
+    .forEach(el => el.classList.remove('dnd-dragging','dnd-over-top','dnd-over-bottom','dnd-over-inside'));
+  dndState = null;
+}
+async function dndDrop(e, section, targetPath) {
+  e.preventDefault();
+  dndLeave(e);
+  if (!dndState || dndState.section !== section || dndState.path === targetPath) { dndEnd(e); return; }
+  if (targetPath.startsWith(dndState.path + '/')) { dndEnd(e); return; }
+  const srcPath = dndState.path;
+  const el = e.currentTarget;
+  const rect = el.getBoundingClientRect();
+  const rel  = (e.clientY - rect.top) / rect.height;
+  let pos = rel < 0.25 ? 'before' : rel > 0.75 ? 'after' : 'inside';
+  dndEnd(e);
+  await moveFolderTo(section, srcPath, targetPath, pos);
+}
+
+async function moveFolderTo(section, srcPath, targetPath, pos) {
+  const cats = categories[section] || [];
+  const srcName  = srcPath.split('/').pop();
+  const tgtParts = targetPath.split('/');
+
+  let newPath;
+  if (pos === 'inside') {
+    // 타겟 폴더의 자식으로
+    newPath = targetPath + '/' + srcName;
+  } else {
+    // 타겟과 같은 부모 레벨로 (before/after는 순서만 다름)
+    const parentParts = tgtParts.slice(0, -1);
+    newPath = parentParts.length ? parentParts.join('/') + '/' + srcName : srcName;
+  }
+
+  if (newPath === srcPath) return;
+  if (cats.includes(newPath)) { toast('같은 이름의 폴더가 이미 있어요'); return; }
+
+  // 경로 재매핑: srcPath/* → newPath/*
+  const remap = old => {
+    if (old === srcPath) return newPath;
+    if (old.startsWith(srcPath + '/')) return newPath + old.slice(srcPath.length);
+    return old;
+  };
+
+  // categories 배열 재구성: src 관련 항목 제거 후 target 위치에 삽입
+  const srcItems = cats.filter(c => c === srcPath || c.startsWith(srcPath + '/'));
+  const remapped = srcItems.map(remap);
+  let rest = cats.filter(c => c !== srcPath && !c.startsWith(srcPath + '/'));
+  const tgtIdx = rest.indexOf(targetPath);
+  if (tgtIdx === -1) {
+    rest = rest.concat(remapped);
+  } else {
+    const insertAt = pos === 'before' ? tgtIdx : tgtIdx + 1;
+    rest.splice(insertAt, 0, ...remapped);
+  }
+  categories[section] = rest;
+
+  // 글 cat 경로 업데이트
+  const list = section === 'posts' ? posts : papers;
+  const changed = [];
+  list.forEach(p => {
+    const np = remap(p.cat || '');
+    if (np !== p.cat) { p.cat = np; changed.push(p); }
+  });
+
+  save(); await saveCategories();
+  for (const p of changed) {
+    await supa.from(section === 'posts' ? 'posts' : 'papers').update({ cat: p.cat }).eq('id', p.id);
+  }
+  section === 'posts' ? renderPostsPage() : renderPaperPage();
+  toast('폴더 이동됨');
+}
+
+// ── 뷰 모드 토글 ─────────────────────────────────────────────────
+function toggleViewMode(section) {
+  postViewMode[section] = postViewMode[section] === 'folder' ? 'list' : 'folder';
+  section === 'posts' ? renderPostsPage() : renderPaperPage();
+}
+
+// ── 메인 영역 폴더 그룹 펼침/접기 ────────────────────────────────
+function togglePostGroup(section, path) {
+  postGroupOpen[section][path] = !postGroupOpen[section][path];
+  const bodyEl = document.getElementById(`pg-body-${section}-${path.replace(/[^a-z0-9]/gi,'_')}`);
+  if (bodyEl) {
+    const isOpen = postGroupOpen[section][path];
+    bodyEl.style.maxHeight = isOpen ? bodyEl.scrollHeight + 'px' : '0';
+    const btn = bodyEl.previousElementSibling?.querySelector('.post-group-toggle');
+    if (btn) btn.classList.toggle('open', isOpen);
+    const icon = bodyEl.previousElementSibling?.querySelector('.post-group-icon');
+    if (icon) icon.textContent = isOpen ? '📂' : '📁';
+  }
+}
+
+// ── 폴더 그룹별 렌더링 ───────────────────────────────────────────
+function renderGroupedPosts(fullList, section, cols) {
+  const cats = categories[section] || [];
+  const tree  = buildFolderTree(cats);
+  const gridCls = cols > 1 ? `posts-grid-wrap cols-${cols}` : 'posts-grid-wrap';
+  let html = '';
+
+  function renderGroup(node, depth) {
+    const path = node.path;
+    const groupPosts = fullList.filter(p => p.cat && (p.cat === path || p.cat.startsWith(path + '/')));
+    if (!groupPosts.length && !node.children.length) return '';
+    const isOpen = postGroupOpen[section][path] !== false; // 기본 펼침
+    const bodyId = `pg-body-${section}-${path.replace(/[^a-z0-9]/gi,'_')}`;
+    const indent = depth > 0 ? `margin-left:${depth * 18}px;` : '';
+    let g = `<div class="post-group-section" style="${indent}">
+      <div class="post-group-header" onclick="togglePostGroup('${section}','${path.replace(/'/g,"\\'")}')">
+        <span class="post-group-toggle${isOpen?' open':''}">▶</span>
+        <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
+        <span class="post-group-name">${esc(node.name)}</span>
+        <span class="post-group-count">${groupPosts.length}</span>
+      </div>
+      <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
+        <div class="post-group-body-inner">`;
+    // 하위 폴더 먼저
+    node.children.forEach(child => { g += renderGroup(child, 0); });
+    // 이 폴더 직속 글
+    const directPosts = fullList.filter(p => p.cat === path);
+    if (directPosts.length) {
+      g += `<div class="${gridCls}">` + directPosts.map(p => postCardHTML(p, section)).join('') + '</div>';
+    }
+    g += `</div></div></div>`;
+    return g;
+  }
+
+  tree.forEach(node => { html += renderGroup(node, 0); });
+
+  // 미분류 글
+  const uncategorized = fullList.filter(p => !p.cat || !cats.includes(p.cat));
+  if (uncategorized.length) {
+    const isOpen = postGroupOpen[section]['__none__'] !== false;
+    const bodyId = `pg-body-${section}-__none__`;
+    html += `<div class="post-group-section">
+      <div class="post-group-header" onclick="togglePostGroup('${section}','__none__')">
+        <span class="post-group-toggle${isOpen?' open':''}">▶</span>
+        <span class="post-group-icon">${isOpen?'📂':'📁'}</span>
+        <span class="post-group-name" style="color:var(--s500)">미분류</span>
+        <span class="post-group-count">${uncategorized.length}</span>
+      </div>
+      <div class="post-group-body" id="${bodyId}" style="max-height:${isOpen?'99999px':'0'}">
+        <div class="post-group-body-inner">
+          <div class="${gridCls}">${uncategorized.map(p=>postCardHTML(p,section)).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return html || `<div class="empty-state"><div class="empty-icon">✍️</div><h3>글이 없습니다</h3></div>`;
+}
+
 function renderEditorTags(){
   document.getElementById('editor-tag-list').innerHTML=editorTags.map(t=>
     `<span class="e-tag-pill">#${esc(t)}<span class="tag-rm" onclick="rmTag('${esc(t)}')">×</span></span>`
